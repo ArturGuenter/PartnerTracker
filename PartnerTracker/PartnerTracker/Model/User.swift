@@ -6,10 +6,12 @@
 //
 
 import Foundation
-struct User: Codable, Identifiable {
-    var id: UUID = UUID()
+
+struct AppUser: Codable, Identifiable {
+    var id: String
     var surname: String
     var name: String
     var email: String
-    var favorites: [String]
+    var favorites: [String] = []
 }
+
