@@ -11,4 +11,5 @@ struct User: Codable, Identifiable {
     var surname: String
     var name: String
     var email: String
+    var favorites: [String]
 }
