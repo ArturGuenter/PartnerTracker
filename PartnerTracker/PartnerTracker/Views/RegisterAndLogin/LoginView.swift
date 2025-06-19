@@ -19,18 +19,30 @@ struct LoginView: View {
                         .font(.largeTitle.bold())
                         .foregroundColor(.primary)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        
 
                     TextField("E-Mail", text: $email)
                         .textFieldStyle(PlainTextFieldStyle())
                         .padding()
                         .background(Color(.secondarySystemBackground))
                         .cornerRadius(12)
-
+                        .overlay(
+                                                    RoundedRectangle(cornerRadius: 12)
+                                                        .stroke(Color.gray, lineWidth: 1)
+                                                )
+                        
+            
+            
+            
                     SecureField("Passwort", text: $password)
                         .textFieldStyle(PlainTextFieldStyle())
                         .padding()
                         .background(Color(.secondarySystemBackground))
                         .cornerRadius(12)
+                        .overlay(
+                                                    RoundedRectangle(cornerRadius: 12)
+                                                        .stroke(Color.gray, lineWidth: 1)
+                        )
 
                     Button(action: {
                         loginRegisterViewModel.login(email: email, password: password)
