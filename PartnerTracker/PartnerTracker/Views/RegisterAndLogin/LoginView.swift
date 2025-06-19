@@ -10,10 +10,45 @@ import SwiftUI
 struct LoginView: View {
     
     @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
+    @State private var email = ""
+        @State private var password = ""
     
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
+        VStack(spacing: 24) {
+                    Text("Login")
+                        .font(.largeTitle.bold())
+                        .foregroundColor(.primary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    TextField("E-Mail", text: $email)
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(12)
+
+                    SecureField("Passwort", text: $password)
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(12)
+
+                    Button(action: {
+                        loginRegisterViewModel.login(email: email, password: password)
+                    }) {
+                        Text("Einloggen")
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(12)
+                    }
+
+                    Spacer()
+                }
+                .padding()
+                .background(Color(.systemGroupedBackground))
+            }
+    
 }
 
 #Preview {

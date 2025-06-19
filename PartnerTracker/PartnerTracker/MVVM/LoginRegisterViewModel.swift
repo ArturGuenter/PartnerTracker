@@ -68,5 +68,17 @@ class LoginRegisterViewModel: ObservableObject {
             }
         }
     }
+    
+    func login(email: String, password: String) {
+        auth.signIn(withEmail: email, password: password) { [weak self] authResult, error in
+            if let error = error {
+                print("Login fehlgeschlagen: \(error.localizedDescription)")
+                return
+            }
+
+            self?.fetchCurrentUser()
+        }
+    }
+
 }
 
