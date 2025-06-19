@@ -8,11 +8,48 @@
 import SwiftUI
 
 struct RegisterView: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+    
+    @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
+    @State private var name = ""
+        @State private var surname = ""
+        @State private var email = ""
+        @State private var password = ""
+    
+    var body: some View {VStack(spacing: 24) {
+        Text("Registrieren")
+            .font(.largeTitle.bold())
+            .foregroundColor(.primary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        
+        Group {
+            TextField("Vorname", text: $name)
+            TextField("Nachname", text: $surname)
+            TextField("E-Mail", text: $email)
+            SecureField("Passwort", text: $password)
+        }
+        .textFieldStyle(PlainTextFieldStyle())
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+
+        Button(action: {
+            loginRegisterViewModel.register(email: email, password: password, name: name, surname: surname)
+        }) {
+            Text("Registrieren")
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.blue)
+                .cornerRadius(12)
+        }
+
+        Spacer()
     }
+    .padding()
+    .background(Color(.systemGroupedBackground))
+}
 }
 
 #Preview {
-    RegisterView()
+    RegisterView(loginRegisterViewModel: LoginRegisterViewModel())
 }
