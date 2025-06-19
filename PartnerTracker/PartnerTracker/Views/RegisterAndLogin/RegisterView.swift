@@ -31,6 +31,10 @@ struct RegisterView: View {
         .padding()
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.gray.opacity(0.4), lineWidth:1)
+        )
 
         Button(action: {
             loginRegisterViewModel.register(email: email, password: password, name: name, surname: surname)
