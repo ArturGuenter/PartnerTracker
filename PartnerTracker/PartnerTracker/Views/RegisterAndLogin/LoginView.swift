@@ -15,11 +15,16 @@ struct LoginView: View {
     
     var body: some View {
         VStack(spacing: 24) {
-                    Text("Login")
-                        .font(.largeTitle.bold())
-                        .foregroundColor(.primary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        
+            HStack{
+                Spacer()
+                
+                Text("Login")
+                    .font(.largeTitle.bold())
+                    .foregroundColor(.primary)
+                    .frame(maxWidth: .infinity)
+                
+                Spacer()
+            }
 
                     TextField("E-Mail", text: $email)
                         .textFieldStyle(PlainTextFieldStyle())
