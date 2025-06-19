@@ -19,12 +19,25 @@ struct ContentView: View {
             .tabItem{
                         Label("Home", systemImage: "house")
                             }
+            .tag(1)
+            
+            TaskView()
+                            .tabItem {
+                                Label("Tasks", systemImage: "list.bullet")
+                            }
+                            .tag(2)
+                    
+                    FamilyView()
+                            .tabItem {
+                                Image(systemName: "person.3.fill")
+                                Text("Familie")
+                            }
+                            .tag(3)
+            
         }
-        FamilyView(selection: $selection)
-                .tabItem {
-                    Image(systemName: "person.3.fill")
-                    Text("Familie")
-                }
+        
+        
+        
             
             
         
