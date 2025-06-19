@@ -11,9 +11,9 @@ struct RegisterView: View {
     
     @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
     @State private var name = ""
-        @State private var surname = ""
-        @State private var email = ""
-        @State private var password = ""
+    @State private var surname = ""
+    @State private var email = ""
+    @State private var password = ""
     
     var body: some View {VStack(spacing: 24) {
         Text("Registrieren")
@@ -35,7 +35,7 @@ struct RegisterView: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.gray.opacity(0.4), lineWidth:1)
         )
-
+        
         Button(action: {
             loginRegisterViewModel.register(email: email, password: password, name: name, surname: surname)
         }) {
@@ -46,12 +46,12 @@ struct RegisterView: View {
                 .background(Color.blue)
                 .cornerRadius(12)
         }
-
+        
         Spacer()
     }
     .padding()
     .background(Color(.systemGroupedBackground))
-}
+    }
 }
 
 #Preview {

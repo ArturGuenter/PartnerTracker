@@ -11,7 +11,7 @@ struct LoginView: View {
     
     @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
     @State private var email = ""
-        @State private var password = ""
+    @State private var password = ""
     
     var body: some View {
         VStack(spacing: 24) {

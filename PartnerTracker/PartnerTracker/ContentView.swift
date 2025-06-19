@@ -10,15 +10,24 @@ import SwiftUI
 struct ContentView: View {
     
     @StateObject private var loginRegisterViewModel = LoginRegisterViewModel()
+    @State private var selection = 1
     
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world")
+        
+        TabView(selection: $selection){
+            HomeView(selection: $selection)
+            .tabItem{
+                        Label("Home", systemImage: "house")
+                            }
         }
-        .padding()
+        FamilyView(selection: $selection)
+                .tabItem {
+                    Image(systemName: "person.3.fill")
+                    Text("Familie")
+                }
+            
+            
+        
     }
 }
 

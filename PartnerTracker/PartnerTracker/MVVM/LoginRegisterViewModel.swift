@@ -11,9 +11,9 @@ import Combine
 class LoginRegisterViewModel: ObservableObject {
     private var auth = Auth.auth()
     private var db = Firestore.firestore()
-
+    
     @Published var user: AppUser?
-
+    
     func register(email: String, password: String, name: String, surname: String) {
         auth.createUser(withEmail: email, password: password) { [weak self] authResult, error in
             if let error = error {
@@ -23,18 +23,18 @@ class LoginRegisterViewModel: ObservableObject {
             
             guard let self = self,
                   let firebaseUser = authResult?.user else { return }
-
+            
             let appUser = AppUser(
                 id: firebaseUser.uid,
                 surname: surname,
                 name: name,
                 email: email
             )
-
+            
             self.saveUserToFirestore(appUser)
         }
     }
-
+    
     private func saveUserToFirestore(_ user: AppUser) {
         do {
             try db.collection("users").document(user.id).setData(from: user) { error in
@@ -51,16 +51,16 @@ class LoginRegisterViewModel: ObservableObject {
             print("Serialisierungsfehler beim Speichern des Users: \(error.localizedDescription)")
         }
     }
-
+    
     func fetchCurrentUser() {
         guard let uid = auth.currentUser?.uid else { return }
-
+        
         db.collection("users").document(uid).getDocument { [weak self] snapshot, error in
             if let error = error {
                 print("Fehler beim Laden des Benutzers: \(error.localizedDescription)")
                 return
             }
-
+            
             if let user = try? snapshot?.data(as: AppUser.self) {
                 DispatchQueue.main.async {
                     self?.user = user
@@ -75,10 +75,10 @@ class LoginRegisterViewModel: ObservableObject {
                 print("Login fehlgeschlagen: \(error.localizedDescription)")
                 return
             }
-
+            
             self?.fetchCurrentUser()
         }
     }
-
+    
 }
 
