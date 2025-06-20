@@ -9,10 +9,12 @@ import SwiftUI
 
 struct ContentView: View {
     
-    @StateObject private var loginRegisterViewModel = LoginRegisterViewModel()
-    @State private var selection = 1
+    @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
+    @Binding private var selection = 1
     
     var body: some View {
+        
+        
         
         TabView(selection: $selection){
             HomeView(selection: $selection)
@@ -45,5 +47,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    ContentView(loginRegisterViewModel: LoginRegisterViewModel())
 }
