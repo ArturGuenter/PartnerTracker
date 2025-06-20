@@ -12,7 +12,14 @@ class LoginRegisterViewModel: ObservableObject {
     private var auth = Auth.auth()
     private var db = Firestore.firestore()
     
+    @Published var isLoggedIn: Bool = false
     @Published var user: AppUser?
+    
+    init() {
+            self.isLoggedIn = Auth.auth().currentUser != nil
+        }
+
+        
     
     func register(email: String, password: String, name: String, surname: String) {
         auth.createUser(withEmail: email, password: password) { [weak self] authResult, error in
