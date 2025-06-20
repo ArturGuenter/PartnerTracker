@@ -10,7 +10,7 @@ import SwiftUI
 struct ContentView: View {
     
     @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
-    @Binding private var selection = 1
+    @Binding  var selection : Int
     
     var body: some View {
         
@@ -47,5 +47,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView(loginRegisterViewModel: LoginRegisterViewModel())
+    ContentView(loginRegisterViewModel: LoginRegisterViewModel(), selection: .constant(1))
 }
