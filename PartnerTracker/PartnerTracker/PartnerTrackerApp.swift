@@ -11,7 +11,7 @@ import Firebase
 @main
 struct PartnerTrackerApp: App {
     @StateObject private var loginRegisterViewModel = LoginRegisterViewModel()
-    @State private var selection = 1
+    
     
     init(){
         FirebaseConfiguration.shared.setLoggerLevel(.min)
@@ -20,13 +20,12 @@ struct PartnerTrackerApp: App {
     var body: some Scene {
         
             WindowGroup {
-                        if loginRegisterViewModel.isLoggedIn {
-                            HomeView(selection: $selection)
-                                
-                        } else {
-                            LoginView(loginRegisterViewModel: loginRegisterViewModel)
-                                
-                        }
+                if loginRegisterViewModel.isLoggedIn {
+                    ContentView(loginRegisterViewModel: loginRegisterViewModel)
+                } else {
+                    LoginView(loginRegisterViewModel: loginRegisterViewModel)
+                }
+
                     }
           
     }

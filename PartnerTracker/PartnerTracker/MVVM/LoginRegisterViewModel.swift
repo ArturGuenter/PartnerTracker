@@ -17,6 +17,9 @@ class LoginRegisterViewModel: ObservableObject {
     
     init() {
             self.isLoggedIn = Auth.auth().currentUser != nil
+            if isLoggedIn {
+                fetchCurrentUser()
+            }
         }
 
         

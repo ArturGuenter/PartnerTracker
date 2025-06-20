@@ -8,44 +8,33 @@
 import SwiftUI
 
 struct ContentView: View {
-    
     @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
-    @Binding  var selection : Int
-    
+    @State private var selection = 1
+
     var body: some View {
-        
-        
-        
-        TabView(selection: $selection){
+        TabView(selection: $selection) {
             HomeView(selection: $selection)
-            .tabItem{
-                        Label("Home", systemImage: "house")
-                            }
-            .tag(1)
-            
+                .tabItem {
+                    Label("Home", systemImage: "house")
+                }
+                .tag(1)
+
             TaskView()
-                            .tabItem {
-                                Label("Tasks", systemImage: "list.bullet")
-                            }
-                            .tag(2)
-                    
-                    FamilyView()
-                            .tabItem {
-                                Image(systemName: "person.3.fill")
-                                Text("Familie")
-                            }
-                            .tag(3)
-            
+                .tabItem {
+                    Label("Tasks", systemImage: "list.bullet")
+                }
+                .tag(2)
+
+            FamilyView()
+                .tabItem {
+                    Label("Familie", systemImage: "person.3.fill")
+                }
+                .tag(3)
         }
-        
-        
-        
-            
-            
-        
     }
 }
 
+
 #Preview {
-    ContentView(loginRegisterViewModel: LoginRegisterViewModel(), selection: .constant(1))
+    ContentView(loginRegisterViewModel: LoginRegisterViewModel())
 }
