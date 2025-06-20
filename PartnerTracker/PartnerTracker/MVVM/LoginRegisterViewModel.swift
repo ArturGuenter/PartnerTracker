@@ -87,5 +87,10 @@ class LoginRegisterViewModel: ObservableObject {
         }
     }
     
+    func signOut() {
+        try? Auth.auth().signOut()
+        isLoggedIn = false
+    }
+    
 }
 
