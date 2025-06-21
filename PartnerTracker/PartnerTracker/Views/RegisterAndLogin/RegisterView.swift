@@ -10,10 +10,14 @@ import SwiftUI
 struct RegisterView: View {
     
     @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
+    @State private var confirmPassword = ""
+    @State private var errorMessage = ""
+
     @State private var name = ""
     @State private var surname = ""
     @State private var email = ""
     @State private var password = ""
+    
     
     var body: some View {VStack(spacing: 24) {
         Text("Registrieren")
@@ -26,6 +30,8 @@ struct RegisterView: View {
             TextField("Nachname", text: $surname)
             TextField("E-Mail", text: $email)
             SecureField("Passwort", text: $password)
+            SecureField("Passwort bestätigen", text: $confirmPassword)
+
         }
         .textFieldStyle(PlainTextFieldStyle())
         .padding()
