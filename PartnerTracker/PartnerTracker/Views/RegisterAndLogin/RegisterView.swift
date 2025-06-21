@@ -43,6 +43,17 @@ struct RegisterView: View {
         )
         
         Button(action: {
+            guard password.count >= 8 else {
+                errorMessage = "Das Passwort muss mindestens 8 Zeichen lang sein."
+                return
+            }
+            
+            guard password == confirmPassword else {
+                errorMessage = "Die Passwörter stimmen nicht überein."
+                return
+            }
+            
+            errorMessage = ""
             loginRegisterViewModel.register(email: email, password: password, name: name, surname: surname)
         }) {
             Text("Registrieren")
@@ -52,6 +63,7 @@ struct RegisterView: View {
                 .background(Color.blue)
                 .cornerRadius(12)
         }
+
         
         Spacer()
     }
