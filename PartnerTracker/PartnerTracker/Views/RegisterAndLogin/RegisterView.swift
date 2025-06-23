@@ -52,11 +52,30 @@ struct RegisterView: View {
                     .padding(.top, -12)
             }
             
+            VStack(alignment: .leading, spacing: 4) {
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .frame(height: 6)
+                        .foregroundColor(Color.gray.opacity(0.3))
+
+                    Capsule()
+                        .frame(width: CGFloat(passwordStrength) / 4 * 200, height: 6)
+                        .foregroundColor(passwordStrengthColor())
+                        .animation(.easeInOut(duration: 0.2), value: passwordStrength)
+                }
+
+                Text(passwordStrengthDescription())
+                    .font(.caption)
+                    .foregroundColor(passwordStrengthColor())
+            }
+
+            
             Button(action: {
-                guard password.count >= 8 else {
-                    errorMessage = "Das Passwort muss mindestens 8 Zeichen lang sein."
+                guard passwordStrength >= 3 else {
+                    errorMessage = "Das Passwort ist nicht sicher genug."
                     return
                 }
+
                 
                 guard password == confirmPassword else {
                     errorMessage = "Die Passwörter stimmen nicht überein."
@@ -94,6 +113,24 @@ struct RegisterView: View {
         return strength
     }
     
+    func passwordStrengthColor() -> Color {
+        switch passwordStrength {
+        case 0...1: return .red
+        case 2: return .orange
+        case 3: return .yellow
+        default: return .green
+        }
+    }
+
+    func passwordStrengthDescription() -> String {
+        switch passwordStrength {
+        case 0...1: return "Schwach"
+        case 2: return "Mittel"
+        case 3: return "Gut"
+        default: return "Stark"
+        }
+    }
+
     
 }
 
