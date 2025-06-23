@@ -53,21 +53,28 @@ struct RegisterView: View {
             }
             
             VStack(alignment: .leading, spacing: 4) {
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .frame(height: 6)
-                        .foregroundColor(Color.gray.opacity(0.3))
-
-                    Capsule()
-                        .frame(width: CGFloat(passwordStrength) / 4 * 200, height: 6)
-                        .foregroundColor(passwordStrengthColor())
-                        .animation(.easeInOut(duration: 0.2), value: passwordStrength)
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .frame(height: 6)
+                            .foregroundColor(Color.gray.opacity(0.3))
+                        
+                        Capsule()
+                            .frame(
+                                width: geometry.size.width * CGFloat(passwordStrength) / 4,
+                                height: 6
+                            )
+                            .foregroundColor(passwordStrengthColor())
+                            .animation(.easeInOut(duration: 0.2), value: passwordStrength)
+                    }
                 }
+                .frame(height: 6) // ← Höhe fixieren
 
                 Text(passwordStrengthDescription())
                     .font(.caption)
                     .foregroundColor(passwordStrengthColor())
             }
+
 
             
             Button(action: {
@@ -109,6 +116,7 @@ struct RegisterView: View {
         if uppercase.evaluate(with: password) { strength += 1 }
         if number.evaluate(with: password) { strength += 1 }
         if special.evaluate(with: password) { strength += 1 }
+        
 
         return strength
     }
