@@ -33,7 +33,12 @@ struct RegisterView: View {
                 SecureField("Passwort", text: $password)
                     .onChange(of: password) { newValue, oldValue in
                         passwordStrength = analyzePassword(newValue)
+                        if password.isEmpty {
+                            passwordStrength = 0
+                        }
                     }
+                    
+
                 SecureField("Passwort bestätigen", text: $confirmPassword)
             }
             .textFieldStyle(PlainTextFieldStyle())
@@ -78,17 +83,18 @@ struct RegisterView: View {
 
             
             Button(action: {
-                guard passwordStrength >= 3 else {
+                let currentStrength = analyzePassword(password) // Direkt prüfen
+                
+                guard currentStrength >= 3 else {
                     errorMessage = "Das Passwort ist nicht sicher genug."
                     return
                 }
 
-                
                 guard password == confirmPassword else {
                     errorMessage = "Die Passwörter stimmen nicht überein."
                     return
                 }
-                
+
                 errorMessage = ""
                 loginRegisterViewModel.register(email: email, password: password, name: name, surname: surname)
             }) {
@@ -99,6 +105,7 @@ struct RegisterView: View {
                     .background(Color.blue)
                     .cornerRadius(12)
             }
+
             
             Spacer()
         }
