@@ -16,6 +16,8 @@ struct RegisterView: View {
     @State private var password = ""
     @State private var confirmPassword = ""
     @State private var errorMessage = ""
+    @State private var passwordStrength: Int = 0
+
     
     var body: some View {
         VStack(spacing: 24) {
