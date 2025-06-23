@@ -21,6 +21,7 @@ struct RegisterView: View {
     
     var body: some View {
         VStack(spacing: 24) {
+            Spacer()
             Text("Registrieren")
                 .font(.largeTitle.bold())
                 .foregroundColor(.primary)
