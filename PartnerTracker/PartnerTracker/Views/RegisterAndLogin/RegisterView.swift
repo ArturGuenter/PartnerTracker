@@ -31,6 +31,9 @@ struct RegisterView: View {
                 TextField("Nachname", text: $surname)
                 TextField("E-Mail", text: $email)
                 SecureField("Passwort", text: $password)
+                    .onChange(of: password) { newValue, oldValue in
+                        passwordStrength = analyzePassword(newValue)
+                    }
                 SecureField("Passwort bestätigen", text: $confirmPassword)
             }
             .textFieldStyle(PlainTextFieldStyle())
@@ -76,7 +79,26 @@ struct RegisterView: View {
         .padding()
         .background(Color(.systemGroupedBackground))
     }
+    
+    func analyzePassword(_ password: String) -> Int {
+        var strength = 0
+        let uppercase = NSPredicate(format: "SELF MATCHES %@", ".*[A-Z]+.*")
+        let number = NSPredicate(format: "SELF MATCHES %@", ".*[0-9]+.*")
+        let special = NSPredicate(format: "SELF MATCHES %@", ".*[!&^%$#@()/]+.*")
+
+        if password.count >= 8 { strength += 1 }
+        if uppercase.evaluate(with: password) { strength += 1 }
+        if number.evaluate(with: password) { strength += 1 }
+        if special.evaluate(with: password) { strength += 1 }
+
+        return strength
+    }
+    
+    
 }
+
+
+
 
 #Preview {
     RegisterView(loginRegisterViewModel: LoginRegisterViewModel())
