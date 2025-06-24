@@ -7,7 +7,7 @@
 import FirebaseAuth
 import FirebaseFirestore
 import Combine
-
+@MainActor
 class LoginRegisterViewModel: ObservableObject {
     private var auth = Auth.auth()
     private var db = Firestore.firestore()
