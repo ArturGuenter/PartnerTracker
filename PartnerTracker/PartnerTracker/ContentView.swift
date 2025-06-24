@@ -25,7 +25,7 @@ struct ContentView: View {
                 }
                 .tag(2)
 
-            FamilyView()
+            GroupView()
                 .tabItem {
                     Label("Familie", systemImage: "person.3.fill")
                 }

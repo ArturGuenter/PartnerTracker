@@ -27,10 +27,37 @@ struct RegisterView: View {
                 .foregroundColor(.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            Group {
+            
                 TextField("Vorname", text: $name)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding()
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                )
+            
                 TextField("Nachname", text: $surname)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding()
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                )
+            
                 TextField("E-Mail", text: $email)
+                .textFieldStyle(PlainTextFieldStyle())
+                .padding()
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                )
+            
                 SecureField("Passwort", text: $password)
                     .onChange(of: password) { newValue, oldValue in
                         passwordStrength = analyzePassword(newValue)
@@ -38,10 +65,17 @@ struct RegisterView: View {
                             passwordStrength = 0
                         }
                     }
-                    
-
+                    .textFieldStyle(PlainTextFieldStyle())
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                    )
+            
+                  
                 SecureField("Passwort bestätigen", text: $confirmPassword)
-            }
             .textFieldStyle(PlainTextFieldStyle())
             .padding()
             .background(Color(.secondarySystemBackground))
@@ -158,6 +192,4 @@ struct RegisterView: View {
 }
 
 
-#Preview {
-    RegisterView(loginRegisterViewModel: LoginRegisterViewModel())
-}
+
