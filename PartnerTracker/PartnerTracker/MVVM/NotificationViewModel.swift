@@ -8,5 +8,5 @@
 import Foundation
 @MainActor
 class NotificationViewModel: ObservableObject {
-    
+     
 }
