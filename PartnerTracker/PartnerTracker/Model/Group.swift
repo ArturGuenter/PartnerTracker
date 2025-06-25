@@ -6,9 +6,12 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct Group: Identifiable, Codable {
-    var id: String
+    @DocumentID var id: String?
     var name: String
-    var memberIds: [String] 
+    var memberIds: [String]
+    var createdAt: Date?
+
 }
