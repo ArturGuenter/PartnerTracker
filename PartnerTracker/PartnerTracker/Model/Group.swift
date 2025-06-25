@@ -9,9 +9,12 @@ import Foundation
 import FirebaseFirestore
 
 struct Group: Identifiable, Codable {
-    @DocumentID var id: String?
+    var id: String = UUID().uuidString
     var name: String
     var memberIds: [String]
     var createdAt: Date?
+    
+    
+    
 
 }
