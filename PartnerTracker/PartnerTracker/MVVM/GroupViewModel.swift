@@ -22,14 +22,15 @@ class GroupViewModel: ObservableObject {
         return uid
     }
 
-    func createGroup(name: String) async throws {
+    func createGroup(name: String, password: String) async throws {
         let newGroupRef = db.collection("groups").document()
         
         let group = Group(
             id: newGroupRef.documentID,
             name: name,
             memberIds: [currentUserId],
-            createdAt: nil // wird durch serverTimestamp ersetzt
+            createdAt: nil,
+            password: password // neu
         )
         
         var groupData = try Firestore.Encoder().encode(group)
@@ -37,6 +38,7 @@ class GroupViewModel: ObservableObject {
 
         try await newGroupRef.setData(groupData)
     }
+
 
     func fetchGroupsForCurrentUser() async throws {
         let snapshot = try await db.collection("groups")
