@@ -13,6 +13,8 @@ struct GroupAdd: View {
         @State private var errorMessage: String = ""
         @Environment(\.dismiss) var dismiss
         @State private var isLoading = false
+    @State private var password: String = ""
+
 
         var body: some View {
             VStack(spacing: 24) {
@@ -28,6 +30,15 @@ struct GroupAdd: View {
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(Color.gray.opacity(0.4), lineWidth: 1)
                     )
+                SecureField("Gruppenpasswort", text: $password)
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                    )
+
 
                 if !errorMessage.isEmpty {
                     Text(errorMessage)
@@ -76,15 +87,21 @@ struct GroupAdd: View {
                 return
             }
 
+            guard !password.trimmingCharacters(in: .whitespaces).isEmpty else {
+                errorMessage = "Bitte ein Gruppenpasswort angeben."
+                isLoading = false
+                return
+            }
+            
             do {
-                try await groupViewModel.createGroup(name: trimmedName)
+                try await groupViewModel.createGroup(name: trimmedName, password: password)
                 dismiss()
             } catch {
                 errorMessage = error.localizedDescription
-                print("[CreateGroupView] Fehler beim Erstellen der Gruppe:", error)
             }
-
             isLoading = false
+            
+            
         }
     }
 
