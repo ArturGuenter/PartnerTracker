@@ -13,8 +13,5 @@ struct Group: Identifiable, Codable {
     var name: String
     var memberIds: [String]
     var createdAt: Date?
-    
-    
-    
-
+    var password: String 
 }
