@@ -30,7 +30,7 @@ struct GroupAdd: View {
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(Color.gray.opacity(0.4), lineWidth: 1)
                     )
-                SecureField("Gruppenpasswort", text: $password)
+                SecureField("Passwort 4 Ziffern z.B. 1234", text: $password)
                     .padding()
                     .background(Color(.secondarySystemBackground))
                     .cornerRadius(12)
@@ -75,34 +75,37 @@ struct GroupAdd: View {
             .background(Color(.systemGroupedBackground))
         }
 
-        private func createGroup() async {
-            errorMessage = ""
-            isLoading = true
+    private func createGroup() async {
+        errorMessage = ""
+        isLoading = true
 
-            let trimmedName = groupName.trimmingCharacters(in: .whitespaces)
+        let trimmedName = groupName.trimmingCharacters(in: .whitespaces)
+        let trimmedPassword = password.trimmingCharacters(in: .whitespaces)
 
-            guard !trimmedName.isEmpty else {
-                errorMessage = "Gruppenname darf nicht leer sein."
-                isLoading = false
-                return
-            }
-
-            guard !password.trimmingCharacters(in: .whitespaces).isEmpty else {
-                errorMessage = "Bitte ein Gruppenpasswort angeben."
-                isLoading = false
-                return
-            }
-            
-            do {
-                try await groupViewModel.createGroup(name: trimmedName, password: password)
-                dismiss()
-            } catch {
-                errorMessage = error.localizedDescription
-            }
+        guard !trimmedName.isEmpty else {
+            errorMessage = "Gruppenname darf nicht leer sein."
             isLoading = false
-            
-            
+            return
         }
+
+        // Passwort: Muss genau 4 Ziffern sein
+        let passwordPattern = #"^\d{4}$"#
+        if trimmedPassword.range(of: passwordPattern, options: .regularExpression) == nil {
+            errorMessage = "Das Passwort muss aus genau 4 Ziffern bestehen."
+            isLoading = false
+            return
+        }
+
+        do {
+            try await groupViewModel.createGroup(name: trimmedName, password: trimmedPassword)
+            dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
+        isLoading = false
+    }
+
     }
 
 #Preview {
