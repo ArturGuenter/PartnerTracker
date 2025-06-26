@@ -47,12 +47,21 @@ struct GroupView: View {
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
+                            // Aktion: Gruppe beitreten
+                        } label: {
+                            Image(systemName: "person.3.fill")
+                        }
+                    }
+
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
                             showCreateGroupSheet = true
                         } label: {
                             Image(systemName: "plus")
                         }
                     }
                 }
+
                 .sheet(isPresented: $showCreateGroupSheet) {
                     GroupAdd(groupViewModel: groupViewModel)
                 }
