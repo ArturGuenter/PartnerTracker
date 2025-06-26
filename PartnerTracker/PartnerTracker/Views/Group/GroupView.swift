@@ -57,10 +57,18 @@ struct GroupView: View {
                     GroupAdd(groupViewModel: groupViewModel)
                 }
                 .onAppear {
+                    #if DEBUG
+                    // Verhindert Aufruf im Preview
+                    if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+                        return
+                    }
+                    #endif
+
                     Task {
                         await loadGroups()
                     }
                 }
+
             }
         }
 
