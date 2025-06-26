@@ -14,7 +14,7 @@ struct GroupView: View {
         @State private var errorMessage = ""
 
         var body: some View {
-            NavigationView {
+            NavigationStack {
                 VStack {
                     if isLoading {
                         ProgressView("Lade Gruppen …")
@@ -28,16 +28,18 @@ struct GroupView: View {
                             .foregroundColor(.secondary)
                             .padding()
                     } else {
-                        List(groupViewModel.groups) { group in
-                            VStack(alignment: .leading) {
+                        List(groupViewModel.groups, id: \.id) { group in
+                            VStack(alignment: .leading, spacing: 4) {
                                 Text(group.name)
                                     .font(.headline)
-                                if group.createdBy == groupViewModel.currentUserId {
-                                    Text("Erstellt von dir")
+                                
+                                if let createdAt = group.createdAt {
+                                    Text("Erstellt am \(createdAt.formatted(date: .abbreviated, time: .shortened))")
                                         .font(.caption)
                                         .foregroundColor(.gray)
                                 }
                             }
+                            .padding(.vertical, 4)
                         }
                     }
                 }
@@ -65,11 +67,10 @@ struct GroupView: View {
         private func loadGroups() async {
             do {
                 try await groupViewModel.fetchGroupsForCurrentUser()
-                isLoading = false
             } catch {
                 errorMessage = error.localizedDescription
-                isLoading = false
             }
+            isLoading = false
         }
     }
 
