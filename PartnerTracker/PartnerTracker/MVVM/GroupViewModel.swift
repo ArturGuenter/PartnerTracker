@@ -67,7 +67,7 @@ class GroupViewModel: ObservableObject {
             throw NSError(domain: "Group", code: 403, userInfo: [NSLocalizedDescriptionKey: "Falsches Passwort."])
         }
 
-        // Mitglied hinzufügen
+        
         try await groupRef.updateData([
             "memberIds": FieldValue.arrayUnion([currentUserId])
         ])
