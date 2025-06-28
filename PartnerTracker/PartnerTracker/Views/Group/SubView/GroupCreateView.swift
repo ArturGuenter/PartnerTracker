@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct GroupCreate: View {
+struct GroupCreateView: View {
     @ObservedObject var groupViewModel: GroupViewModel
         @State private var groupName: String = ""
         @State private var errorMessage: String = ""
@@ -109,5 +109,5 @@ struct GroupCreate: View {
     }
 
 #Preview {
-    GroupCreate(groupViewModel: GroupViewModel())
+    GroupCreateView(groupViewModel: GroupViewModel())
 }

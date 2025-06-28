@@ -52,4 +52,28 @@ class GroupViewModel: ObservableObject {
 
         self.groups = fetchedGroups
     }
+    
+    
+    func joinGroup(groupId: String, password: String) async throws {
+        let groupRef = db.collection("groups").document(groupId)
+        let snapshot = try await groupRef.getDocument()
+
+        guard let data = snapshot.data(),
+              let storedPassword = data["password"] as? String else {
+            throw NSError(domain: "Group", code: 404, userInfo: [NSLocalizedDescriptionKey: "Gruppe nicht gefunden."])
+        }
+
+        guard storedPassword == password else {
+            throw NSError(domain: "Group", code: 403, userInfo: [NSLocalizedDescriptionKey: "Falsches Passwort."])
+        }
+
+        // Mitglied hinzufügen
+        try await groupRef.updateData([
+            "memberIds": FieldValue.arrayUnion([currentUserId])
+        ])
+
+        // Optional: Gruppenliste neu laden
+        try await fetchGroupsForCurrentUser()
+    }
+
 }

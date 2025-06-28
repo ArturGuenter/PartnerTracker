@@ -64,10 +64,10 @@ struct GroupView: View {
                 }
 
                 .sheet(isPresented: $showCreateGroupSheet) {
-                    GroupCreate(groupViewModel: groupViewModel)
+                    GroupCreateView(groupViewModel: groupViewModel)
                 }
                 .sheet(isPresented: $showAddGroupSheet) {
-                
+                    GroupAddView(groupViewModel: groupViewModel)
                 }
                 .onAppear {
                     #if DEBUG
