@@ -12,6 +12,7 @@ struct GroupView: View {
         @State private var showCreateGroupSheet = false
         @State private var isLoading = true
         @State private var errorMessage = ""
+    @State private var showAddGroupSheet = false
 
         var body: some View {
             NavigationStack {
@@ -63,7 +64,10 @@ struct GroupView: View {
                 }
 
                 .sheet(isPresented: $showCreateGroupSheet) {
-                    GroupAdd(groupViewModel: groupViewModel)
+                    GroupCreate(groupViewModel: groupViewModel)
+                }
+                .sheet(isPresented: $showAddGroupSheet) {
+                
                 }
                 .onAppear {
                     #if DEBUG
