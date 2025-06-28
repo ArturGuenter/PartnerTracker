@@ -29,12 +29,20 @@ struct GroupAddView: View {
                     .padding()
                     .background(Color(.secondarySystemBackground))
                     .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                    )
 
                 SecureField("4-stelliges Gruppenpasswort", text: $password)
                     .keyboardType(.numberPad)
                     .padding()
                     .background(Color(.secondarySystemBackground))
                     .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                    )
 
                 if !errorMessage.isEmpty {
                     Text(errorMessage)

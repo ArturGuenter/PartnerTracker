@@ -48,7 +48,7 @@ struct GroupView: View {
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
-                            // Aktion: Gruppe beitreten
+                            showAddGroupSheet = true
                         } label: {
                             Image(systemName: "person.3.fill")
                         }
