@@ -30,18 +30,38 @@ struct GroupView: View {
                             .padding()
                     } else {
                         List(groupViewModel.groups, id: \.id) { group in
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: 6) {
                                 Text(group.name)
                                     .font(.headline)
-                                
+
                                 if let createdAt = group.createdAt {
                                     Text("Erstellt am \(createdAt.formatted(date: .abbreviated, time: .shortened))")
                                         .font(.caption)
                                         .foregroundColor(.gray)
                                 }
+
+                                HStack {
+                                    Text("ID: \(group.id)")
+                                        .font(.caption2)
+                                        .foregroundColor(.gray)
+                                        .lineLimit(1)
+                                        .truncationMode(.middle)
+
+                                    Spacer()
+
+                                    Button(action: {
+                                        UIPasteboard.general.string = group.id
+                                    }) {
+                                        Image(systemName: "doc.on.doc")
+                                            .foregroundColor(.blue)
+                                    }
+                                    .buttonStyle(BorderlessButtonStyle())
+                                    .accessibilityLabel("Gruppen-ID kopieren")
+                                }
                             }
-                            .padding(.vertical, 4)
+                            .padding(.vertical, 6)
                         }
+
                     }
                 }
                 .navigationTitle("Meine Gruppen")
