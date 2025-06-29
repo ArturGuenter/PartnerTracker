@@ -13,6 +13,8 @@ struct GroupView: View {
         @State private var isLoading = true
         @State private var errorMessage = ""
     @State private var showAddGroupSheet = false
+    @State private var showCopyConfirmation = false
+
 
         var body: some View {
             NavigationStack {
@@ -51,18 +53,29 @@ struct GroupView: View {
 
                                     Button(action: {
                                         UIPasteboard.general.string = group.id
+                                        withAnimation {
+                                            showCopyConfirmation = true
+                                        }
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                            withAnimation {
+                                                showCopyConfirmation = false
+                                            }
+                                        }
                                     }) {
                                         Image(systemName: "doc.on.doc")
                                             .foregroundColor(.blue)
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
                                     .accessibilityLabel("Gruppen-ID kopieren")
+
                                 }
                             }
                             .padding(.vertical, 6)
                         }
 
                     }
+                    
+
                 }
                 .navigationTitle("Meine Gruppen")
                 .toolbar {
