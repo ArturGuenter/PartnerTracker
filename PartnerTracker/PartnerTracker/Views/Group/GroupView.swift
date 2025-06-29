@@ -95,6 +95,19 @@ struct GroupView: View {
                         }
                     }
                 }
+                
+                if showCopyConfirmation {
+                    Text("Gruppen-ID kopiert!")
+                        .font(.caption)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.black.opacity(0.8))
+                        .cornerRadius(12)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .zIndex(1)
+                        .padding(.top, 8)
+                }
 
                 .sheet(isPresented: $showCreateGroupSheet) {
                     GroupCreateView(groupViewModel: groupViewModel)
