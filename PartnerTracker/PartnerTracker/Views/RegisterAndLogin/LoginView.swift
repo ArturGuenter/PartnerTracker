@@ -8,48 +8,32 @@
 import SwiftUI
 
 struct LoginView: View {
-    
     @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
     @State private var email = ""
     @State private var password = ""
-    
+    @State private var navigateToMain = false
+
     var body: some View {
-        NavigationStack{
+        NavigationStack {
             VStack(spacing: 24) {
-                HStack{
-                    Spacer()
-                    
-                    Text("Login")
-                        .font(.largeTitle.bold())
-                        .foregroundColor(.primary)
-                        .frame(maxWidth: .infinity)
-                    
-                    Spacer()
-                }
-                
+                Text("Login")
+                    .font(.largeTitle.bold())
+                    .frame(maxWidth: .infinity, alignment: .center)
+
                 TextField("E-Mail", text: $email)
                     .textFieldStyle(PlainTextFieldStyle())
                     .padding()
                     .background(Color(.secondarySystemBackground))
                     .cornerRadius(12)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray, lineWidth: 1)
-                    )
-                
-                
-                
-                
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.gray, lineWidth: 1))
+
                 SecureField("Passwort", text: $password)
                     .textFieldStyle(PlainTextFieldStyle())
                     .padding()
                     .background(Color(.secondarySystemBackground))
                     .cornerRadius(12)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray, lineWidth: 1)
-                    )
-                
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.gray, lineWidth: 1))
+
                 Button(action: {
                     loginRegisterViewModel.login(email: email, password: password)
                 }) {
@@ -60,21 +44,30 @@ struct LoginView: View {
                         .background(Color.blue)
                         .cornerRadius(12)
                 }
-                
-                NavigationLink(destination: RegisterView(loginRegisterViewModel: loginRegisterViewModel)){
+
+                NavigationLink(destination: RegisterView(loginRegisterViewModel: loginRegisterViewModel)) {
                     Text("Registrieren")
                         .font(.callout)
-                        .foregroundStyle(.blue)
+                        .foregroundColor(.blue)
                 }
-                
+
                 Spacer()
             }
             .padding()
             .background(Color(.systemGroupedBackground))
+            .navigationDestination(isPresented: $navigateToMain) {
+                GroupView()
+            }
+            .onChange(of: loginRegisterViewModel.isLoggedIn) { isLoggedIn, oldvalue in
+                if isLoggedIn {
+                    navigateToMain = true
+                }
+            }
         }
     }
-    
 }
+
+
 
 #Preview {
     LoginView(loginRegisterViewModel: LoginRegisterViewModel())
