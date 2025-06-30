@@ -32,45 +32,45 @@ struct GroupView: View {
                             .padding()
                     } else {
                         List(groupViewModel.groups, id: \.id) { group in
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text(group.name)
-                                    .font(.headline)
-
-                                if let createdAt = group.createdAt {
-                                    Text("Erstellt am \(createdAt.formatted(date: .abbreviated, time: .shortened))")
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
-                                }
-
-                                HStack {
-                                    Text("ID: \(group.id)")
-                                        .font(.caption2)
-                                        .foregroundColor(.gray)
-                                        .lineLimit(1)
-                                        .truncationMode(.middle)
-
-                                    Spacer()
-
-                                    Button(action: {
-                                        UIPasteboard.general.string = group.id
-                                        withAnimation {
-                                            showCopyConfirmation = true
-                                        }
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                            withAnimation {
-                                                showCopyConfirmation = false
-                                            }
-                                        }
-                                    }) {
-                                        Image(systemName: "doc.on.doc")
-                                            .foregroundColor(.blue)
+                            NavigationLink(destination: GroupDetailView(group: group)) {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(group.name)
+                                        .font(.headline)
+                                    
+                                    if let createdAt = group.createdAt {
+                                        Text("Erstellt am \(createdAt.formatted(date: .abbreviated, time: .shortened))")
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
                                     }
-                                    .buttonStyle(BorderlessButtonStyle())
-                                    .accessibilityLabel("Gruppen-ID kopieren")
-
+                                    
+                                    HStack {
+                                        Text("ID: \(group.id)")
+                                            .font(.caption2)
+                                            .foregroundColor(.gray)
+                                            .lineLimit(1)
+                                            .truncationMode(.middle)
+                                        
+                                        Spacer()
+                                        
+                                        Button(action: {
+                                            UIPasteboard.general.string = group.id
+                                            withAnimation {
+                                                showCopyConfirmation = true
+                                            }
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                                withAnimation {
+                                                    showCopyConfirmation = false
+                                                }
+                                            }
+                                        }) {
+                                            Image(systemName: "doc.on.doc")
+                                                .foregroundColor(.blue)
+                                        }
+                                        .buttonStyle(BorderlessButtonStyle())
+                                    }
                                 }
+                                .padding(.vertical, 6)
                             }
-                            .padding(.vertical, 6)
                         }
                         
 
