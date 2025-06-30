@@ -21,13 +21,13 @@ struct ContentView: View {
 
             TaskView()
                 .tabItem {
-                    Label("Tasks", systemImage: "list.bullet")
+                    Label("Aufgaben", systemImage: "list.bullet")
                 }
                 .tag(2)
 
             GroupView()
                 .tabItem {
-                    Label("Familie", systemImage: "person.3.fill")
+                    Label("Gruppe", systemImage: "person.3.fill")
                 }
                 .tag(3)
         }
