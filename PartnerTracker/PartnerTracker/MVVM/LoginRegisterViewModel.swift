@@ -85,10 +85,14 @@ class LoginRegisterViewModel: ObservableObject {
                 print("Login fehlgeschlagen: \(error.localizedDescription)")
                 return
             }
-            
-            self?.fetchCurrentUser()
+
+            guard let self = self else { return }
+
+            self.isLoggedIn = true
+            self.fetchCurrentUser()
         }
     }
+
     
     func signOut() {
         try? Auth.auth().signOut()
