@@ -59,6 +59,12 @@ struct LoginView: View {
                             .background(Color.blue)
                             .cornerRadius(12)
                     }
+            
+            NavigationLink(destination: RegisterView(loginRegisterViewModel: loginRegisterViewModel)){
+                Text("Registrieren")
+                    .font(.headline)
+                    .foregroundStyle(.blue)
+            }
 
                     Spacer()
                 }
