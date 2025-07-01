@@ -13,23 +13,22 @@ import FirebaseAuth
 struct PartnerTrackerApp: App {
     @StateObject private var loginRegisterViewModel = LoginRegisterViewModel()
     
-    
-    init(){
+    init() {
         FirebaseConfiguration.shared.setLoggerLevel(.min)
         FirebaseApp.configure()
-        try? Auth.auth().signOut()
     }
-    var body: some Scene {
-        
-            WindowGroup {
-                if loginRegisterViewModel.isLoggedIn {
-                    ContentView(loginRegisterViewModel: loginRegisterViewModel)
-                } else {
-                    LoginView(loginRegisterViewModel: loginRegisterViewModel)
-                }
 
-                    }
-          
+    var body: some Scene {
+        WindowGroup {
+            if loginRegisterViewModel.isLoading {
+                ProgressView("Lade Benutzerdaten…")
+            } else if loginRegisterViewModel.isLoggedIn {
+                ContentView(loginRegisterViewModel: loginRegisterViewModel)
+            } else {
+                LoginView(loginRegisterViewModel: loginRegisterViewModel)
+            }
+        }
     }
 }
-user bleibt eingeloggt obwohl app gelöscht, nun hat es gekalppt mit beim app satrt alle ausloggen was nicht gut ist 
+
+
