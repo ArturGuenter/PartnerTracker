@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Firebase
+import FirebaseAuth
 
 @main
 struct PartnerTrackerApp: App {
@@ -16,6 +17,7 @@ struct PartnerTrackerApp: App {
     init(){
         FirebaseConfiguration.shared.setLoggerLevel(.min)
         FirebaseApp.configure()
+        try? Auth.auth().signOut()
     }
     var body: some Scene {
         
@@ -30,3 +32,4 @@ struct PartnerTrackerApp: App {
           
     }
 }
+user bleibt eingeloggt obwohl app gelöscht, nun hat es gekalppt mit beim app satrt alle ausloggen was nicht gut ist 
