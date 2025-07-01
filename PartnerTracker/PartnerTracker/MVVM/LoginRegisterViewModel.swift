@@ -7,21 +7,24 @@
 import FirebaseAuth
 import FirebaseFirestore
 import Combine
+
 @MainActor
 class LoginRegisterViewModel: ObservableObject {
     private var auth = Auth.auth()
     private var db = Firestore.firestore()
-
+    
     @Published var isLoggedIn: Bool = false
     @Published var user: AppUser?
-
+    @Published var isLoading: Bool = true // Neu: Damit UI weiß, wann Status geladen wurde
+    
     init() {
-        
-        auth.addStateDidChangeListener { [weak self] auth, user in
+        // Hört auf Änderungen am Auth-Status
+        auth.addStateDidChangeListener { [weak self] _, user in
             Task { @MainActor in
-                print("Firebase auth state changed. User: \(String(describing: user))")
                 self?.isLoggedIn = user != nil
-                if let user = user {
+                self?.isLoading = false
+                
+                if let _ = user {
                     self?.fetchCurrentUser()
                 } else {
                     self?.user = nil
@@ -36,17 +39,17 @@ class LoginRegisterViewModel: ObservableObject {
                 print("Registrierung fehlgeschlagen: \(error.localizedDescription)")
                 return
             }
-
+            
             guard let self = self,
                   let firebaseUser = authResult?.user else { return }
-
+            
             let appUser = AppUser(
                 id: firebaseUser.uid,
                 surname: surname,
                 name: name,
                 email: email
             )
-
+            
             self.saveUserToFirestore(appUser)
         }
     }
@@ -55,28 +58,26 @@ class LoginRegisterViewModel: ObservableObject {
         do {
             try db.collection("users").document(user.id).setData(from: user) { error in
                 if let error = error {
-                    print("Fehler beim Speichern des Users in Firestore: \(error.localizedDescription)")
+                    print("Fehler beim Speichern des Users: \(error.localizedDescription)")
                 } else {
-                    print("User erfolgreich gespeichert.")
                     DispatchQueue.main.async {
                         self.user = user
                     }
                 }
             }
         } catch {
-            print("Serialisierungsfehler: \(error.localizedDescription)")
+            print("Fehler bei Serialisierung: \(error.localizedDescription)")
         }
     }
 
     func fetchCurrentUser() {
         guard let uid = auth.currentUser?.uid else { return }
-
         db.collection("users").document(uid).getDocument { [weak self] snapshot, error in
             if let error = error {
                 print("Fehler beim Laden des Benutzers: \(error.localizedDescription)")
                 return
             }
-
+            
             if let user = try? snapshot?.data(as: AppUser.self) {
                 DispatchQueue.main.async {
                     self?.user = user
@@ -86,21 +87,22 @@ class LoginRegisterViewModel: ObservableObject {
     }
 
     func login(email: String, password: String) {
-        auth.signIn(withEmail: email, password: password) { [weak self] authResult, error in
+        auth.signIn(withEmail: email, password: password) { [weak self] _, error in
             if let error = error {
                 print("Login fehlgeschlagen: \(error.localizedDescription)")
                 return
             }
-
-            guard let self = self else { return }
-
-            self.fetchCurrentUser()
+            
         }
     }
 
     func signOut() {
-        try? auth.signOut()
-        self.isLoggedIn = false
-        self.user = nil
+        do {
+            try auth.signOut()
+            self.user = nil
+           
+        } catch {
+            print("Fehler beim Ausloggen: \(error.localizedDescription)")
+        }
     }
 }
