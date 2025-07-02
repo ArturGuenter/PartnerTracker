@@ -30,7 +30,7 @@ class GroupViewModel: ObservableObject {
             name: name,
             memberIds: [currentUserId],
             createdAt: nil,
-            password: password 
+            password: password
         )
         
         var groupData = try Firestore.Encoder().encode(group)
@@ -43,15 +43,22 @@ class GroupViewModel: ObservableObject {
     func fetchGroupsForCurrentUser() async throws {
         let snapshot = try await db.collection("groups")
             .whereField("memberIds", arrayContains: currentUserId)
-            .order(by: "createdAt", descending: true)
             .getDocuments()
 
-        let fetchedGroups: [Group] = try snapshot.documents.compactMap { doc in
+        var fetchedGroups: [Group] = try snapshot.documents.compactMap { doc in
             try doc.data(as: Group.self)
+        }
+
+        
+        fetchedGroups.sort { (group1, group2) in
+            let date1 = group1.createdAt ?? Date.distantPast
+            let date2 = group2.createdAt ?? Date.distantPast
+            return date1 > date2 // Neueste zuerst
         }
 
         self.groups = fetchedGroups
     }
+
     
     
     func joinGroup(groupId: String, password: String) async throws {
