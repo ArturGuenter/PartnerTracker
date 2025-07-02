@@ -32,6 +32,8 @@ class LoginRegisterViewModel: ObservableObject {
             }
         }
     }
+    
+    
 
     func register(email: String, password: String, name: String, surname: String) {
         auth.createUser(withEmail: email, password: password) { [weak self] authResult, error in

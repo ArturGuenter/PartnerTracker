@@ -30,7 +30,7 @@ class GroupViewModel: ObservableObject {
             name: name,
             memberIds: [currentUserId],
             createdAt: nil,
-            password: password // neu
+            password: password 
         )
         
         var groupData = try Firestore.Encoder().encode(group)
@@ -72,7 +72,7 @@ class GroupViewModel: ObservableObject {
             "memberIds": FieldValue.arrayUnion([currentUserId])
         ])
 
-        // Optional: Gruppenliste neu laden
+        
         try await fetchGroupsForCurrentUser()
     }
 
