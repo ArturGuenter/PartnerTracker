@@ -13,22 +13,21 @@ struct HomeView: View {
     @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
     
     var body: some View {
+        HStack{
+                        Spacer()
+            Button{
+                loginRegisterViewModel.signOut()
+            } label: {
+                            Image(systemName: "door.left.hand.open")
+                                .padding(.trailing, 20)
+                        }
+                        
+                    }
         VStack(spacing: 24) {
             Text("Willkommen, \(loginRegisterViewModel.user?.name ?? "Benutzer")!")
                 .font(.title2)
             
-            Button(role: .destructive) {
-                loginRegisterViewModel.signOut()
-            } label: {
-                Text("Abmelden")
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.red)
-                    .cornerRadius(12)
-            }
-
-            Spacer()
+            
         }
         .padding()
     }
