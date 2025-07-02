@@ -13,23 +13,27 @@ struct HomeView: View {
     @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
     
     var body: some View {
-        HStack{
-                        Spacer()
-            Button{
-                loginRegisterViewModel.signOut()
-            } label: {
-                            Image(systemName: "door.left.hand.open")
-                                .padding(.trailing, 20)
-                        }
+        NavigationStack {
+                    VStack {
+                        Text("Willkommen, \(loginRegisterViewModel.user?.name ?? "Nutzer")!")
                         
                     }
-        VStack(spacing: 24) {
-            Text("Willkommen, \(loginRegisterViewModel.user?.name ?? "Benutzer")!")
-                .font(.title2)
-            
-            
-        }
-        .padding()
+                    .navigationTitle("Home")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button {
+                                loginRegisterViewModel.signOut()
+                            } label: {
+                                Image(systemName: "door.left.hand.open")
+                                    .imageScale(.large)
+                                    .padding(.trailing, 10)
+                            }
+                            .accessibilityLabel("Abmelden")
+                        }
+                    }
+                }
+        
     }
 }
 
