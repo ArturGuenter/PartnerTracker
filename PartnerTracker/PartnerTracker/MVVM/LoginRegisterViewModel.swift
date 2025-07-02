@@ -18,20 +18,18 @@ class LoginRegisterViewModel: ObservableObject {
     @Published var isLoading: Bool = true // Neu: Damit UI weiß, wann Status geladen wurde
     
     init() {
-        // Hört auf Änderungen am Auth-Status
-        auth.addStateDidChangeListener { [weak self] _, user in
-            Task { @MainActor in
-                self?.isLoggedIn = user != nil
-                self?.isLoading = false
-                
-                if let _ = user {
-                    self?.fetchCurrentUser()
-                } else {
-                    self?.user = nil
-                }
-            }
+        print("LoginRegisterViewModel initialisiert.")
+        
+        if let user = Auth.auth().currentUser {
+            print("Es gibt einen eingeloggten User: \(user.email ?? "Unbekannt")")
+            self.isLoggedIn = true
+            fetchCurrentUser()
+        } else {
+            print("Kein eingeloggter User gefunden.")
+            self.isLoggedIn = false
         }
     }
+
 
     func register(email: String, password: String, name: String, surname: String) {
         auth.createUser(withEmail: email, password: password) { [weak self] authResult, error in
