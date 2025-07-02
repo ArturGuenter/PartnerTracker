@@ -131,6 +131,11 @@ struct GroupView: View {
                 
                 
             }
+            .onAppear {
+                Task {
+                    try? await groupViewModel.fetchGroupsForCurrentUser()
+                }
+            }
         }
 
         private func loadGroups() async {

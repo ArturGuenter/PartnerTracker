@@ -37,7 +37,11 @@ class GroupViewModel: ObservableObject {
         groupData["createdAt"] = FieldValue.serverTimestamp()
 
         try await newGroupRef.setData(groupData)
+
+        
+        try await fetchGroupsForCurrentUser()
     }
+
 
 
     func fetchGroupsForCurrentUser() async throws {
