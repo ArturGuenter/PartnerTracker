@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
+    @StateObject private var groupViewModel = GroupViewModel()
+    @StateObject private var taskViewModel = TaskViewModel()
     @State private var selection = 1
 
     var body: some View {
@@ -19,13 +21,13 @@ struct ContentView: View {
                 }
                 .tag(1)
 
-            TaskView()
+            TaskView(taskViewModel: taskViewModel, groupViewModel: groupViewModel)
                 .tabItem {
                     Label("Aufgaben", systemImage: "list.bullet")
                 }
                 .tag(2)
 
-            GroupView()
+            GroupView(groupViewModel: groupViewModel)
                 .tabItem {
                     Label("Gruppe", systemImage: "person.3.fill")
                 }

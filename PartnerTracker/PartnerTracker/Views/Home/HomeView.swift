@@ -11,6 +11,7 @@ import SwiftUI
 struct HomeView: View {
     @Binding var selection: Int
     @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
+   
     
     var body: some View {
         NavigationStack {

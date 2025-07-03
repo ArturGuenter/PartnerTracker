@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct GroupView: View {
-    @StateObject var groupViewModel = GroupViewModel()
+    @ObservedObject var groupViewModel : GroupViewModel
         @State private var showCreateGroupSheet = false
         @State private var isLoading = true
         @State private var errorMessage = ""
@@ -149,5 +149,5 @@ struct GroupView: View {
     }
 
 #Preview {
-    GroupView()
+    GroupView(groupViewModel: GroupViewModel())
 }

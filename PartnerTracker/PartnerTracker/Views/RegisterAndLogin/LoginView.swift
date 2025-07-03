@@ -9,6 +9,7 @@ import SwiftUI
 
 struct LoginView: View {
     @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
+    
     @State private var email = ""
     @State private var password = ""
     @State private var navigateToMain = false
@@ -56,7 +57,7 @@ struct LoginView: View {
             .padding()
             .background(Color(.systemGroupedBackground))
             .navigationDestination(isPresented: $navigateToMain) {
-                GroupView()
+                ContentView(loginRegisterViewModel: loginRegisterViewModel)
             }
             .onChange(of: loginRegisterViewModel.isLoggedIn) { isLoggedIn, oldvalue in
                 if isLoggedIn {

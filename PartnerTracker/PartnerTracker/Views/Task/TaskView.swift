@@ -16,12 +16,12 @@ struct TaskView: View {
             VStack(alignment: .leading, spacing: 24) {
 
                 // Eigene Aufgaben
-                if !taskViewModel.ownTasks.isEmpty {
+                if !taskViewModel.personalTasks.isEmpty {
                     Text("Meine Aufgaben")
                         .font(.headline)
                         .padding(.horizontal)
 
-                    ForEach(taskViewModel.ownTasks) { task in
+                    ForEach(taskViewModel.personalTasks) { task in
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
                                 Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
@@ -39,31 +39,27 @@ struct TaskView: View {
                     }
                 }
 
-                // Gruppenaufgaben pro Gruppe
-                ForEach(groupViewModel.groups) { group in
-                    let tasksForGroup = taskViewModel.groupTasks.filter { $0.groupId == group.id }
+                // Aufgaben aus Gruppen
+                ForEach(taskViewModel.groupedTasks.sorted(by: { $0.key < $1.key }), id: \.key) { groupName, tasks in
+                    Text("Gruppe: \(groupName)")
+                        .font(.headline)
+                        .padding(.horizontal)
 
-                    if !tasksForGroup.isEmpty {
-                        Text("Gruppe: \(group.name)")
-                            .font(.headline)
-                            .padding(.horizontal)
-
-                        ForEach(tasksForGroup) { task in
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
-                                        .foregroundColor(task.isDone ? .green : .gray)
-                                    Text(task.title)
-                                        .strikethrough(task.isDone)
-                                        .foregroundColor(task.isDone ? .gray : .primary)
-                                    Spacer()
-                                }
+                    ForEach(tasks) { task in
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(task.isDone ? .green : .gray)
+                                Text(task.title)
+                                    .strikethrough(task.isDone)
+                                    .foregroundColor(task.isDone ? .gray : .primary)
+                                Spacer()
                             }
-                            .padding()
-                            .background(Color(.secondarySystemBackground))
-                            .cornerRadius(12)
-                            .padding(.horizontal)
                         }
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
                     }
                 }
 
@@ -72,14 +68,16 @@ struct TaskView: View {
         }
         .onAppear {
             Task {
-                try? await taskViewModel.fetchTasks()
+                try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
             }
         }
     }
 }
 
-
-
 #Preview {
-    TaskView()
+    TaskView(
+        taskViewModel: TaskViewModel(),
+        groupViewModel: GroupViewModel()
+    )
 }
+

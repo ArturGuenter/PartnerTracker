@@ -22,7 +22,7 @@ class TaskViewModel: ObservableObject {
     }
 
     func fetchTasks(groups: [Group]) async throws {
-        // Eigene Aufgaben
+     
         let personalSnapshot = try await db.collection("tasks")
             .whereField("ownerId", isEqualTo: currentUserId)
             .order(by: "createdAt", descending: true)
@@ -32,7 +32,9 @@ class TaskViewModel: ObservableObject {
             try $0.data(as: TaskItem.self)
         }
 
-        // Aufgaben aus Gruppen
+      
+        var newGroupedTasks: [String: [TaskItem]] = [:]
+        
         for group in groups {
             let groupSnapshot = try await db.collection("tasks")
                 .whereField("groupId", isEqualTo: group.id)
@@ -44,9 +46,13 @@ class TaskViewModel: ObservableObject {
             }
             
             if !groupTasks.isEmpty {
-                self.groupedTasks[group.name] = groupTasks
+                newGroupedTasks[group.name] = groupTasks
             }
         }
+
+       
+        self.groupedTasks = newGroupedTasks
     }
 }
+
 
