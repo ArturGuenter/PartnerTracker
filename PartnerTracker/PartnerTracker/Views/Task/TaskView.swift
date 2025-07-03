@@ -13,41 +13,71 @@ struct TaskView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 24) {
 
                 // Eigene Aufgaben
-                if !taskViewModel.personalTasks.isEmpty {
+                if !taskViewModel.ownTasks.isEmpty {
                     Text("Meine Aufgaben")
                         .font(.headline)
+                        .padding(.horizontal)
 
-                    ForEach(taskViewModel.personalTasks) { task in
-                        TaskRow(task: task)
+                    ForEach(taskViewModel.ownTasks) { task in
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(task.isDone ? .green : .gray)
+                                Text(task.title)
+                                    .strikethrough(task.isDone)
+                                    .foregroundColor(task.isDone ? .gray : .primary)
+                                Spacer()
+                            }
+                        }
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
                     }
                 }
 
-                // Gruppenaufgaben
-                ForEach(Array(taskViewModel.groupedTasks.keys), id: \.self) { groupName in
-                    if let tasks = taskViewModel.groupedTasks[groupName] {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Gruppe: \(groupName)")
-                                .font(.headline)
+                // Gruppenaufgaben pro Gruppe
+                ForEach(groupViewModel.groups) { group in
+                    let tasksForGroup = taskViewModel.groupTasks.filter { $0.groupId == group.id }
 
-                            ForEach(tasks) { task in
-                                TaskRow(task: task)
+                    if !tasksForGroup.isEmpty {
+                        Text("Gruppe: \(group.name)")
+                            .font(.headline)
+                            .padding(.horizontal)
+
+                        ForEach(tasksForGroup) { task in
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
+                                        .foregroundColor(task.isDone ? .green : .gray)
+                                    Text(task.title)
+                                        .strikethrough(task.isDone)
+                                        .foregroundColor(task.isDone ? .gray : .primary)
+                                    Spacer()
+                                }
                             }
+                            .padding()
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(12)
+                            .padding(.horizontal)
                         }
                     }
                 }
+
+                Spacer(minLength: 40)
             }
-            .padding()
         }
         .onAppear {
             Task {
-                try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                try? await taskViewModel.fetchTasks()
             }
         }
     }
 }
+
 
 
 #Preview {
