@@ -6,3 +6,11 @@
 //
 
 import Foundation
+struct TaskItem: Identifiable, Codable {
+    var id: String
+    var title: String
+    var isDone: Bool
+    var ownerId: String?
+    var groupId: String?
+    var createdAt: Date?
+}
