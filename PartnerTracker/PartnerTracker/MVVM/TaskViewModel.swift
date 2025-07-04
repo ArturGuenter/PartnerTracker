@@ -70,7 +70,7 @@ class TaskViewModel: ObservableObject {
                 createdAt: Date()
             )
 
-            try? db.collection("tasks").document(defaultTask.id).setData([
+            try? await db.collection("tasks").document(defaultTask.id).setData([
                 "id": defaultTask.id,
                 "title": defaultTask.title,
                 "isDone": defaultTask.isDone,
