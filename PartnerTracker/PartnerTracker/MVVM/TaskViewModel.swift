@@ -53,6 +53,34 @@ class TaskViewModel: ObservableObject {
        
         self.groupedTasks = newGroupedTasks
     }
+    
+    
+    func addDefaultTaskIfNeeded() async {
+        let snapshot = try? await db.collection("tasks")
+            .whereField("ownerId", isEqualTo: currentUserId)
+            .getDocuments()
+
+        if let count = snapshot?.count, count == 0 {
+            let defaultTask = TaskItem(
+                id: UUID().uuidString,
+                title: "App öffnen",
+                isDone: false,
+                ownerId: currentUserId,
+                groupId: nil,
+                createdAt: Date()
+            )
+
+            try? db.collection("tasks").document(defaultTask.id).setData([
+                "id": defaultTask.id,
+                "title": defaultTask.title,
+                "isDone": defaultTask.isDone,
+                "ownerId": defaultTask.ownerId,
+                "groupId": NSNull(), 
+                "createdAt": Timestamp(date: defaultTask.createdAt)
+            ])
+        }
+    }
+
 }
 
 
