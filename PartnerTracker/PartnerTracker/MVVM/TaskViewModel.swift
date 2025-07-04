@@ -75,8 +75,9 @@ class TaskViewModel: ObservableObject {
                 "title": defaultTask.title,
                 "isDone": defaultTask.isDone,
                 "ownerId": defaultTask.ownerId,
-                "groupId": NSNull(), 
-                "createdAt": Timestamp(date: defaultTask.createdAt)
+                "groupId": NSNull(),
+                "createdAt": Timestamp(date: defaultTask.createdAt ?? Date())
+
             ])
         }
     }

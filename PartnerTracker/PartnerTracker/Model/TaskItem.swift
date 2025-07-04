@@ -12,5 +12,5 @@ struct TaskItem: Identifiable, Codable {
     var isDone: Bool
     var ownerId: String?
     var groupId: String?
-    var createdAt: Date?
+    let createdAt: Date
 }
