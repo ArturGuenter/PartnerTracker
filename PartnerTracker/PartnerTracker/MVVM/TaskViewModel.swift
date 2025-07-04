@@ -23,6 +23,8 @@ class TaskViewModel: ObservableObject {
 
     func fetchTasks(groups: [Group]) async throws {
      
+        await addDefaultTaskIfNeeded()
+        
         let personalSnapshot = try await db.collection("tasks")
             .whereField("ownerId", isEqualTo: currentUserId)
             .order(by: "createdAt", descending: true)
@@ -76,7 +78,7 @@ class TaskViewModel: ObservableObject {
                 "isDone": defaultTask.isDone,
                 "ownerId": defaultTask.ownerId,
                 "groupId": NSNull(),
-                "createdAt": Timestamp(date: defaultTask.createdAt ?? Date())
+                "createdAt": Timestamp(date: defaultTask.createdAt)
 
             ])
         }
