@@ -10,6 +10,7 @@ import SwiftUI
 struct TaskView: View {
     @ObservedObject var taskViewModel: TaskViewModel
     @ObservedObject var groupViewModel: GroupViewModel
+
     @State private var showPersonalTaskSheet = false
     @State private var showGroupTaskSheetForGroupId: String?
     @State private var newTaskTitle = ""
@@ -18,73 +19,94 @@ struct TaskView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
 
-                // "Meine Aufgaben"
-                Text("Meine Aufgaben")
-                    .font(.headline)
+                // MARK: - Eigene Aufgabenbereich
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("Meine Aufgaben")
+                            .font(.headline)
+                        Spacer()
+                        Button(action: {
+                            showPersonalTaskSheet = true
+                        }) {
+                            Label("Neue Aufgabe", systemImage: "plus.circle")
+                        }
+                    }
                     .padding(.horizontal)
 
-                if taskViewModel.personalTasks.isEmpty {
-                    Text("Noch keine eigenen Aufgaben.")
-                        .foregroundColor(.gray)
-                        .padding(.horizontal)
-                } else {
-                    ForEach(taskViewModel.personalTasks) { task in
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
-                                    .foregroundColor(task.isDone ? .green : .gray)
-                                Text(task.title)
-                                    .strikethrough(task.isDone)
-                                    .foregroundColor(task.isDone ? .gray : .primary)
-                                Spacer()
+                    if taskViewModel.personalTasks.isEmpty {
+                        Text("Noch keine eigenen Aufgaben.")
+                            .foregroundColor(.gray)
+                            .padding(.horizontal)
+                    } else {
+                        ForEach(taskViewModel.personalTasks) { task in
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
+                                        .foregroundColor(task.isDone ? .green : .gray)
+                                    Text(task.title)
+                                        .strikethrough(task.isDone)
+                                        .foregroundColor(task.isDone ? .gray : .primary)
+                                    Spacer()
+                                }
                             }
+                            .padding()
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(12)
+                            .padding(.horizontal)
                         }
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
                     }
                 }
 
-                // "Gruppenaufgaben"
-                Text("Gruppenaufgaben")
-                    .font(.headline)
-                    .padding(.horizontal)
-
-                if groupViewModel.groups.isEmpty {
-                    Text("Du bist noch keiner Gruppe beigetreten.")
-                        .foregroundColor(.gray)
+                // MARK: - Gruppenaufgabenbereich
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Gruppenaufgaben")
+                        .font(.headline)
                         .padding(.horizontal)
-                } else {
-                    ForEach(groupViewModel.groups) { group in
-                        if let tasks = taskViewModel.groupedTasks[group.name], !tasks.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Gruppe: \(group.name)")
-                                    .font(.subheadline)
-                                    .bold()
-                                    .padding(.horizontal)
 
-                                ForEach(tasks) { task in
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        HStack {
-                                            Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
-                                                .foregroundColor(task.isDone ? .green : .gray)
-                                            Text(task.title)
-                                                .strikethrough(task.isDone)
-                                                .foregroundColor(task.isDone ? .gray : .primary)
-                                            Spacer()
-                                        }
+                    if groupViewModel.groups.isEmpty {
+                        Text("Du bist noch keiner Gruppe beigetreten.")
+                            .foregroundColor(.gray)
+                            .padding(.horizontal)
+                    } else {
+                        ForEach(groupViewModel.groups) { group in
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Text("Gruppe: \(group.name)")
+                                        .font(.subheadline)
+                                        .bold()
+                                    Spacer()
+                                    Button(action: {
+                                        showGroupTaskSheetForGroupId = group.id
+                                    }) {
+                                        Label("Neue Aufgabe", systemImage: "plus.circle")
+                                            .labelStyle(TitleOnlyLabelStyle())
                                     }
-                                    .padding()
-                                    .background(Color(.secondarySystemBackground))
-                                    .cornerRadius(12)
-                                    .padding(.horizontal)
+                                }
+                                .padding(.horizontal)
+
+                                if let tasks = taskViewModel.groupedTasks[group.name], !tasks.isEmpty {
+                                    ForEach(tasks) { task in
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            HStack {
+                                                Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
+                                                    .foregroundColor(task.isDone ? .green : .gray)
+                                                Text(task.title)
+                                                    .strikethrough(task.isDone)
+                                                    .foregroundColor(task.isDone ? .gray : .primary)
+                                                Spacer()
+                                            }
+                                        }
+                                        .padding()
+                                        .background(Color(.secondarySystemBackground))
+                                        .cornerRadius(12)
+                                        .padding(.horizontal)
+                                    }
+                                } else {
+                                    Text("Keine Aufgaben in dieser Gruppe.")
+                                        .foregroundColor(.gray)
+                                        .padding(.horizontal)
                                 }
                             }
-                        } else {
-                            Text("Gruppe: \(group.name) – Keine Aufgaben")
-                                .foregroundColor(.gray)
-                                .padding(.horizontal)
                         }
                     }
                 }
@@ -103,6 +125,10 @@ struct TaskView: View {
                 }
             }
         }
+
+       
+
+        
     }
 }
 
