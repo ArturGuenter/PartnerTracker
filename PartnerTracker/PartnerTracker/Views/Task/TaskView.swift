@@ -10,6 +10,9 @@ import SwiftUI
 struct TaskView: View {
     @ObservedObject var taskViewModel: TaskViewModel
     @ObservedObject var groupViewModel: GroupViewModel
+    @State private var showPersonalTaskSheet = false
+    @State private var showGroupTaskSheetForGroupId: String?
+    @State private var newTaskTitle = ""
 
     var body: some View {
         ScrollView {
