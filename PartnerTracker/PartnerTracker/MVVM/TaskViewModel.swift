@@ -20,6 +20,7 @@ class TaskViewModel: ObservableObject {
     var currentUserId: String {
         auth.currentUser?.uid ?? ""
     }
+    
 
     func fetchTasks(groups: [Group]) async throws {
      
@@ -62,27 +63,29 @@ class TaskViewModel: ObservableObject {
             .whereField("ownerId", isEqualTo: currentUserId)
             .getDocuments()
 
-        if let count = snapshot?.count, count == 0 {
-            let defaultTask = TaskItem(
-                id: UUID().uuidString,
-                title: "App öffnen",
-                isDone: false,
-                ownerId: currentUserId,
-                groupId: nil,
-                createdAt: Date()
-            )
-
-            try? await db.collection("tasks").document(defaultTask.id).setData([
-                "id": defaultTask.id,
-                "title": defaultTask.title,
-                "isDone": defaultTask.isDone,
-                "ownerId": defaultTask.ownerId,
-                "groupId": NSNull(),
-                "createdAt": Timestamp(date: defaultTask.createdAt)
-
-            ])
+        guard let snapshot = snapshot, snapshot.isEmpty else {
+            return 
         }
+
+        let defaultTask = TaskItem(
+            id: UUID().uuidString,
+            title: "App öffnen",
+            isDone: false,
+            ownerId: currentUserId,
+            groupId: nil,
+            createdAt: Date()
+        )
+
+        try? await db.collection("tasks").document(defaultTask.id).setData([
+            "id": defaultTask.id,
+            "title": defaultTask.title,
+            "isDone": defaultTask.isDone,
+            "ownerId": defaultTask.ownerId,
+            "groupId": NSNull(),
+            "createdAt": Timestamp(date: defaultTask.createdAt)
+        ])
     }
+
 
 }
 
