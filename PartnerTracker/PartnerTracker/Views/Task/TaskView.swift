@@ -156,7 +156,37 @@ struct TaskView: View {
             }
         }
 
-        
+        // MARK: - Sheet für Gruppenaufgabe
+        .sheet(item: $showGroupTaskSheetForGroupId) { groupId in
+            if let group = groupViewModel.groups.first(where: { $0.id == groupId }) {
+                NavigationView {
+                    Form {
+                        Section(header: Text("Neue Aufgabe für \(group.name)")) {
+                            TextField("Titel", text: $newTaskTitle)
+                        }
+                    }
+                    .navigationTitle("Gruppenaufgabe")
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Abbrechen") {
+                                newTaskTitle = ""
+                                showGroupTaskSheetForGroupId = nil
+                            }
+                        }
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Hinzufügen") {
+                                Task {
+                                    await taskViewModel.addGroupTask(title: newTaskTitle, group: group)
+                                    newTaskTitle = ""
+                                    showGroupTaskSheetForGroupId = nil
+                                }
+                            }
+                            .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
