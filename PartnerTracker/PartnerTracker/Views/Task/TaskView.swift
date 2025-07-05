@@ -126,7 +126,35 @@ struct TaskView: View {
             }
         }
 
-       
+        // MARK: - Sheet für eigene Aufgabe
+        .sheet(isPresented: $showPersonalTaskSheet) {
+            NavigationView {
+                Form {
+                    Section(header: Text("Neue persönliche Aufgabe")) {
+                        TextField("Titel", text: $newTaskTitle)
+                    }
+                }
+                .navigationTitle("Eigene Aufgabe")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Abbrechen") {
+                            newTaskTitle = ""
+                            showPersonalTaskSheet = false
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Hinzufügen") {
+                            Task {
+                                await taskViewModel.addPersonalTask(title: newTaskTitle)
+                                newTaskTitle = ""
+                                showPersonalTaskSheet = false
+                            }
+                        }
+                        .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
+                    }
+                }
+            }
+        }
 
         
     }
