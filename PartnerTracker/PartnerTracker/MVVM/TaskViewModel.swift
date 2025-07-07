@@ -21,9 +21,9 @@ class TaskViewModel: ObservableObject {
         auth.currentUser?.uid ?? ""
     }
     
-
+    
     func fetchTasks(groups: [Group]) async throws {
-     
+        
         await addDefaultTaskIfNeeded()
         
         let personalSnapshot = try await db.collection("tasks")
@@ -34,8 +34,8 @@ class TaskViewModel: ObservableObject {
         self.personalTasks = try personalSnapshot.documents.compactMap {
             try $0.data(as: TaskItem.self)
         }
-
-      
+        
+        
         var newGroupedTasks: [String: [TaskItem]] = [:]
         
         for group in groups {
@@ -52,8 +52,8 @@ class TaskViewModel: ObservableObject {
                 newGroupedTasks[group.name] = groupTasks
             }
         }
-
-       
+        
+        
         self.groupedTasks = newGroupedTasks
     }
     
@@ -62,11 +62,11 @@ class TaskViewModel: ObservableObject {
         let snapshot = try? await db.collection("tasks")
             .whereField("ownerId", isEqualTo: currentUserId)
             .getDocuments()
-
+        
         guard let snapshot = snapshot, snapshot.isEmpty else {
-            return 
+            return
         }
-
+        
         let defaultTask = TaskItem(
             id: UUID().uuidString,
             title: "App öffnen",
@@ -75,7 +75,7 @@ class TaskViewModel: ObservableObject {
             groupId: nil,
             createdAt: Date()
         )
-
+        
         try? await db.collection("tasks").document(defaultTask.id).setData([
             "id": defaultTask.id,
             "title": defaultTask.title,
@@ -85,7 +85,7 @@ class TaskViewModel: ObservableObject {
             "createdAt": Timestamp(date: defaultTask.createdAt)
         ])
     }
-
+    
     func addPersonalTask(title: String) async {
         let newTask = TaskItem(
             id: UUID().uuidString,
@@ -95,7 +95,7 @@ class TaskViewModel: ObservableObject {
             groupId: nil,
             createdAt: Date()
         )
-
+        
         do {
             try await db.collection("tasks").document(newTask.id).setData([
                 "id": newTask.id,
@@ -110,6 +110,32 @@ class TaskViewModel: ObservableObject {
             print("Fehler beim Hinzufügen eigener Aufgabe: \(error)")
         }
     }
+    
+    func addGroupTask(title: String, group: Group) async {
+        let newTask = TaskItem(
+            id: UUID().uuidString,
+            title: title,
+            isDone: false,
+            ownerId: currentUserId,
+            groupId: group.id,
+            createdAt: Date()
+        )
+
+        do {
+            try await db.collection("tasks").document(newTask.id).setData([
+                "id": newTask.id,
+                "title": newTask.title,
+                "isDone": newTask.isDone,
+                "ownerId": newTask.ownerId,
+                "groupId": group.id,
+                "createdAt": Timestamp(date: newTask.createdAt)
+            ])
+            try await fetchTasks(groups: [])
+        } catch {
+            print("Fehler beim Hinzufügen Gruppen-Aufgabe: \(error)")
+        }
+    }
+    
 }
 
 
