@@ -16,7 +16,6 @@ struct TaskView: View {
     @State private var newPersonalTaskTitle = ""
     @State private var newGroupTaskTitle = ""
 
-
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
@@ -45,6 +44,12 @@ struct TaskView: View {
                                 HStack {
                                     Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
                                         .foregroundColor(task.isDone ? .green : .gray)
+                                        .onTapGesture {
+                                            Task {
+                                                await taskViewModel.toggleTaskDone(task)
+                                            }
+                                        }
+
                                     Text(task.title)
                                         .strikethrough(task.isDone)
                                         .foregroundColor(task.isDone ? .gray : .primary)
@@ -82,16 +87,23 @@ struct TaskView: View {
                                     }) {
                                         Label("Neue Aufgabe", systemImage: "plus.circle")
                                     }
-
                                 }
                                 .padding(.horizontal)
 
-                                if let tasks = taskViewModel.groupedTasks[group.name], !tasks.isEmpty {
+                                let tasks = taskViewModel.groupedTasks[group.name] ?? []
+
+                                if !tasks.isEmpty {
                                     ForEach(tasks) { task in
                                         VStack(alignment: .leading, spacing: 8) {
                                             HStack {
                                                 Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
                                                     .foregroundColor(task.isDone ? .green : .gray)
+                                                    .onTapGesture {
+                                                        Task {
+                                                            await taskViewModel.toggleTaskDone(task)
+                                                        }
+                                                    }
+
                                                 Text(task.title)
                                                     .strikethrough(task.isDone)
                                                     .foregroundColor(task.isDone ? .gray : .primary)
@@ -128,31 +140,31 @@ struct TaskView: View {
             }
         }
 
-        // MARK: - Sheet für eigene Aufgabe
+        // MARK: - Sheet für persönliche Aufgabe
         .sheet(isPresented: $showPersonalTaskSheet) {
             NavigationView {
                 Form {
                     Section(header: Text("Neue persönliche Aufgabe")) {
-                        TextField("Titel", text: $newTaskTitle)
+                        TextField("Titel", text: $newPersonalTaskTitle)
                     }
                 }
                 .navigationTitle("Eigene Aufgabe")
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Abbrechen") {
-                            newTaskTitle = ""
+                            newPersonalTaskTitle = ""
                             showPersonalTaskSheet = false
                         }
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Hinzufügen") {
                             Task {
-                                await taskViewModel.addPersonalTask(title: newTaskTitle)
-                                newTaskTitle = ""
+                                await taskViewModel.addPersonalTask(title: newPersonalTaskTitle)
+                                newPersonalTaskTitle = ""
                                 showPersonalTaskSheet = false
                             }
                         }
-                        .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
+                        .disabled(newPersonalTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
                 }
             }
@@ -163,39 +175,39 @@ struct TaskView: View {
             NavigationView {
                 Form {
                     Section(header: Text("Neue Aufgabe für \(group.name)")) {
-                        TextField("Titel", text: $newTaskTitle)
+                        TextField("Titel", text: $newGroupTaskTitle)
                     }
                 }
                 .navigationTitle("Gruppenaufgabe")
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Abbrechen") {
-                            newTaskTitle = ""
+                            newGroupTaskTitle = ""
                             showGroupTaskSheetForGroup = nil
                         }
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Hinzufügen") {
                             Task {
-                                await taskViewModel.addGroupTask(title: newTaskTitle, group: group)
-                                newTaskTitle = ""
+                                await taskViewModel.addGroupTask(title: newGroupTaskTitle, group: group)
+                                newGroupTaskTitle = ""
                                 showGroupTaskSheetForGroup = nil
                             }
                         }
-                        .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
+                        .disabled(newGroupTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
                 }
             }
         }
+    }
+}
 
-
-
+// MARK: - Vorschau mit Beispieldaten
 
 #Preview {
     let taskVM = TaskViewModel()
     let groupVM = GroupViewModel()
 
-    // Beispielaufgabe (persönlich)
     taskVM.personalTasks = [
         TaskItem(
             id: "1",
@@ -207,7 +219,6 @@ struct TaskView: View {
         )
     ]
 
-    // Beispielgruppe mit Passwort
     groupVM.groups = [
         Group(
             id: "g1",
@@ -218,7 +229,6 @@ struct TaskView: View {
         )
     ]
 
-    // Beispielaufgabe in Gruppe
     taskVM.groupedTasks = [
         "Projekt X": [
             TaskItem(
@@ -237,6 +247,3 @@ struct TaskView: View {
         groupViewModel: groupVM
     )
 }
-
-
-
