@@ -13,7 +13,9 @@ struct TaskView: View {
 
     @State private var showPersonalTaskSheet = false
     @State private var showGroupTaskSheetForGroup: Group?
-    @State private var newTaskTitle = ""
+    @State private var newPersonalTaskTitle = ""
+    @State private var newGroupTaskTitle = ""
+
 
     var body: some View {
         ScrollView {
