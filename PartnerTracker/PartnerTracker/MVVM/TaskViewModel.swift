@@ -86,7 +86,30 @@ class TaskViewModel: ObservableObject {
         ])
     }
 
+    func addPersonalTask(title: String) async {
+        let newTask = TaskItem(
+            id: UUID().uuidString,
+            title: title,
+            isDone: false,
+            ownerId: currentUserId,
+            groupId: nil,
+            createdAt: Date()
+        )
 
+        do {
+            try await db.collection("tasks").document(newTask.id).setData([
+                "id": newTask.id,
+                "title": newTask.title,
+                "isDone": newTask.isDone,
+                "ownerId": newTask.ownerId,
+                "groupId": NSNull(),
+                "createdAt": Timestamp(date: newTask.createdAt)
+            ])
+            try await fetchTasks(groups: [])
+        } catch {
+            print("Fehler beim Hinzufügen eigener Aufgabe: \(error)")
+        }
+    }
 }
 
 
