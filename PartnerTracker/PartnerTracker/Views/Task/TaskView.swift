@@ -13,14 +13,13 @@ struct TaskView: View {
 
     @State private var showPersonalTaskSheet = false
     @State private var showGroupTaskSheetForGroup: Group?
-    @State private var newPersonalTaskTitle = ""
-    @State private var newGroupTaskTitle = ""
+    @State private var newTaskTitle = ""
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
 
-                // MARK: - Eigene Aufgabenbereich
+                // MARK: - Eigene Aufgaben
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Text("Meine Aufgaben")
@@ -40,21 +39,18 @@ struct TaskView: View {
                             .padding(.horizontal)
                     } else {
                         ForEach(taskViewModel.personalTasks) { task in
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
-                                        .foregroundColor(task.isDone ? .green : .gray)
-                                        .onTapGesture {
-                                            Task {
-                                                await taskViewModel.toggleTaskDone(task)
-                                            }
+                            HStack {
+                                Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(task.isDone ? .green : .gray)
+                                    .onTapGesture {
+                                        Task {
+                                            await taskViewModel.toggleTaskDone(task)
                                         }
-
-                                    Text(task.title)
-                                        .strikethrough(task.isDone)
-                                        .foregroundColor(task.isDone ? .gray : .primary)
-                                    Spacer()
-                                }
+                                    }
+                                Text(task.title)
+                                    .strikethrough(task.isDone)
+                                    .foregroundColor(task.isDone ? .gray : .primary)
+                                Spacer()
                             }
                             .padding()
                             .background(Color(.secondarySystemBackground))
@@ -64,7 +60,7 @@ struct TaskView: View {
                     }
                 }
 
-                // MARK: - Gruppenaufgabenbereich
+                // MARK: - Gruppenaufgaben
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Gruppenaufgaben")
                         .font(.headline)
@@ -76,51 +72,20 @@ struct TaskView: View {
                             .padding(.horizontal)
                     } else {
                         ForEach(groupViewModel.groups) { group in
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Text("Gruppe: \(group.name)")
-                                        .font(.subheadline)
-                                        .bold()
-                                    Spacer()
-                                    Button(action: {
-                                        showGroupTaskSheetForGroup = group
-                                    }) {
-                                        Label("Neue Aufgabe", systemImage: "plus.circle")
+                            let tasks = taskViewModel.groupedTasks[group.name] ?? []
+
+                            GroupTaskSection(
+                                group: group,
+                                tasks: tasks,
+                                onAddTapped: {
+                                    showGroupTaskSheetForGroup = group
+                                },
+                                onToggleDone: { task in
+                                    Task {
+                                        await taskViewModel.toggleTaskDone(task)
                                     }
                                 }
-                                .padding(.horizontal)
-
-                                let tasks = taskViewModel.groupedTasks[group.name] ?? []
-
-                                if !tasks.isEmpty {
-                                    ForEach(tasks) { task in
-                                        VStack(alignment: .leading, spacing: 8) {
-                                            HStack {
-                                                Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
-                                                    .foregroundColor(task.isDone ? .green : .gray)
-                                                    .onTapGesture {
-                                                        Task {
-                                                            await taskViewModel.toggleTaskDone(task)
-                                                        }
-                                                    }
-
-                                                Text(task.title)
-                                                    .strikethrough(task.isDone)
-                                                    .foregroundColor(task.isDone ? .gray : .primary)
-                                                Spacer()
-                                            }
-                                        }
-                                        .padding()
-                                        .background(Color(.secondarySystemBackground))
-                                        .cornerRadius(12)
-                                        .padding(.horizontal)
-                                    }
-                                } else {
-                                    Text("Keine Aufgaben in dieser Gruppe.")
-                                        .foregroundColor(.gray)
-                                        .padding(.horizontal)
-                                }
-                            }
+                            )
                         }
                     }
                 }
@@ -140,31 +105,31 @@ struct TaskView: View {
             }
         }
 
-        // MARK: - Sheet für persönliche Aufgabe
+        // MARK: - Sheet für eigene Aufgabe
         .sheet(isPresented: $showPersonalTaskSheet) {
             NavigationView {
                 Form {
                     Section(header: Text("Neue persönliche Aufgabe")) {
-                        TextField("Titel", text: $newPersonalTaskTitle)
+                        TextField("Titel", text: $newTaskTitle)
                     }
                 }
                 .navigationTitle("Eigene Aufgabe")
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Abbrechen") {
-                            newPersonalTaskTitle = ""
+                            newTaskTitle = ""
                             showPersonalTaskSheet = false
                         }
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Hinzufügen") {
                             Task {
-                                await taskViewModel.addPersonalTask(title: newPersonalTaskTitle)
-                                newPersonalTaskTitle = ""
+                                await taskViewModel.addPersonalTask(title: newTaskTitle)
+                                newTaskTitle = ""
                                 showPersonalTaskSheet = false
                             }
                         }
-                        .disabled(newPersonalTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
+                        .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
                 }
             }
@@ -175,32 +140,34 @@ struct TaskView: View {
             NavigationView {
                 Form {
                     Section(header: Text("Neue Aufgabe für \(group.name)")) {
-                        TextField("Titel", text: $newGroupTaskTitle)
+                        TextField("Titel", text: $newTaskTitle)
                     }
                 }
                 .navigationTitle("Gruppenaufgabe")
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Abbrechen") {
-                            newGroupTaskTitle = ""
+                            newTaskTitle = ""
                             showGroupTaskSheetForGroup = nil
                         }
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Hinzufügen") {
                             Task {
-                                await taskViewModel.addGroupTask(title: newGroupTaskTitle, group: group)
-                                newGroupTaskTitle = ""
+                                await taskViewModel.addGroupTask(title: newTaskTitle, group: group)
+                                newTaskTitle = ""
                                 showGroupTaskSheetForGroup = nil
                             }
                         }
-                        .disabled(newGroupTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
+                        .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
                 }
             }
         }
     }
 }
+
+
 
 // MARK: - Vorschau mit Beispieldaten
 
