@@ -12,7 +12,7 @@ struct TaskView: View {
     @ObservedObject var groupViewModel: GroupViewModel
 
     @State private var showPersonalTaskSheet = false
-    @State private var showGroupTaskSheetForGroupId: String?
+    @State private var showGroupTaskSheetForGroup: Group?
     @State private var newTaskTitle = ""
 
     var body: some View {
@@ -76,11 +76,11 @@ struct TaskView: View {
                                         .bold()
                                     Spacer()
                                     Button(action: {
-                                        showGroupTaskSheetForGroupId = group.id
+                                        showGroupTaskSheetForGroup = group
                                     }) {
                                         Label("Neue Aufgabe", systemImage: "plus.circle")
-                                            .labelStyle(TitleOnlyLabelStyle())
                                     }
+
                                 }
                                 .padding(.horizontal)
 
@@ -157,38 +157,35 @@ struct TaskView: View {
         }
 
         // MARK: - Sheet für Gruppenaufgabe
-        .sheet(item: $showGroupTaskSheetForGroupId) { groupId in
-            if let group = groupViewModel.groups.first(where: { $0.id == groupId }) {
-                NavigationView {
-                    Form {
-                        Section(header: Text("Neue Aufgabe für \(group.name)")) {
-                            TextField("Titel", text: $newTaskTitle)
+        .sheet(item: $showGroupTaskSheetForGroup) { group in
+            NavigationView {
+                Form {
+                    Section(header: Text("Neue Aufgabe für \(group.name)")) {
+                        TextField("Titel", text: $newTaskTitle)
+                    }
+                }
+                .navigationTitle("Gruppenaufgabe")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Abbrechen") {
+                            newTaskTitle = ""
+                            showGroupTaskSheetForGroup = nil
                         }
                     }
-                    .navigationTitle("Gruppenaufgabe")
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Abbrechen") {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Hinzufügen") {
+                            Task {
+                                await taskViewModel.addGroupTask(title: newTaskTitle, group: group)
                                 newTaskTitle = ""
-                                showGroupTaskSheetForGroupId = nil
+                                showGroupTaskSheetForGroup = nil
                             }
                         }
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("Hinzufügen") {
-                                Task {
-                                    await taskViewModel.addGroupTask(title: newTaskTitle, group: group)
-                                    newTaskTitle = ""
-                                    showGroupTaskSheetForGroupId = nil
-                                }
-                            }
-                            .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
-                        }
+                        .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
                 }
             }
         }
-    }
-}
+
 
 
 
