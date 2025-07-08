@@ -38,6 +38,7 @@ struct TaskView: View {
                             .foregroundColor(.gray)
                             .padding(.horizontal)
                     } else {
+                        /*
                         ForEach(taskViewModel.personalTasks) { task in
                             HStack {
                                 Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
@@ -56,7 +57,7 @@ struct TaskView: View {
                             .background(Color(.secondarySystemBackground))
                             .cornerRadius(12)
                             .padding(.horizontal)
-                        }
+                        }*/
                     }
                 }
 
@@ -71,6 +72,7 @@ struct TaskView: View {
                             .foregroundColor(.gray)
                             .padding(.horizontal)
                     } else {
+                        /*
                         ForEach(groupViewModel.groups) { group in
                             let tasks = taskViewModel.groupedTasks[group.name] ?? []
 
@@ -86,7 +88,7 @@ struct TaskView: View {
                                     }
                                 }
                             )
-                        }
+                        }*/
                     }
                 }
 

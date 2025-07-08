@@ -54,5 +54,38 @@ struct GroupTaskSection: View {
 }
 
 #Preview {
-    GroupTaskSection()
+    GroupTaskSection(
+        group: Group(
+            id: "g1",
+            name: "Projektteam Alpha",
+            memberIds: ["user1", "user2"],
+            createdAt: Date(),
+            password: "1234"
+        ),
+        tasks: [
+            TaskItem(
+                id: "t1",
+                title: "Design finalisieren",
+                isDone: false,
+                ownerId: "user1",
+                groupId: "g1",
+                createdAt: Date()
+            ),
+            TaskItem(
+                id: "t2",
+                title: "Meeting vorbereiten",
+                isDone: true,
+                ownerId: "user2",
+                groupId: "g1",
+                createdAt: Date()
+            )
+        ],
+        onAddTapped: {
+            print("Neue Gruppenaufgabe hinzufügen")
+        },
+        onToggleDone: { task in
+            print("Toggle für Aufgabe: \(task.title)")
+        }
+    )
 }
+
