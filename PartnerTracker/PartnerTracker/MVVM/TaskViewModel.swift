@@ -136,6 +136,18 @@ class TaskViewModel: ObservableObject {
         }
     }
     
+    
+    
+    
+    func makeGroupsWithTasks(from groups: [Group]) -> [GroupWithTasks] {
+        groups.map { group in
+            let tasks = groupedTasks[group.name] ?? []
+            return GroupWithTasks(group: group, tasks: tasks)
+        }
+    }
+
+    
+    
 }
 
 
