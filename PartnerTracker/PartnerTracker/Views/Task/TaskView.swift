@@ -38,7 +38,7 @@ struct TaskView: View {
                             .foregroundColor(.gray)
                             .padding(.horizontal)
                     } else {
-                        /*
+                        
                         ForEach(taskViewModel.personalTasks) { task in
                             HStack {
                                 Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
@@ -58,7 +58,7 @@ struct TaskView: View {
                             .cornerRadius(12)
                             .padding(.horizontal)
                         }
-                        */
+                        
                     }
                 }
 

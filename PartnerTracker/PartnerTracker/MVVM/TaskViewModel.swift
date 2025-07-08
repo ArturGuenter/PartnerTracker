@@ -136,7 +136,42 @@ class TaskViewModel: ObservableObject {
         }
     }
     
-    
+    func toggleTaskDone(_ task: TaskItem) async {
+        let newStatus = !task.isDone
+
+        do {
+            // Firestore aktualisieren
+            try await db.collection("tasks").document(task.id).updateData([
+                "isDone": newStatus
+            ])
+
+            // Lokale Daten aktualisieren
+            if task.groupId == nil {
+                // Persönliche Aufgabe
+                if let index = personalTasks.firstIndex(where: { $0.id == task.id }) {
+                    var updatedTask = personalTasks[index]
+                    updatedTask.isDone = newStatus
+                    personalTasks[index] = updatedTask
+                }
+            } else {
+                // Gruppenaufgabe
+                for (groupName, tasks) in groupedTasks {
+                    if let index = tasks.firstIndex(where: { $0.id == task.id }) {
+                        var updatedTask = tasks[index]
+                        updatedTask.isDone = newStatus
+                        var updatedTasks = tasks
+                        updatedTasks[index] = updatedTask
+                        groupedTasks[groupName] = updatedTasks
+                        break
+                    }
+                }
+            }
+
+        } catch {
+            print("Fehler beim Umschalten des Aufgabenstatus: \(error)")
+        }
+    }
+
 }
 
 
