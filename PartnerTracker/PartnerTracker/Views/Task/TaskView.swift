@@ -57,7 +57,8 @@ struct TaskView: View {
                             .background(Color(.secondarySystemBackground))
                             .cornerRadius(12)
                             .padding(.horizontal)
-                        }*/
+                        }
+                        */
                     }
                 }
 
@@ -72,13 +73,11 @@ struct TaskView: View {
                             .foregroundColor(.gray)
                             .padding(.horizontal)
                     } else {
-                        /*
+                        
                         ForEach(groupViewModel.groups) { group in
-                            let tasks = taskViewModel.groupedTasks[group.name] ?? []
-
                             GroupTaskSection(
                                 group: group,
-                                tasks: tasks,
+                                tasks: taskViewModel.groupedTasks[group.name] ?? [],
                                 onAddTapped: {
                                     showGroupTaskSheetForGroup = group
                                 },
@@ -87,8 +86,10 @@ struct TaskView: View {
                                         await taskViewModel.toggleTaskDone(task)
                                     }
                                 }
+
                             )
-                        }*/
+                        }
+
                     }
                 }
 
