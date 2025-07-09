@@ -31,8 +31,8 @@ class TaskViewModel: ObservableObject {
 
         let personalSnapshot = try await db.collection("tasks")
             .whereField("ownerId", isEqualTo: uid)
-            .order(by: "createdAt", descending: true)
             .getDocuments()
+
         
         self.personalTasks = try personalSnapshot.documents.compactMap {
             try $0.data(as: TaskItem.self)
