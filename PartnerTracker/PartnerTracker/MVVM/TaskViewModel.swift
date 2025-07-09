@@ -42,12 +42,12 @@ class TaskViewModel: ObservableObject {
         for group in groups {
             let groupSnapshot = try await db.collection("tasks")
                 .whereField("groupId", isEqualTo: group.id)
-                .order(by: "createdAt", descending: true)
                 .getDocuments()
-            
+
             let groupTasks = try groupSnapshot.documents.compactMap {
                 try $0.data(as: TaskItem.self)
-            }
+            }.sorted(by: { $0.createdAt > $1.createdAt })
+
 
             if !groupTasks.isEmpty {
                 newGroupedTasks[group.name] = groupTasks
