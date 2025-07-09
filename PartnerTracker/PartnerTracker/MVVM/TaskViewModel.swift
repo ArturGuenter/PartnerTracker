@@ -33,10 +33,9 @@ class TaskViewModel: ObservableObject {
             .whereField("ownerId", isEqualTo: uid)
             .getDocuments()
 
-        
         self.personalTasks = try personalSnapshot.documents.compactMap {
             try $0.data(as: TaskItem.self)
-        }
+        }.sorted(by: { $0.createdAt > $1.createdAt })
 
         var newGroupedTasks: [String: [TaskItem]] = [:]
 
