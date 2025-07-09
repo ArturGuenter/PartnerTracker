@@ -112,11 +112,16 @@ class TaskViewModel: ObservableObject {
     }
     
     func addGroupTask(title: String, group: Group) async {
+        guard let uid = currentUserId else {
+            print("⚠️ Kein eingeloggter Benutzer – Gruppenaufgabe wird nicht gespeichert.")
+            return
+        }
+
         let newTask = TaskItem(
             id: UUID().uuidString,
             title: title,
             isDone: false,
-            ownerId: currentUserId,
+            ownerId: uid,
             groupId: group.id,
             createdAt: Date()
         )
@@ -135,6 +140,7 @@ class TaskViewModel: ObservableObject {
             print("Fehler beim Hinzufügen Gruppen-Aufgabe: \(error)")
         }
     }
+
     
     func toggleTaskDone(_ task: TaskItem) async {
         let newStatus = !task.isDone
