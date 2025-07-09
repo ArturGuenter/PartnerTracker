@@ -18,51 +18,51 @@ class TaskViewModel: ObservableObject {
     private let auth = Auth.auth()
     
     var currentUserId: String? {
-            auth.currentUser?.uid
-        }
-    
-    
+        auth.currentUser?.uid
+    }
+
     func fetchTasks(groups: [Group]) async throws {
-            guard let uid = currentUserId else {
-                print("⚠️ Kein eingeloggter Benutzer – fetchTasks abgebrochen.")
-                return
-            }
+        guard let uid = currentUserId else {
+            print("⚠️ Kein eingeloggter Benutzer – fetchTasks abgebrochen.")
+            return
+        }
 
-            await addDefaultTaskIfNeeded()
+        await addDefaultTaskIfNeeded()
 
-            let personalSnapshot = try await db.collection("tasks")
-                .whereField("ownerId", isEqualTo: uid)
+        let personalSnapshot = try await db.collection("tasks")
+            .whereField("ownerId", isEqualTo: uid)
+            .order(by: "createdAt", descending: true)
+            .getDocuments()
+        
+        self.personalTasks = try personalSnapshot.documents.compactMap {
+            try $0.data(as: TaskItem.self)
+        }
+
+        var newGroupedTasks: [String: [TaskItem]] = [:]
+
+        for group in groups {
+            let groupSnapshot = try await db.collection("tasks")
+                .whereField("groupId", isEqualTo: group.id)
                 .order(by: "createdAt", descending: true)
                 .getDocuments()
             
-            self.personalTasks = try personalSnapshot.documents.compactMap {
+            let groupTasks = try groupSnapshot.documents.compactMap {
                 try $0.data(as: TaskItem.self)
             }
 
-            var newGroupedTasks: [String: [TaskItem]] = [:]
-
-            for group in groups {
-                let groupSnapshot = try await db.collection("tasks")
-                    .whereField("groupId", isEqualTo: group.id)
-                    .order(by: "createdAt", descending: true)
-                    .getDocuments()
-                
-                let groupTasks = try groupSnapshot.documents.compactMap {
-                    try $0.data(as: TaskItem.self)
-                }
-
-                if !groupTasks.isEmpty {
-                    newGroupedTasks[group.name] = groupTasks
-                }
+            if !groupTasks.isEmpty {
+                newGroupedTasks[group.name] = groupTasks
             }
-
-            self.groupedTasks = newGroupedTasks
         }
-    
-    
+
+        self.groupedTasks = newGroupedTasks
+    }
+
     func addDefaultTaskIfNeeded() async {
+        guard let uid = currentUserId else { return }
+
         let snapshot = try? await db.collection("tasks")
-            .whereField("ownerId", isEqualTo: currentUserId)
+            .whereField("ownerId", isEqualTo: uid)
             .getDocuments()
         
         guard let snapshot = snapshot, snapshot.isEmpty else {
@@ -73,7 +73,7 @@ class TaskViewModel: ObservableObject {
             id: UUID().uuidString,
             title: "App öffnen",
             isDone: false,
-            ownerId: currentUserId,
+            ownerId: uid,
             groupId: nil,
             createdAt: Date()
         )
@@ -82,28 +82,33 @@ class TaskViewModel: ObservableObject {
             "id": defaultTask.id,
             "title": defaultTask.title,
             "isDone": defaultTask.isDone,
-            "ownerId": defaultTask.ownerId,
+            "ownerId": uid,
             "groupId": NSNull(),
             "createdAt": Timestamp(date: defaultTask.createdAt)
         ])
     }
-    
+
     func addPersonalTask(title: String) async {
+        guard let uid = currentUserId else {
+            print("⚠️ Kein eingeloggter Benutzer – persönliche Aufgabe wird nicht gespeichert.")
+            return
+        }
+
         let newTask = TaskItem(
             id: UUID().uuidString,
             title: title,
             isDone: false,
-            ownerId: currentUserId,
+            ownerId: uid,
             groupId: nil,
             createdAt: Date()
         )
-        
+
         do {
             try await db.collection("tasks").document(newTask.id).setData([
                 "id": newTask.id,
                 "title": newTask.title,
                 "isDone": newTask.isDone,
-                "ownerId": newTask.ownerId,
+                "ownerId": uid,
                 "groupId": NSNull(),
                 "createdAt": Timestamp(date: newTask.createdAt)
             ])
@@ -112,7 +117,7 @@ class TaskViewModel: ObservableObject {
             print("Fehler beim Hinzufügen eigener Aufgabe: \(error)")
         }
     }
-    
+
     func addGroupTask(title: String, group: Group) async {
         guard let uid = currentUserId else {
             print("⚠️ Kein eingeloggter Benutzer – Gruppenaufgabe wird nicht gespeichert.")
@@ -133,7 +138,7 @@ class TaskViewModel: ObservableObject {
                 "id": newTask.id,
                 "title": newTask.title,
                 "isDone": newTask.isDone,
-                "ownerId": newTask.ownerId,
+                "ownerId": uid,
                 "groupId": group.id,
                 "createdAt": Timestamp(date: newTask.createdAt)
             ])
@@ -143,26 +148,21 @@ class TaskViewModel: ObservableObject {
         }
     }
 
-    
     func toggleTaskDone(_ task: TaskItem) async {
         let newStatus = !task.isDone
 
         do {
-            // Firestore aktualisieren
             try await db.collection("tasks").document(task.id).updateData([
                 "isDone": newStatus
             ])
 
-            // Lokale Daten aktualisieren
             if task.groupId == nil {
-                // Persönliche Aufgabe
                 if let index = personalTasks.firstIndex(where: { $0.id == task.id }) {
                     var updatedTask = personalTasks[index]
                     updatedTask.isDone = newStatus
                     personalTasks[index] = updatedTask
                 }
             } else {
-                // Gruppenaufgabe
                 for (groupName, tasks) in groupedTasks {
                     if let index = tasks.firstIndex(where: { $0.id == task.id }) {
                         var updatedTask = tasks[index]
@@ -179,7 +179,7 @@ class TaskViewModel: ObservableObject {
             print("Fehler beim Umschalten des Aufgabenstatus: \(error)")
         }
     }
-
 }
+
 
 
