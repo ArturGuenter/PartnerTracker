@@ -17,9 +17,9 @@ class TaskViewModel: ObservableObject {
     private let db = Firestore.firestore()
     private let auth = Auth.auth()
     
-    var currentUserId: String {
-        auth.currentUser?.uid ?? ""
-    }
+    var currentUserId: String? {
+            auth.currentUser?.uid
+        }
     
     
     func fetchTasks(groups: [Group]) async throws {
