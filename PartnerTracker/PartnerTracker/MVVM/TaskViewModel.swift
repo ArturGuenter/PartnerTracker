@@ -23,39 +23,41 @@ class TaskViewModel: ObservableObject {
     
     
     func fetchTasks(groups: [Group]) async throws {
-        
-        await addDefaultTaskIfNeeded()
-        
-        let personalSnapshot = try await db.collection("tasks")
-            .whereField("ownerId", isEqualTo: currentUserId)
-            .order(by: "createdAt", descending: true)
-            .getDocuments()
-        
-        self.personalTasks = try personalSnapshot.documents.compactMap {
-            try $0.data(as: TaskItem.self)
-        }
-        
-        
-        var newGroupedTasks: [String: [TaskItem]] = [:]
-        
-        for group in groups {
-            let groupSnapshot = try await db.collection("tasks")
-                .whereField("groupId", isEqualTo: group.id)
+            guard let uid = currentUserId else {
+                print("⚠️ Kein eingeloggter Benutzer – fetchTasks abgebrochen.")
+                return
+            }
+
+            await addDefaultTaskIfNeeded()
+
+            let personalSnapshot = try await db.collection("tasks")
+                .whereField("ownerId", isEqualTo: uid)
                 .order(by: "createdAt", descending: true)
                 .getDocuments()
             
-            let groupTasks = try groupSnapshot.documents.compactMap {
+            self.personalTasks = try personalSnapshot.documents.compactMap {
                 try $0.data(as: TaskItem.self)
             }
-            
-            if !groupTasks.isEmpty {
-                newGroupedTasks[group.name] = groupTasks
+
+            var newGroupedTasks: [String: [TaskItem]] = [:]
+
+            for group in groups {
+                let groupSnapshot = try await db.collection("tasks")
+                    .whereField("groupId", isEqualTo: group.id)
+                    .order(by: "createdAt", descending: true)
+                    .getDocuments()
+                
+                let groupTasks = try groupSnapshot.documents.compactMap {
+                    try $0.data(as: TaskItem.self)
+                }
+
+                if !groupTasks.isEmpty {
+                    newGroupedTasks[group.name] = groupTasks
+                }
             }
+
+            self.groupedTasks = newGroupedTasks
         }
-        
-        
-        self.groupedTasks = newGroupedTasks
-    }
     
     
     func addDefaultTaskIfNeeded() async {
