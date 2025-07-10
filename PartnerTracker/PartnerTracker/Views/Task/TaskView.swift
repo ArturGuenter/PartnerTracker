@@ -99,14 +99,18 @@ struct TaskView: View {
         .onAppear {
             Task {
                 do {
-                    try await groupViewModel.fetchGroupsForCurrentUser()
                     try await taskViewModel.addDefaultTaskIfNeeded()
-                    try await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+
+                    try await groupViewModel.fetchGroupsForCurrentUser()
+                    let groupsSnapshot = groupViewModel.groups
+                    
+                    try await taskViewModel.fetchTasks(groups: groupsSnapshot)
                 } catch {
                     print("Fehler beim Laden: \(error.localizedDescription)")
                 }
             }
         }
+
 
         // MARK: - Sheet für eigene Aufgabe
         .sheet(isPresented: $showPersonalTaskSheet) {
