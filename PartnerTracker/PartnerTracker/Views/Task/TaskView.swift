@@ -160,10 +160,12 @@ struct TaskView: View {
                         Button("Hinzufügen") {
                             Task {
                                 await taskViewModel.addGroupTask(title: newTaskTitle, group: group)
+                                try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
                                 newTaskTitle = ""
                                 showGroupTaskSheetForGroup = nil
                             }
                         }
+
                         .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
                 }
