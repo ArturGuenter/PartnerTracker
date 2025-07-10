@@ -29,11 +29,11 @@ class TaskViewModel: ObservableObject {
 
         await addDefaultTaskIfNeeded()
 
+        
         let personalSnapshot = try await db.collection("tasks")
             .whereField("ownerId", isEqualTo: uid)
             .whereField("groupId", isEqualTo: NSNull())
             .getDocuments()
-
 
         self.personalTasks = try personalSnapshot.documents.compactMap {
             try $0.data(as: TaskItem.self)
@@ -50,7 +50,6 @@ class TaskViewModel: ObservableObject {
                 try $0.data(as: TaskItem.self)
             }.sorted(by: { $0.createdAt > $1.createdAt })
 
-
             if !groupTasks.isEmpty {
                 newGroupedTasks[group.name] = groupTasks
             }
@@ -58,6 +57,7 @@ class TaskViewModel: ObservableObject {
 
         self.groupedTasks = newGroupedTasks
     }
+
 
     func addDefaultTaskIfNeeded() async {
         guard let uid = currentUserId else { return }
