@@ -128,10 +128,12 @@ struct TaskView: View {
                         Button("Hinzufügen") {
                             Task {
                                 await taskViewModel.addPersonalTask(title: newTaskTitle)
+                                try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
                                 newTaskTitle = ""
                                 showPersonalTaskSheet = false
                             }
                         }
+
                         .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
                 }
