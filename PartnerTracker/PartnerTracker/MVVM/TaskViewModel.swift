@@ -141,11 +141,23 @@ class TaskViewModel: ObservableObject {
                 "groupId": group.id,
                 "createdAt": Timestamp(date: newTask.createdAt)
             ])
-            try await fetchTasks(groups: [])
+
+            // ✅ Nur diese Gruppe neu laden
+            let groupSnapshot = try await db.collection("tasks")
+                .whereField("groupId", isEqualTo: group.id)
+                .getDocuments()
+
+            let groupTasks = try groupSnapshot.documents.compactMap {
+                try $0.data(as: TaskItem.self)
+            }.sorted(by: { $0.createdAt > $1.createdAt })
+
+            self.groupedTasks[group.name] = groupTasks
+
         } catch {
             print("Fehler beim Hinzufügen Gruppen-Aufgabe: \(error)")
         }
     }
+
 
     func toggleTaskDone(_ task: TaskItem) async {
         let newStatus = !task.isDone
