@@ -15,9 +15,35 @@ struct HomeView: View {
     
     var body: some View {
         NavigationStack {
+            /*
                     VStack {
-                        Text("Willkommen, \(loginRegisterViewModel.user?.name ?? "Nutzer")!")
-                        
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 24) {
+                                Text("Willkommen zurück, Artur 👋")
+                                    .font(.title)
+                                
+                                ProgressRingView(completed: 20, total: 50)
+                                    .frame(height: 180)
+
+                                VStack(alignment: .leading) {
+                                    Text("Heute zu erledigen")
+                                        .font(.headline)
+                                    ForEach(todayTasks.prefix(3)) { task in
+                                        TaskRowView(task: task)
+                                    }
+                                }
+
+                                MotivationQuoteView()
+                                HStack {
+                                    Button("➕ Neue Aufgabe") { showNewTaskSheet = true }
+                                    Spacer()
+                                    Button("📅 Übersicht") { navigateToCalendar() }
+                                }
+                            }
+                            .padding()
+                        }
+
+                      */
                     }
                     .navigationTitle("Home")
                     .navigationBarTitleDisplayMode(.inline)
