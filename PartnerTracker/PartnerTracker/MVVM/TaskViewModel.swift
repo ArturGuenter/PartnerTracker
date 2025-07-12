@@ -201,7 +201,15 @@ class TaskViewModel: ObservableObject {
             if task.groupId == nil {
                 // Persönliche Aufgabe entfernen
                 self.personalTasks.removeAll { $0.id == task.id }
-            } 
+            } else {
+                // Gruppenaufgabe entfernen
+                for (groupName, tasks) in groupedTasks {
+                    if tasks.contains(where: { $0.id == task.id }) {
+                        groupedTasks[groupName] = tasks.filter { $0.id != task.id }
+                        break
+                    }
+                }
+            }
 
         } catch {
             print("Fehler beim Löschen der Aufgabe: \(error.localizedDescription)")
