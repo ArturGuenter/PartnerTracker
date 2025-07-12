@@ -15,8 +15,9 @@ struct HomeView: View {
     
     var body: some View {
         NavigationStack {
-            /*
+            
                     VStack {
+                        /*
                         ScrollView {
                             VStack(alignment: .leading, spacing: 24) {
                                 Text("Willkommen zurück, Artur 👋")

@@ -192,6 +192,23 @@ class TaskViewModel: ObservableObject {
             print("Fehler beim Umschalten des Aufgabenstatus: \(error)")
         }
     }
+    
+    
+    func deleteTask(_ task: TaskItem) async {
+        do {
+            try await db.collection("tasks").document(task.id).delete()
+
+            if task.groupId == nil {
+                // Persönliche Aufgabe entfernen
+                self.personalTasks.removeAll { $0.id == task.id }
+            } 
+
+        } catch {
+            print("Fehler beim Löschen der Aufgabe: \(error.localizedDescription)")
+        }
+    }
+
+    
 }
 
 
