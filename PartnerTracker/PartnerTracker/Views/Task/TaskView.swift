@@ -38,27 +38,36 @@ struct TaskView: View {
                             .foregroundColor(.gray)
                             .padding(.horizontal)
                     } else {
-                        
-                        ForEach(taskViewModel.personalTasks) { task in
-                            HStack {
-                                Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
-                                    .foregroundColor(task.isDone ? .green : .gray)
-                                    .onTapGesture {
-                                        Task {
-                                            await taskViewModel.toggleTaskDone(task)
+                        LazyVStack(spacing: 8) {
+                            ForEach(taskViewModel.personalTasks) { task in
+                                HStack {
+                                    Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
+                                        .foregroundColor(task.isDone ? .green : .gray)
+                                        .onTapGesture {
+                                            Task {
+                                                await taskViewModel.toggleTaskDone(task)
+                                            }
                                         }
+                                    Text(task.title)
+                                        .strikethrough(task.isDone)
+                                        .foregroundColor(task.isDone ? .gray : .primary)
+                                    Spacer()
+                                }
+                                .padding()
+                                .background(Color(.secondarySystemBackground))
+                                .cornerRadius(12)
+                                .padding(.horizontal)
+                                .swipeActions {
+                                    Button(role: .destructive) {
+                                        Task {
+                                            await taskViewModel.deleteTask(task)
+                                        }
+                                    } label: {
+                                        Label("Löschen", systemImage: "trash")
                                     }
-                                Text(task.title)
-                                    .strikethrough(task.isDone)
-                                    .foregroundColor(task.isDone ? .gray : .primary)
-                                Spacer()
+                                }
                             }
-                            .padding()
-                            .background(Color(.secondarySystemBackground))
-                            .cornerRadius(12)
-                            .padding(.horizontal)
                         }
-                        
                     }
                 }
 
@@ -73,23 +82,54 @@ struct TaskView: View {
                             .foregroundColor(.gray)
                             .padding(.horizontal)
                     } else {
-                        
                         ForEach(groupViewModel.groups) { group in
-                            GroupTaskSection(
-                                group: group,
-                                tasks: taskViewModel.groupedTasks[group.name] ?? [],
-                                onAddTapped: {
-                                    showGroupTaskSheetForGroup = group
-                                },
-                                onToggleDone: { task in
-                                    Task {
-                                        await taskViewModel.toggleTaskDone(task)
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Text(group.name)
+                                        .font(.subheadline)
+                                        .bold()
+                                    Spacer()
+                                    Button(action: {
+                                        showGroupTaskSheetForGroup = group
+                                    }) {
+                                        Image(systemName: "plus.circle")
                                     }
                                 }
+                                .padding(.horizontal)
 
-                            )
+                                ForEach(taskViewModel.groupedTasks[group.name] ?? []) { task in
+                                    HStack {
+                                        Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
+                                            .foregroundColor(task.isDone ? .green : .gray)
+                                            .onTapGesture {
+                                                Task {
+                                                    await taskViewModel.toggleTaskDone(task)
+                                                }
+                                            }
+
+                                        Text(task.title)
+                                            .strikethrough(task.isDone)
+                                            .foregroundColor(task.isDone ? .gray : .primary)
+                                        Spacer()
+                                    }
+                                    .padding()
+                                    .background(Color(.tertiarySystemBackground))
+                                    .cornerRadius(12)
+                                    .padding(.horizontal)
+                                    .swipeActions {
+                                        if task.ownerId == taskViewModel.currentUserId {
+                                            Button(role: .destructive) {
+                                                Task {
+                                                    await taskViewModel.deleteTask(task)
+                                                }
+                                            } label: {
+                                                Label("Löschen", systemImage: "trash")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
-
                     }
                 }
 
@@ -100,17 +140,13 @@ struct TaskView: View {
             Task {
                 do {
                     try await taskViewModel.addDefaultTaskIfNeeded()
-
                     try await groupViewModel.fetchGroupsForCurrentUser()
-                    let groupsSnapshot = groupViewModel.groups
-                    
-                    try await taskViewModel.fetchTasks(groups: groupsSnapshot)
+                    try await taskViewModel.fetchTasks(groups: groupViewModel.groups)
                 } catch {
                     print("Fehler beim Laden: \(error.localizedDescription)")
                 }
             }
         }
-
 
         // MARK: - Sheet für eigene Aufgabe
         .sheet(isPresented: $showPersonalTaskSheet) {
@@ -137,7 +173,6 @@ struct TaskView: View {
                                 showPersonalTaskSheet = false
                             }
                         }
-
                         .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
                 }
@@ -169,7 +204,6 @@ struct TaskView: View {
                                 showGroupTaskSheetForGroup = nil
                             }
                         }
-
                         .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
                 }
@@ -177,6 +211,7 @@ struct TaskView: View {
         }
     }
 }
+
 
 
 
