@@ -20,7 +20,27 @@ struct EditTaskSheet: View {
         }
     
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationStack {
+                   Form {
+                       Section(header: Text("Aufgabe bearbeiten")) {
+                           TextField("Titel", text: $updatedTitle)
+                       }
+                   }
+                   .navigationTitle("Bearbeiten")
+                   .toolbar {
+                       ToolbarItem(placement: .cancellationAction) {
+                           Button("Abbrechen") {
+                               onSave(task.title)
+                           }
+                       }
+                       ToolbarItem(placement: .confirmationAction) {
+                           Button("Speichern") {
+                               onSave(updatedTitle)
+                           }
+                           .disabled(updatedTitle.trimmingCharacters(in: .whitespaces).isEmpty)
+                       }
+                   }
+               }
     }
 }
 
