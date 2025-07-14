@@ -45,5 +45,18 @@ struct EditTaskSheet: View {
 }
 
 #Preview {
-    EditTaskSheet(task: <#TaskItem#>, onSave: <#(String) -> Void#>)
+    EditTaskSheet(
+        task: TaskItem(
+            id: "123",
+            title: "Beispiel-Aufgabe",
+            isDone: false,
+            ownerId: "demoUser",
+            groupId: nil,
+            createdAt: Date()
+        ),
+        onSave: { newTitle in
+            print("Neuer Titel: \(newTitle)")
+        }
+    )
 }
+
