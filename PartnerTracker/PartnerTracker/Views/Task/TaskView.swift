@@ -14,6 +14,9 @@ struct TaskView: View {
     @State private var showPersonalTaskSheet = false
     @State private var showGroupTaskSheetForGroup: Group?
     @State private var newTaskTitle = ""
+    
+    @State private var editingTask: TaskItem?
+
 
     var body: some View {
         List {
@@ -47,6 +50,7 @@ struct TaskView: View {
                                 .strikethrough(task.isDone)
                                 .foregroundColor(task.isDone ? .gray : .primary)
                             Spacer()
+                            
                         }
                         .padding(.vertical, 4)
                         .swipeActions {
