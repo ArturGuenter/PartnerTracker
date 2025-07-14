@@ -50,7 +50,14 @@ struct TaskView: View {
                                 .strikethrough(task.isDone)
                                 .foregroundColor(task.isDone ? .gray : .primary)
                             Spacer()
-                            
+                            Button {
+                                editingTask = task
+                            } label: {
+                                Image(systemName: "pencil")
+                                    .foregroundColor(.blue)
+                            }
+                            .buttonStyle(BorderlessButtonStyle())
+
                         }
                         .padding(.vertical, 4)
                         .swipeActions {
@@ -198,6 +205,17 @@ struct TaskView: View {
                 }
             }
         }
+        // MARK: - Sheet Aufagabe Bearbeiten
+        .sheet(item: $editingTask) { task in
+            EditTaskSheet(task: task) { updatedTitle in
+                Task {
+                    await taskViewModel.updateTaskTitle(task: task, newTitle: updatedTitle)
+                    try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                }
+                editingTask = nil
+            }
+        }
+
     }
 }
 
