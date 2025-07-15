@@ -38,6 +38,23 @@ class TaskViewModel: ObservableObject {
         return Double(groupTasks.filter { $0.isDone }.count) / Double(groupTasks.count)
     }
     
+    var doneTaskCount: Int {
+        (personalTasks + groupedTasks.flatMap { $0.value }).filter { $0.isDone }.count
+    }
+
+    var totalTaskCount: Int {
+        personalTasks.count + groupedTasks.flatMap { $0.value }.count
+    }
+
+    var donePersonalTaskCount: Int {
+        personalTasks.filter { $0.isDone }.count
+    }
+
+    var doneGroupTaskCount: Int {
+        groupedTasks.flatMap { $0.value }.filter { $0.isDone }.count
+    }
+
+    
     
     
 

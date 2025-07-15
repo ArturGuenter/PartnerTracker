@@ -24,7 +24,8 @@ struct HomeView: View {
                                 progress: taskViewModel.overallCompletionRate,
                                 title: "Alle Aufgaben",
                                 completed: taskViewModel.doneTaskCount,
-                                total: taskViewModel.totalTaskCount
+                                total: taskViewModel.totalTaskCount,
+                                size: 200
                             )
 
                             HStack(spacing: 20) {
@@ -32,18 +33,22 @@ struct HomeView: View {
                                     progress: taskViewModel.personalCompletionRate,
                                     title: "Eigene",
                                     completed: taskViewModel.donePersonalTaskCount,
-                                    total: taskViewModel.personalTasks.count
+                                    total: taskViewModel.personalTasks.count,
+                                    size: 120
                                 )
 
                                 CircularProgressBar(
                                     progress: taskViewModel.groupCompletionRate,
                                     title: "Gruppe",
                                     completed: taskViewModel.doneGroupTaskCount,
-                                    total: taskViewModel.groupedTasks.flatMap { $0.value }.count
+                                    total: taskViewModel.groupedTasks.flatMap { $0.value }.count,
+                                    size: 120 
                                 )
                             }
                         }
                         .padding()
+
+
 
 
                         
