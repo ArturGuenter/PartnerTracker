@@ -21,14 +21,22 @@ class TaskViewModel: ObservableObject {
         auth.currentUser?.uid
     }
     
-    var completionRate: Double {
+    var overallCompletionRate: Double {
         let allTasks = personalTasks + groupedTasks.flatMap { $0.value }
         guard !allTasks.isEmpty else { return 0.0 }
-        let doneTasks = allTasks.filter { $0.isDone }
-        return Double(doneTasks.count) / Double(allTasks.count)
+        return Double(allTasks.filter { $0.isDone }.count) / Double(allTasks.count)
     }
 
+    var personalCompletionRate: Double {
+        guard !personalTasks.isEmpty else { return 0.0 }
+        return Double(personalTasks.filter { $0.isDone }.count) / Double(personalTasks.count)
+    }
     
+    var groupCompletionRate: Double {
+        let groupTasks = groupedTasks.flatMap { $0.value }
+        guard !groupTasks.isEmpty else { return 0.0 }
+        return Double(groupTasks.filter { $0.isDone }.count) / Double(groupTasks.count)
+    }
     
     
     
