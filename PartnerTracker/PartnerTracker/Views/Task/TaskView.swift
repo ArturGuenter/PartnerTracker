@@ -111,6 +111,13 @@ struct TaskView: View {
                                             .strikethrough(task.isDone)
                                             .foregroundColor(task.isDone ? .gray : .primary)
                                         Spacer()
+                                        Button {
+                                            editingTask = task
+                                        } label: {
+                                            Image(systemName: "pencil")
+                                                .foregroundColor(.blue)
+                                        }
+                                        .buttonStyle(BorderlessButtonStyle())
                                     }
                                     .padding(.vertical, 4)
                                     .swipeActions {

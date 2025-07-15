@@ -20,6 +20,18 @@ class TaskViewModel: ObservableObject {
     var currentUserId: String? {
         auth.currentUser?.uid
     }
+    
+    var completionRate: Double {
+        let allTasks = personalTasks + groupedTasks.flatMap { $0.value }
+        guard !allTasks.isEmpty else { return 0.0 }
+        let doneTasks = allTasks.filter { $0.isDone }
+        return Double(doneTasks.count) / Double(allTasks.count)
+    }
+
+    
+    
+    
+    
 
     func fetchTasks(groups: [Group]) async throws {
         guard let uid = currentUserId else {
