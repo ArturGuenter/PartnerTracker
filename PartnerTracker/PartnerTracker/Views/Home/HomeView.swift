@@ -19,13 +19,33 @@ struct HomeView: View {
             
                     VStack {
                         
-                        VStack {
-                            ProgressView(value: taskViewModel.overallCompletionRate)
-                                .progressViewStyle(CircularProgressViewStyle(tint: .blue))
-                                .scaleEffect(2.0)
-                            Text("Gesamter Fortschritt: \(Int(taskViewModel.overallCompletionRate * 100))%")
-                                .font(.headline)
+                        VStack(spacing: 32) {
+                            CircularProgressBar(
+                                progress: taskViewModel.overallCompletionRate,
+                                title: "Alle Aufgaben",
+                                completed: taskViewModel.doneTaskCount,
+                                total: taskViewModel.totalTaskCount
+                            )
+
+                            HStack(spacing: 20) {
+                                CircularProgressBar(
+                                    progress: taskViewModel.personalCompletionRate,
+                                    title: "Eigene",
+                                    completed: taskViewModel.donePersonalTaskCount,
+                                    total: taskViewModel.personalTasks.count
+                                )
+
+                                CircularProgressBar(
+                                    progress: taskViewModel.groupCompletionRate,
+                                    title: "Gruppe",
+                                    completed: taskViewModel.doneGroupTaskCount,
+                                    total: taskViewModel.groupedTasks.flatMap { $0.value }.count
+                                )
+                            }
                         }
+                        .padding()
+
+
                         
 
                     }
