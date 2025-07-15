@@ -11,40 +11,23 @@ import SwiftUI
 struct HomeView: View {
     @Binding var selection: Int
     @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
+    @ObservedObject var taskViewModel: TaskViewModel
    
     
     var body: some View {
         NavigationStack {
             
                     VStack {
-                        /*
-                        ScrollView {
-                            VStack(alignment: .leading, spacing: 24) {
-                                Text("Willkommen zurück, Artur 👋")
-                                    .font(.title)
-                                
-                                ProgressRingView(completed: 20, total: 50)
-                                    .frame(height: 180)
-
-                                VStack(alignment: .leading) {
-                                    Text("Heute zu erledigen")
-                                        .font(.headline)
-                                    ForEach(todayTasks.prefix(3)) { task in
-                                        TaskRowView(task: task)
-                                    }
-                                }
-
-                                MotivationQuoteView()
-                                HStack {
-                                    Button("➕ Neue Aufgabe") { showNewTaskSheet = true }
-                                    Spacer()
-                                    Button("📅 Übersicht") { navigateToCalendar() }
-                                }
-                            }
-                            .padding()
+                        
+                        VStack {
+                            ProgressView(value: taskViewModel.overallCompletionRate)
+                                .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                                .scaleEffect(2.0)
+                            Text("Gesamter Fortschritt: \(Int(taskViewModel.overallCompletionRate * 100))%")
+                                .font(.headline)
                         }
+                        
 
-                      */
                     }
                     .navigationTitle("Home")
                     .navigationBarTitleDisplayMode(.inline)
@@ -67,5 +50,5 @@ struct HomeView: View {
 
 
 #Preview {
-    HomeView(selection: .constant(1), loginRegisterViewModel: LoginRegisterViewModel())
+    HomeView(selection: .constant(1), loginRegisterViewModel: LoginRegisterViewModel(), taskViewModel: TaskViewModel())
 }
