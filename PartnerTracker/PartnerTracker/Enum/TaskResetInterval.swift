@@ -10,5 +10,6 @@ import Foundation
 enum TaskResetInterval: String, Codable {
     case daily
     case weekly
+    case monthly
     case never
 }
