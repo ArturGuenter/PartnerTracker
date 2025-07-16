@@ -285,7 +285,31 @@ class TaskViewModel: ObservableObject {
         }
     }
 
-    
+    private func getResetTaskIfNeeded(task: TaskItem, now: Date) -> TaskItem? {
+        guard task.isDone, let lastDone = task.lastDoneAt else { return nil }
+
+        switch task.resetInterval {
+        case .daily:
+            if !Calendar.current.isDateInToday(lastDone) {
+                var resetTask = task
+                resetTask.isDone = false
+                resetTask.lastDoneAt = nil
+                return resetTask
+            }
+        case .weekly:
+            let weekOfLastDone = Calendar.current.component(.weekOfYear, from: lastDone)
+            let weekOfNow = Calendar.current.component(.weekOfYear, from: now)
+            if weekOfLastDone != weekOfNow {
+                var resetTask = task
+                resetTask.isDone = false
+                resetTask.lastDoneAt = nil
+                return resetTask
+            }
+        case .never:
+            return nil
+        }
+        return nil
+    }
 
     // MARK: - Aufgaben löschen & bearbeiten
 
