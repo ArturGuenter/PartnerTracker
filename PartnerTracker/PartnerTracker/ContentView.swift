@@ -15,7 +15,7 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selection) {
-            HomeView(selection: $selection, loginRegisterViewModel: loginRegisterViewModel, taskViewModel: taskViewModel)
+            HomeView(selection: $selection, loginRegisterViewModel: loginRegisterViewModel, taskViewModel: taskViewModel, groupViewModel: groupViewModel)
                 .tabItem {
                     Label("Home", systemImage: "house")
                 }

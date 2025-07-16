@@ -12,7 +12,7 @@ struct HomeView: View {
     @Binding var selection: Int
     @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
     @ObservedObject var taskViewModel: TaskViewModel
-    @ObservedObject var groupviewmodel: GroupViewModel
+    @ObservedObject var groupViewModel: GroupViewModel
    
     
     var body: some View {
@@ -70,11 +70,22 @@ struct HomeView: View {
                         }
                     }
                 }
+        .onAppear {
+            Task {
+                do {
+                    try await groupViewModel.fetchGroupsForCurrentUser()
+                    try await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                } catch {
+                    print("Fehler beim Laden der Daten: \(error.localizedDescription)")
+                }
+            }
+        }
+
         
     }
 }
 
 
 #Preview {
-    HomeView(selection: .constant(1), loginRegisterViewModel: LoginRegisterViewModel(), taskViewModel: TaskViewModel(), groupviewmodel: GroupViewModel())
+    HomeView(selection: .constant(1), loginRegisterViewModel: LoginRegisterViewModel(), taskViewModel: TaskViewModel(), groupViewModel: GroupViewModel())
 }
