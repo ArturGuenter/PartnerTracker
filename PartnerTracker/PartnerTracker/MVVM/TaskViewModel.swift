@@ -123,6 +123,7 @@ class TaskViewModel: ObservableObject {
             "ownerId": uid,
             "groupId": NSNull(),
             "createdAt": Timestamp(date: defaultTask.createdAt)
+            
         ])
     }
 
@@ -148,7 +149,7 @@ class TaskViewModel: ObservableObject {
                 "isDone": newTask.isDone,
                 "ownerId": uid,
                 "groupId": NSNull(),
-                "createdAt": Timestamp(date: newTask.createdAt)
+                "createdAt": Timestamp(date: newTask.createdAt),
             ])
             try await fetchTasks(groups: [])
         } catch {
