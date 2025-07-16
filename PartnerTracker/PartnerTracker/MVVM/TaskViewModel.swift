@@ -240,6 +240,51 @@ class TaskViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Aufgaben zurücksetzen
+
+    func checkAndResetTasks() async {
+        let now = Date()
+        var tasksToUpdate: [(TaskItem, IndexPath)] = []
+
+        for (index, task) in personalTasks.enumerated() {
+            if let resetTask = getResetTaskIfNeeded(task: task, now: now) {
+                tasksToUpdate.append((resetTask, IndexPath(row: index, section: 0)))
+            }
+        }
+
+        for (groupName, tasks) in groupedTasks {
+            for (index, task) in tasks.enumerated() {
+                if let resetTask = getResetTaskIfNeeded(task: task, now: now) {
+                    tasksToUpdate.append((resetTask, IndexPath(row: index, section: groupName.hashValue)))
+                }
+            }
+        }
+
+        for (task, indexPath) in tasksToUpdate {
+            do {
+                try await db.collection("tasks").document(task.id).updateData([
+                    "isDone": false,
+                    "lastDoneAt": NSNull()
+                ])
+
+                if indexPath.section == 0 {
+                    personalTasks[indexPath.row] = task
+                } else {
+                    for (groupName, tasks) in groupedTasks {
+                        if groupName.hashValue == indexPath.section {
+                            var groupTasks = tasks
+                            groupTasks[indexPath.row] = task
+                            groupedTasks[groupName] = groupTasks
+                        }
+                    }
+                }
+
+            } catch {
+                print("Fehler beim Zurücksetzen der Aufgabe: \(error)")
+            }
+        }
+    }
+
     
 
     // MARK: - Aufgaben löschen & bearbeiten
