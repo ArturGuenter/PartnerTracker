@@ -13,4 +13,8 @@ struct TaskItem: Identifiable, Codable {
     var ownerId: String?
     var groupId: String?
     let createdAt: Date
+    
+    var repeatInterval: String? 
+    var lastCompletedAt: Date?
 }
+
