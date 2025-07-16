@@ -12,6 +12,7 @@ struct HomeView: View {
     @Binding var selection: Int
     @ObservedObject var loginRegisterViewModel: LoginRegisterViewModel
     @ObservedObject var taskViewModel: TaskViewModel
+    @ObservedObject var groupviewmodel: GroupViewModel
    
     
     var body: some View {
@@ -75,5 +76,5 @@ struct HomeView: View {
 
 
 #Preview {
-    HomeView(selection: .constant(1), loginRegisterViewModel: LoginRegisterViewModel(), taskViewModel: TaskViewModel())
+    HomeView(selection: .constant(1), loginRegisterViewModel: LoginRegisterViewModel(), taskViewModel: TaskViewModel(), groupviewmodel: GroupViewModel())
 }
