@@ -8,10 +8,18 @@
 import SwiftUI
 
 struct TaskIntervalPicker: View {
+    @Binding var selectedInterval: TaskResetInterval
+
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Picker("Wiederholen", selection: $selectedInterval) {
+            ForEach(TaskResetInterval.allCases) { interval in
+                Text(interval.rawValue.capitalized).tag(interval)
+            }
+        }
+        .pickerStyle(.segmented)
     }
 }
+
 
 #Preview {
     TaskIntervalPicker()
