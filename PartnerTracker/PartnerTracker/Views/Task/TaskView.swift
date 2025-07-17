@@ -157,74 +157,49 @@ struct TaskView: View {
 
         // MARK: - Sheet eigene Aufgabe
         .sheet(isPresented: $showPersonalTaskSheet) {
-            NavigationView {
-                Form {
-                    Section(header: Text("Neue persönliche Aufgabe")) {
-                        TextField("Titel", text: $newTaskTitle)
-                    }
-                    Section(header: Text("Intervall")) {
-                        TaskIntervalPicker(selectedInterval: $personalTaskInterval)
-                    }
-
-                }
-                .navigationTitle("Eigene Aufgabe")
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Abbrechen") {
-                            newTaskTitle = ""
-                            showPersonalTaskSheet = false
-                        }
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Hinzufügen") {
-                            Task {
-                                await taskViewModel.addPersonalTask(title: newTaskTitle)
-                                try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
-                                newTaskTitle = ""
-                                showPersonalTaskSheet = false
-                            }
-                        }
-                        .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
+            TaskSheetView(
+                title: "Neue persönliche Aufgabe",
+                taskTitle: $newTaskTitle,
+                selectedInterval: $personalTaskInterval,
+                onCancel: {
+                    newTaskTitle = ""
+                    showPersonalTaskSheet = false
+                },
+                onConfirm: {
+                    Task {
+                        await taskViewModel.addPersonalTask(title: newTaskTitle, interval: personalTaskInterval)
+                        try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                        newTaskTitle = ""
+                        showPersonalTaskSheet = false
+                        personalTaskInterval = .daily
                     }
                 }
-            }
+            )
         }
+
 
         // MARK: - Sheet Gruppenaufgabe
-        .sheet(item: $showGroupTaskSheetForGroup) { group in
-            NavigationView {
-                Form {
-                    Section(header: Text("Neue Aufgabe für \(group.name)")) {
-                        TextField("Titel", text: $newTaskTitle)
-                    }
-                    Section(header: Text("Intervall")) {
-                        TaskIntervalPicker(selectedInterval: $groupTaskInterval)
-                    
-                    }
-
-                }
-                .navigationTitle("Gruppenaufgabe")
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Abbrechen") {
-                            newTaskTitle = ""
-                            showGroupTaskSheetForGroup = nil
-                        }
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Hinzufügen") {
-                            Task {
-                                await taskViewModel.addGroupTask(title: newTaskTitle, group: group)
-                                try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
-                                newTaskTitle = ""
-                                showGroupTaskSheetForGroup = nil
-                            }
-                        }
-                        .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
+        .sheet(isPresented: $showPersonalTaskSheet) {
+            TaskSheetView(
+                title: "Neue persönliche Aufgabe",
+                taskTitle: $newTaskTitle,
+                selectedInterval: $personalTaskInterval,
+                onCancel: {
+                    newTaskTitle = ""
+                    showPersonalTaskSheet = false
+                },
+                onConfirm: {
+                    Task {
+                        await taskViewModel.addPersonalTask(title: newTaskTitle, interval: personalTaskInterval)
+                        try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                        newTaskTitle = ""
+                        showPersonalTaskSheet = false
+                        personalTaskInterval = .daily
                     }
                 }
-            }
+            )
         }
+
         
         // MARK: - Sheet Aufagabe Bearbeiten
         .sheet(item: $editingTask) { task in
