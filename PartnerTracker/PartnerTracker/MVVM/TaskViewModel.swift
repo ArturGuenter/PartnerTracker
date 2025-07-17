@@ -66,16 +66,33 @@ class TaskViewModel: ObservableObject {
 
         await addDefaultTaskIfNeeded()
 
-        
+        // Persönliche Aufgaben laden und resetten
         let personalSnapshot = try await db.collection("tasks")
             .whereField("ownerId", isEqualTo: uid)
             .whereField("groupId", isEqualTo: NSNull())
             .getDocuments()
 
-        self.personalTasks = try personalSnapshot.documents.compactMap {
+        let loadedPersonalTasks = try personalSnapshot.documents.compactMap {
             try $0.data(as: TaskItem.self)
-        }.sorted(by: { $0.createdAt > $1.createdAt })
+        }
 
+        var resetPersonalTasks: [TaskItem] = []
+        
+        try await withThrowingTaskGroup(of: TaskItem.self) { group in
+            for task in loadedPersonalTasks {
+                group.addTask {
+                    await self.checkAndResetTaskIfNeeded(task)
+                }
+            }
+
+            for try await checkedTask in group {
+                resetPersonalTasks.append(checkedTask)
+            }
+        }
+
+        self.personalTasks = resetPersonalTasks.sorted(by: { $0.createdAt > $1.createdAt })
+
+        // Gruppenaufgaben laden und resetten
         var newGroupedTasks: [String: [TaskItem]] = [:]
 
         for group in groups {
@@ -83,17 +100,32 @@ class TaskViewModel: ObservableObject {
                 .whereField("groupId", isEqualTo: group.id)
                 .getDocuments()
 
-            let groupTasks = try groupSnapshot.documents.compactMap {
+            let loadedGroupTasks = try groupSnapshot.documents.compactMap {
                 try $0.data(as: TaskItem.self)
-            }.sorted(by: { $0.createdAt > $1.createdAt })
+            }
 
-            if !groupTasks.isEmpty {
-                newGroupedTasks[group.name] = groupTasks
+            var resetGroupTasks: [TaskItem] = []
+
+            try await withThrowingTaskGroup(of: TaskItem.self) { groupTaskGroup in
+                for task in loadedGroupTasks {
+                    groupTaskGroup.addTask {
+                        await self.checkAndResetTaskIfNeeded(task)
+                    }
+                }
+
+                for try await checkedTask in groupTaskGroup {
+                    resetGroupTasks.append(checkedTask)
+                }
+            }
+
+            if !resetGroupTasks.isEmpty {
+                newGroupedTasks[group.name] = resetGroupTasks.sorted(by: { $0.createdAt > $1.createdAt })
             }
         }
 
         self.groupedTasks = newGroupedTasks
     }
+
 
 
     func addDefaultTaskIfNeeded() async {
@@ -295,6 +327,50 @@ class TaskViewModel: ObservableObject {
         }
     }
 
+
+    func checkAndResetTaskIfNeeded(_ task: TaskItem) async -> TaskItem {
+        let now = Date()
+        let calendar = Calendar.current
+        var needsReset = false
+
+        switch task.resetInterval {
+        case .daily:
+            if !calendar.isDateInToday(task.lastResetAt) {
+                let comparison = calendar.compare(now, to: task.lastResetAt, toGranularity: .day)
+                if comparison == .orderedDescending {
+                    needsReset = true
+                }
+            }
+
+        case .weekly:
+            if calendar.dateComponents([.weekOfYear], from: task.lastResetAt, to: now).weekOfYear ?? 0 >= 1 {
+                needsReset = true
+            }
+        case .monthly:
+            if calendar.dateComponents([.month], from: task.lastResetAt, to: now).month ?? 0 >= 1 {
+                needsReset = true
+            }
+        }
+
+        if needsReset {
+            do {
+                try await db.collection("tasks").document(task.id).updateData([
+                    "isDone": false,
+                    "lastResetAt": Timestamp(date: now)
+                ])
+
+                var resetTask = task
+                resetTask.isDone = false
+                resetTask.lastResetAt = now
+                return resetTask
+            } catch {
+                print("Fehler beim Zurücksetzen: \(error)")
+                return task
+            }
+        } else {
+            return task
+        }
+    }
 
     
 }
