@@ -17,7 +17,9 @@ struct TaskView: View {
     
     @State private var editingTask: TaskItem?
     
-    @State private var selectedInterval: TaskResetInterval = .daily
+    @State private var personalTaskInterval: TaskResetInterval = .daily
+    @State private var groupTaskInterval: TaskResetInterval = .daily
+
 
 
     var body: some View {
@@ -152,7 +154,7 @@ struct TaskView: View {
                 }
             }
         }
-/*
+
         // MARK: - Sheet eigene Aufgabe
         .sheet(isPresented: $showPersonalTaskSheet) {
             NavigationView {
@@ -161,7 +163,7 @@ struct TaskView: View {
                         TextField("Titel", text: $newTaskTitle)
                     }
                     Section(header: Text("Intervall")) {
-                        TaskIntervalPicker(selectedInterval: $selectedInterval)
+                        TaskIntervalPicker(selectedInterval: $personalTaskInterval)
                     }
 
                 }
@@ -196,7 +198,7 @@ struct TaskView: View {
                         TextField("Titel", text: $newTaskTitle)
                     }
                     Section(header: Text("Intervall")) {
-                        TaskIntervalPicker(selectedInterval: $selectedInterval)
+                        TaskIntervalPicker(selectedInterval: $groupTaskInterval)
                     
                     }
 
@@ -234,7 +236,7 @@ struct TaskView: View {
                 editingTask = nil
             }
         }
-        */
+        
 
     }
 }
