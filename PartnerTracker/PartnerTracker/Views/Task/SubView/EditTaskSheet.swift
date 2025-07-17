@@ -52,7 +52,9 @@ struct EditTaskSheet: View {
             isDone: false,
             ownerId: "demoUser",
             groupId: nil,
-            createdAt: Date()
+            createdAt: Date(),
+            resetInterval: TaskResetInterval.daily,
+            lastResetAt: Date()
         ),
         onSave: { newTitle in
             print("Neuer Titel: \(newTitle)")

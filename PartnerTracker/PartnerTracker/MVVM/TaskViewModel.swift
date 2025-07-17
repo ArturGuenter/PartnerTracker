@@ -66,16 +66,33 @@ class TaskViewModel: ObservableObject {
 
         await addDefaultTaskIfNeeded()
 
-        
+        // Persönliche Aufgaben laden und resetten
         let personalSnapshot = try await db.collection("tasks")
             .whereField("ownerId", isEqualTo: uid)
             .whereField("groupId", isEqualTo: NSNull())
             .getDocuments()
 
-        self.personalTasks = try personalSnapshot.documents.compactMap {
+        let loadedPersonalTasks = try personalSnapshot.documents.compactMap {
             try $0.data(as: TaskItem.self)
-        }.sorted(by: { $0.createdAt > $1.createdAt })
+        }
 
+        var resetPersonalTasks: [TaskItem] = []
+        
+        try await withThrowingTaskGroup(of: TaskItem.self) { group in
+            for task in loadedPersonalTasks {
+                group.addTask {
+                    await self.checkAndResetTaskIfNeeded(task)
+                }
+            }
+
+            for try await checkedTask in group {
+                resetPersonalTasks.append(checkedTask)
+            }
+        }
+
+        self.personalTasks = resetPersonalTasks.sorted(by: { $0.createdAt > $1.createdAt })
+
+        // Gruppenaufgaben laden und resetten
         var newGroupedTasks: [String: [TaskItem]] = [:]
 
         for group in groups {
@@ -83,17 +100,32 @@ class TaskViewModel: ObservableObject {
                 .whereField("groupId", isEqualTo: group.id)
                 .getDocuments()
 
-            let groupTasks = try groupSnapshot.documents.compactMap {
+            let loadedGroupTasks = try groupSnapshot.documents.compactMap {
                 try $0.data(as: TaskItem.self)
-            }.sorted(by: { $0.createdAt > $1.createdAt })
+            }
 
-            if !groupTasks.isEmpty {
-                newGroupedTasks[group.name] = groupTasks
+            var resetGroupTasks: [TaskItem] = []
+
+            try await withThrowingTaskGroup(of: TaskItem.self) { groupTaskGroup in
+                for task in loadedGroupTasks {
+                    groupTaskGroup.addTask {
+                        await self.checkAndResetTaskIfNeeded(task)
+                    }
+                }
+
+                for try await checkedTask in groupTaskGroup {
+                    resetGroupTasks.append(checkedTask)
+                }
+            }
+
+            if !resetGroupTasks.isEmpty {
+                newGroupedTasks[group.name] = resetGroupTasks.sorted(by: { $0.createdAt > $1.createdAt })
             }
         }
 
         self.groupedTasks = newGroupedTasks
     }
+
 
 
     func addDefaultTaskIfNeeded() async {
@@ -113,7 +145,9 @@ class TaskViewModel: ObservableObject {
             isDone: false,
             ownerId: uid,
             groupId: nil,
-            createdAt: Date()
+            createdAt: Date(),
+            resetInterval: TaskResetInterval.daily,
+            lastResetAt: Date()
         )
         
         try? await db.collection("tasks").document(defaultTask.id).setData([
@@ -122,25 +156,29 @@ class TaskViewModel: ObservableObject {
             "isDone": defaultTask.isDone,
             "ownerId": uid,
             "groupId": NSNull(),
-            "createdAt": Timestamp(date: defaultTask.createdAt)
+            "createdAt": Timestamp(date: defaultTask.createdAt),
+            "resetInterval": defaultTask.resetInterval.rawValue,
+            "lastResetAt": Timestamp(date: defaultTask.lastResetAt)
             
         ])
     }
 
-    func addPersonalTask(title: String) async {
+    func addPersonalTask(title: String, interval:  TaskResetInterval) async {
         guard let uid = currentUserId else {
             print("⚠️ Kein eingeloggter Benutzer – persönliche Aufgabe wird nicht gespeichert.")
             return
         }
 
         let newTask = TaskItem(
-            id: UUID().uuidString,
-            title: title,
-            isDone: false,
-            ownerId: uid,
-            groupId: nil,
-            createdAt: Date()
-        )
+                id: UUID().uuidString,
+                title: title,
+                isDone: false,
+                ownerId: uid,
+                groupId: nil,
+                createdAt: Date(),
+                resetInterval: interval,
+                lastResetAt: Date()
+            )
 
         do {
             try await db.collection("tasks").document(newTask.id).setData([
@@ -150,6 +188,8 @@ class TaskViewModel: ObservableObject {
                 "ownerId": uid,
                 "groupId": NSNull(),
                 "createdAt": Timestamp(date: newTask.createdAt),
+                "resetInterval": newTask.resetInterval.rawValue,
+                "lastResetAt": Timestamp(date: newTask.lastResetAt)
             ])
             try await fetchTasks(groups: [])
         } catch {
@@ -157,7 +197,7 @@ class TaskViewModel: ObservableObject {
         }
     }
 
-    func addGroupTask(title: String, group: Group) async {
+    func addGroupTask(title: String, group: Group, interval: TaskResetInterval) async {
         guard let uid = currentUserId else {
             print("⚠️ Kein eingeloggter Benutzer – Gruppenaufgabe wird nicht gespeichert.")
             return
@@ -169,7 +209,9 @@ class TaskViewModel: ObservableObject {
             isDone: false,
             ownerId: uid,
             groupId: group.id,
-            createdAt: Date()
+            createdAt: Date(),
+            resetInterval: interval,
+            lastResetAt: Date()
         )
 
         do {
@@ -179,7 +221,9 @@ class TaskViewModel: ObservableObject {
                 "isDone": newTask.isDone,
                 "ownerId": uid,
                 "groupId": group.id,
-                "createdAt": Timestamp(date: newTask.createdAt)
+                "createdAt": Timestamp(date: newTask.createdAt),
+                "resetInterval": newTask.resetInterval.rawValue,
+                "lastResetAt": Timestamp(date: newTask.lastResetAt)
             ])
 
             // ✅ Nur diese Gruppe neu laden
@@ -283,6 +327,50 @@ class TaskViewModel: ObservableObject {
         }
     }
 
+
+    func checkAndResetTaskIfNeeded(_ task: TaskItem) async -> TaskItem {
+        let now = Date()
+        let calendar = Calendar.current
+        var needsReset = false
+
+        switch task.resetInterval {
+        case .daily:
+            if !calendar.isDateInToday(task.lastResetAt) {
+                let comparison = calendar.compare(now, to: task.lastResetAt, toGranularity: .day)
+                if comparison == .orderedDescending {
+                    needsReset = true
+                }
+            }
+
+        case .weekly:
+            if calendar.dateComponents([.weekOfYear], from: task.lastResetAt, to: now).weekOfYear ?? 0 >= 1 {
+                needsReset = true
+            }
+        case .monthly:
+            if calendar.dateComponents([.month], from: task.lastResetAt, to: now).month ?? 0 >= 1 {
+                needsReset = true
+            }
+        }
+
+        if needsReset {
+            do {
+                try await db.collection("tasks").document(task.id).updateData([
+                    "isDone": false,
+                    "lastResetAt": Timestamp(date: now)
+                ])
+
+                var resetTask = task
+                resetTask.isDone = false
+                resetTask.lastResetAt = now
+                return resetTask
+            } catch {
+                print("Fehler beim Zurücksetzen: \(error)")
+                return task
+            }
+        } else {
+            return task
+        }
+    }
 
     
 }

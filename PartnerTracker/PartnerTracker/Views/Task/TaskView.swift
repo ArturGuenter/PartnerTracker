@@ -16,6 +16,10 @@ struct TaskView: View {
     @State private var newTaskTitle = ""
     
     @State private var editingTask: TaskItem?
+    
+    @State private var personalTaskInterval: TaskResetInterval = .daily
+    @State private var groupTaskInterval: TaskResetInterval = .daily
+
 
 
     var body: some View {
@@ -153,65 +157,49 @@ struct TaskView: View {
 
         // MARK: - Sheet eigene Aufgabe
         .sheet(isPresented: $showPersonalTaskSheet) {
-            NavigationView {
-                Form {
-                    Section(header: Text("Neue persönliche Aufgabe")) {
-                        TextField("Titel", text: $newTaskTitle)
+            TaskSheetView(
+                title: "Neue persönliche Aufgabe",
+                taskTitle: $newTaskTitle,
+                selectedInterval: $personalTaskInterval,
+                onCancel: {
+                    newTaskTitle = ""
+                    showPersonalTaskSheet = false
+                },
+                onConfirm: {
+                    Task {
+                        await taskViewModel.addPersonalTask(title: newTaskTitle, interval: personalTaskInterval)
+                        try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                        newTaskTitle = ""
+                        showPersonalTaskSheet = false
+                        personalTaskInterval = .daily
                     }
                 }
-                .navigationTitle("Eigene Aufgabe")
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Abbrechen") {
-                            newTaskTitle = ""
-                            showPersonalTaskSheet = false
-                        }
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Hinzufügen") {
-                            Task {
-                                await taskViewModel.addPersonalTask(title: newTaskTitle)
-                                try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
-                                newTaskTitle = ""
-                                showPersonalTaskSheet = false
-                            }
-                        }
-                        .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
-                    }
-                }
-            }
+            )
         }
 
+
         // MARK: - Sheet Gruppenaufgabe
-        .sheet(item: $showGroupTaskSheetForGroup) { group in
-            NavigationView {
-                Form {
-                    Section(header: Text("Neue Aufgabe für \(group.name)")) {
-                        TextField("Titel", text: $newTaskTitle)
+        .sheet(isPresented: $showPersonalTaskSheet) {
+            TaskSheetView(
+                title: "Neue persönliche Aufgabe",
+                taskTitle: $newTaskTitle,
+                selectedInterval: $personalTaskInterval,
+                onCancel: {
+                    newTaskTitle = ""
+                    showPersonalTaskSheet = false
+                },
+                onConfirm: {
+                    Task {
+                        await taskViewModel.addPersonalTask(title: newTaskTitle, interval: personalTaskInterval)
+                        try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                        newTaskTitle = ""
+                        showPersonalTaskSheet = false
+                        personalTaskInterval = .daily
                     }
                 }
-                .navigationTitle("Gruppenaufgabe")
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Abbrechen") {
-                            newTaskTitle = ""
-                            showGroupTaskSheetForGroup = nil
-                        }
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Hinzufügen") {
-                            Task {
-                                await taskViewModel.addGroupTask(title: newTaskTitle, group: group)
-                                try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
-                                newTaskTitle = ""
-                                showGroupTaskSheetForGroup = nil
-                            }
-                        }
-                        .disabled(newTaskTitle.trimmingCharacters(in: .whitespaces).isEmpty)
-                    }
-                }
-            }
+            )
         }
+
         
         // MARK: - Sheet Aufagabe Bearbeiten
         .sheet(item: $editingTask) { task in
@@ -223,6 +211,7 @@ struct TaskView: View {
                 editingTask = nil
             }
         }
+        
 
     }
 }
@@ -236,7 +225,7 @@ struct TaskView: View {
 #Preview {
     let taskVM = TaskViewModel()
     let groupVM = GroupViewModel()
-
+    
     taskVM.personalTasks = [
         TaskItem(
             id: "1",
@@ -244,10 +233,12 @@ struct TaskView: View {
             isDone: false,
             ownerId: "demo",
             groupId: nil,
-            createdAt: Date()
+            createdAt: Date(),
+            resetInterval: .daily,
+            lastResetAt: Date()
         )
     ]
-
+    
     groupVM.groups = [
         Group(
             id: "g1",
@@ -257,7 +248,7 @@ struct TaskView: View {
             password: "1234"
         )
     ]
-
+    
     taskVM.groupedTasks = [
         "Projekt X": [
             TaskItem(
@@ -266,13 +257,16 @@ struct TaskView: View {
                 isDone: true,
                 ownerId: "demo",
                 groupId: "g1",
-                createdAt: Date()
+                createdAt: Date(),
+                resetInterval: .weekly,
+                lastResetAt: Calendar.current.date(byAdding: .day, value: -8, to: Date()) ?? Date()
             )
         ]
     ]
-
+    
     return TaskView(
         taskViewModel: taskVM,
         groupViewModel: groupVM
     )
 }
+

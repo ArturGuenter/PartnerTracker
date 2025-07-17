@@ -69,7 +69,9 @@ struct GroupTaskSection: View {
                 isDone: false,
                 ownerId: "user1",
                 groupId: "g1",
-                createdAt: Date()
+                createdAt: Date(),
+                resetInterval: TaskResetInterval.daily,
+                lastResetAt: Date()
             ),
             TaskItem(
                 id: "t2",
@@ -77,7 +79,9 @@ struct GroupTaskSection: View {
                 isDone: true,
                 ownerId: "user2",
                 groupId: "g1",
-                createdAt: Date()
+                createdAt: Date(),
+                resetInterval: TaskResetInterval.daily,
+                lastResetAt: Date()
             )
         ],
         onAddTapped: {
