@@ -7,9 +7,10 @@
 
 import Foundation
 
-enum TaskResetInterval: String, Codable {
+enum TaskResetInterval: String, Codable, CaseIterable, Identifiable {
     case daily
     case weekly
     case monthly
-    case never
+    
+    var id: String { rawValue }
 }
