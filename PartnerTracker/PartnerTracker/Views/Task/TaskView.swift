@@ -16,6 +16,8 @@ struct TaskView: View {
     @State private var newTaskTitle = ""
     
     @State private var editingTask: TaskItem?
+    
+    @State private var selectedInterval: TaskResetInterval = .daily
 
 
     var body: some View {
@@ -158,6 +160,15 @@ struct TaskView: View {
                     Section(header: Text("Neue persönliche Aufgabe")) {
                         TextField("Titel", text: $newTaskTitle)
                     }
+                    Section(header: Text("Intervall")) {
+                        Picker("Wiederholen", selection: $selectedInterval) {
+                            ForEach(TaskResetInterval.allCases) { interval in
+                                Text(interval.rawValue.capitalized).tag(interval)
+                            }
+                        }
+                        .pickerStyle(.segmented) 
+                    }
+
                 }
                 .navigationTitle("Eigene Aufgabe")
                 .toolbar {
@@ -189,6 +200,15 @@ struct TaskView: View {
                     Section(header: Text("Neue Aufgabe für \(group.name)")) {
                         TextField("Titel", text: $newTaskTitle)
                     }
+                    Section(header: Text("Intervall")) {
+                        Picker("Wiederholen", selection: $selectedInterval) {
+                            ForEach(TaskResetInterval.allCases) { interval in
+                                Text(interval.rawValue.capitalized).tag(interval)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+
                 }
                 .navigationTitle("Gruppenaufgabe")
                 .toolbar {
@@ -244,7 +264,9 @@ struct TaskView: View {
             isDone: false,
             ownerId: "demo",
             groupId: nil,
-            createdAt: Date()
+            createdAt: Date(),
+            resetInterval: TaskResetInterval.daily,
+            lastResetAt: Date()
         )
     ]
 
@@ -266,7 +288,9 @@ struct TaskView: View {
                 isDone: true,
                 ownerId: "demo",
                 groupId: "g1",
-                createdAt: Date()
+                createdAt: Date(),
+                resetInterval: TaskResetInterval.daily,
+                lastResetAt: Date()
             )
         ]
     ]

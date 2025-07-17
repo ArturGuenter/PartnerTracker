@@ -113,7 +113,9 @@ class TaskViewModel: ObservableObject {
             isDone: false,
             ownerId: uid,
             groupId: nil,
-            createdAt: Date()
+            createdAt: Date(),
+            resetInterval: TaskResetInterval.daily,
+            lastResetAt: Date()
         )
         
         try? await db.collection("tasks").document(defaultTask.id).setData([
@@ -122,7 +124,9 @@ class TaskViewModel: ObservableObject {
             "isDone": defaultTask.isDone,
             "ownerId": uid,
             "groupId": NSNull(),
-            "createdAt": Timestamp(date: defaultTask.createdAt)
+            "createdAt": Timestamp(date: defaultTask.createdAt),
+            "resetInterval": defaultTask.resetInterval.rawValue,
+            "lastResetAt": Timestamp(date: defaultTask.lastResetAt)
             
         ])
     }
