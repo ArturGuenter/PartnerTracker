@@ -127,20 +127,22 @@ class TaskViewModel: ObservableObject {
         ])
     }
 
-    func addPersonalTask(title: String) async {
+    func addPersonalTask(title: String, interval:  TaskResetInterval) async {
         guard let uid = currentUserId else {
             print("⚠️ Kein eingeloggter Benutzer – persönliche Aufgabe wird nicht gespeichert.")
             return
         }
 
         let newTask = TaskItem(
-            id: UUID().uuidString,
-            title: title,
-            isDone: false,
-            ownerId: uid,
-            groupId: nil,
-            createdAt: Date()
-        )
+                id: UUID().uuidString,
+                title: title,
+                isDone: false,
+                ownerId: uid,
+                groupId: nil,
+                createdAt: Date(),
+                resetInterval: interval,
+                lastResetAt: Date()
+            )
 
         do {
             try await db.collection("tasks").document(newTask.id).setData([
@@ -150,6 +152,8 @@ class TaskViewModel: ObservableObject {
                 "ownerId": uid,
                 "groupId": NSNull(),
                 "createdAt": Timestamp(date: newTask.createdAt),
+                "resetInterval": newTask.resetInterval.rawValue,
+                "lastResetAt": Timestamp(date: newTask.lastResetAt)
             ])
             try await fetchTasks(groups: [])
         } catch {
@@ -157,7 +161,7 @@ class TaskViewModel: ObservableObject {
         }
     }
 
-    func addGroupTask(title: String, group: Group) async {
+    func addGroupTask(title: String, group: Group, interval: TaskResetInterval) async {
         guard let uid = currentUserId else {
             print("⚠️ Kein eingeloggter Benutzer – Gruppenaufgabe wird nicht gespeichert.")
             return
@@ -169,7 +173,9 @@ class TaskViewModel: ObservableObject {
             isDone: false,
             ownerId: uid,
             groupId: group.id,
-            createdAt: Date()
+            createdAt: Date(),
+            resetInterval: interval,
+            lastResetAt: Date()
         )
 
         do {
@@ -179,7 +185,9 @@ class TaskViewModel: ObservableObject {
                 "isDone": newTask.isDone,
                 "ownerId": uid,
                 "groupId": group.id,
-                "createdAt": Timestamp(date: newTask.createdAt)
+                "createdAt": Timestamp(date: newTask.createdAt),
+                "resetInterval": newTask.resetInterval.rawValue,
+                "lastResetAt": Timestamp(date: newTask.lastResetAt)
             ])
 
             // ✅ Nur diese Gruppe neu laden
