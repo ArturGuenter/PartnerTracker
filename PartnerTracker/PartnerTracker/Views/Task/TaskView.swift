@@ -152,7 +152,7 @@ struct TaskView: View {
                 }
             }
         }
-
+/*
         // MARK: - Sheet eigene Aufgabe
         .sheet(isPresented: $showPersonalTaskSheet) {
             NavigationView {
@@ -161,12 +161,7 @@ struct TaskView: View {
                         TextField("Titel", text: $newTaskTitle)
                     }
                     Section(header: Text("Intervall")) {
-                        Picker("Wiederholen", selection: $selectedInterval) {
-                            ForEach(TaskResetInterval.allCases) { interval in
-                                Text(interval.rawValue.capitalized).tag(interval)
-                            }
-                        }
-                        .pickerStyle(.segmented) 
+                        TaskIntervalPicker(selectedInterval: $selectedInterval)
                     }
 
                 }
@@ -201,12 +196,8 @@ struct TaskView: View {
                         TextField("Titel", text: $newTaskTitle)
                     }
                     Section(header: Text("Intervall")) {
-                        Picker("Wiederholen", selection: $selectedInterval) {
-                            ForEach(TaskResetInterval.allCases) { interval in
-                                Text(interval.rawValue.capitalized).tag(interval)
-                            }
-                        }
-                        .pickerStyle(.segmented)
+                        TaskIntervalPicker(selectedInterval: $selectedInterval)
+                    
                     }
 
                 }
@@ -243,6 +234,7 @@ struct TaskView: View {
                 editingTask = nil
             }
         }
+        */
 
     }
 }

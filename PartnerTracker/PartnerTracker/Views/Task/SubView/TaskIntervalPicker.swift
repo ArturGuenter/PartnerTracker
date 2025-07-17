@@ -22,5 +22,5 @@ struct TaskIntervalPicker: View {
 
 
 #Preview {
-    TaskIntervalPicker()
+    TaskIntervalPicker(selectedInterval: .constant(TaskResetInterval.daily))
 }
