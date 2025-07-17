@@ -256,7 +256,7 @@ struct TaskView: View {
 #Preview {
     let taskVM = TaskViewModel()
     let groupVM = GroupViewModel()
-
+    
     taskVM.personalTasks = [
         TaskItem(
             id: "1",
@@ -265,11 +265,11 @@ struct TaskView: View {
             ownerId: "demo",
             groupId: nil,
             createdAt: Date(),
-            resetInterval: TaskResetInterval.daily,
+            resetInterval: .daily,
             lastResetAt: Date()
         )
     ]
-
+    
     groupVM.groups = [
         Group(
             id: "g1",
@@ -279,7 +279,7 @@ struct TaskView: View {
             password: "1234"
         )
     ]
-
+    
     taskVM.groupedTasks = [
         "Projekt X": [
             TaskItem(
@@ -289,14 +289,15 @@ struct TaskView: View {
                 ownerId: "demo",
                 groupId: "g1",
                 createdAt: Date(),
-                resetInterval: TaskResetInterval.daily,
-                lastResetAt: Date()
+                resetInterval: .weekly,
+                lastResetAt: Calendar.current.date(byAdding: .day, value: -8, to: Date()) ?? Date()
             )
         ]
     ]
-
+    
     return TaskView(
         taskViewModel: taskVM,
         groupViewModel: groupVM
     )
 }
+
