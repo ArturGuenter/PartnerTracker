@@ -155,6 +155,57 @@ struct TaskView: View {
             }
         }
 
+        .sheet(item: $activeSheet) { sheet in
+            switch sheet {
+            case .personal:
+                TaskSheetView(
+                    title: "Eigene Aufgabe",
+                    taskTitle: $newTaskTitle,
+                    selectedInterval: $selectedInterval,
+                    onCancel: {
+                        newTaskTitle = ""
+                        activeSheet = nil
+                    },
+                    onConfirm: {
+                        Task {
+                            await taskViewModel.addPersonalTask(title: newTaskTitle, interval: selectedInterval)
+                            try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                            newTaskTitle = ""
+                            activeSheet = nil
+                        }
+                    }
+                )
+
+            case .group(let group):
+                TaskSheetView(
+                    title: "Neue Aufgabe für \(group.name)",
+                    taskTitle: $newTaskTitle,
+                    selectedInterval: $selectedInterval,
+                    onCancel: {
+                        newTaskTitle = ""
+                        activeSheet = nil
+                    },
+                    onConfirm: {
+                        Task {
+                            await taskViewModel.addGroupTask(title: newTaskTitle, group: group, interval: selectedInterval)
+                            try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                            newTaskTitle = ""
+                            activeSheet = nil
+                        }
+                    }
+                )
+
+            case .edit(let task):
+                EditTaskSheet(task: task) { updatedTitle in
+                    Task {
+                        await taskViewModel.updateTaskTitle(task: task, newTitle: updatedTitle)
+                        try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                        activeSheet = nil
+                    }
+                }
+            }
+        }
+
         /*
         // MARK: - Sheet eigene Aufgabe
         .sheet(isPresented: $showPersonalTaskSheet) {
