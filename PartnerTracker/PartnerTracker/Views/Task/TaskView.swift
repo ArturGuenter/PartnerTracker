@@ -19,6 +19,9 @@ struct TaskView: View {
     
     @State private var personalTaskInterval: TaskResetInterval = .daily
     @State private var groupTaskInterval: TaskResetInterval = .daily
+    
+    @State private var selectedInterval: TaskResetInterval = .daily
+
 
 
 
@@ -30,11 +33,14 @@ struct TaskView: View {
                     Text("Meine Aufgaben")
                         .font(.headline)
                     Spacer()
-                    Button(action: {
-                        activeSheet = .personal
-                    }) {
-                        Label("Neue Aufgabe", systemImage: "plus.circle")
-                    }
+                Button {
+                    newTaskTitle = ""
+                    selectedInterval = .daily
+                    activeSheet = .personal
+                } label: {
+                    Label("Neue Aufgabe", systemImage: "plus.circle")
+                }
+
                 }
             ) {
                 if taskViewModel.personalTasks.isEmpty {
@@ -90,11 +96,14 @@ struct TaskView: View {
                                     .font(.subheadline)
                                     .bold()
                                 Spacer()
-                                Button {
-                                    activeSheet = .group(group)
-                                } label: {
-                                    Image(systemName: "plus.circle")
-                                }
+                            Button {
+                                newTaskTitle = ""
+                                selectedInterval = .daily
+                                activeSheet = .group(group)
+                            } label: {
+                                Image(systemName: "plus.circle")
+                            }
+
                             }
                         ) {
                             let tasks = taskViewModel.groupedTasks[group.name] ?? []
@@ -162,15 +171,11 @@ struct TaskView: View {
                     title: "Eigene Aufgabe",
                     taskTitle: $newTaskTitle,
                     selectedInterval: $selectedInterval,
-                    onCancel: {
-                        newTaskTitle = ""
-                        activeSheet = nil
-                    },
+                    onCancel: { activeSheet = nil },
                     onConfirm: {
                         Task {
                             await taskViewModel.addPersonalTask(title: newTaskTitle, interval: selectedInterval)
                             try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
-                            newTaskTitle = ""
                             activeSheet = nil
                         }
                     }
@@ -181,15 +186,11 @@ struct TaskView: View {
                     title: "Neue Aufgabe für \(group.name)",
                     taskTitle: $newTaskTitle,
                     selectedInterval: $selectedInterval,
-                    onCancel: {
-                        newTaskTitle = ""
-                        activeSheet = nil
-                    },
+                    onCancel: { activeSheet = nil },
                     onConfirm: {
                         Task {
                             await taskViewModel.addGroupTask(title: newTaskTitle, group: group, interval: selectedInterval)
                             try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
-                            newTaskTitle = ""
                             activeSheet = nil
                         }
                     }
@@ -205,6 +206,7 @@ struct TaskView: View {
                 }
             }
         }
+
 
         /*
         // MARK: - Sheet eigene Aufgabe
