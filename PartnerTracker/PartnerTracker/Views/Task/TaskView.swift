@@ -125,7 +125,9 @@ struct TaskView: View {
                                             .foregroundColor(task.isDone ? .gray : .primary)
                                         Spacer()
                                         Button {
-                                            editingTask = task
+                                            
+                                            activeSheet = .edit(task)
+                                            
                                         } label: {
                                             Image(systemName: "pencil")
                                                 .foregroundColor(.blue)
@@ -253,7 +255,7 @@ struct TaskView: View {
                 }
             )
         }
-
+         */
         
         // MARK: - Sheet Aufagabe Bearbeiten
         .sheet(item: $editingTask) { task in
@@ -265,7 +267,7 @@ struct TaskView: View {
                 editingTask = nil
             }
         }
-        */
+        
 
     }
 }
