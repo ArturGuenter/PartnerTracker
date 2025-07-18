@@ -31,7 +31,7 @@ struct TaskView: View {
                         .font(.headline)
                     Spacer()
                     Button(action: {
-                        showPersonalTaskSheet = true
+                        activeSheet = .personal
                     }) {
                         Label("Neue Aufgabe", systemImage: "plus.circle")
                     }
@@ -91,7 +91,7 @@ struct TaskView: View {
                                     .bold()
                                 Spacer()
                                 Button {
-                                    showGroupTaskSheetForGroup = group
+                                    activeSheet = .group(group)
                                 } label: {
                                     Image(systemName: "plus.circle")
                                 }
@@ -155,6 +155,7 @@ struct TaskView: View {
             }
         }
 
+        /*
         // MARK: - Sheet eigene Aufgabe
         .sheet(isPresented: $showPersonalTaskSheet) {
             TaskSheetView(
@@ -211,7 +212,7 @@ struct TaskView: View {
                 editingTask = nil
             }
         }
-        
+        */
 
     }
 }
