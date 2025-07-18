@@ -11,8 +11,8 @@ struct TaskView: View {
     @ObservedObject var taskViewModel: TaskViewModel
     @ObservedObject var groupViewModel: GroupViewModel
 
-    @State private var showPersonalTaskSheet = false
-    @State private var showGroupTaskSheetForGroup: Group?
+    @State private var activeSheet: TaskSheetType?
+
     @State private var newTaskTitle = ""
     
     @State private var editingTask: TaskItem?
