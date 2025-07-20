@@ -199,9 +199,9 @@ struct TaskView: View {
                 )
 
             case .edit(let task):
-                EditTaskSheet(task: task) { updatedTitle in
+                EditTaskSheet(task: task) { updatedTitle, updatedInterval in
                     Task {
-                        await taskViewModel.updateTaskTitle(task: task, newTitle: updatedTitle)
+                        await taskViewModel.updateTask(task: task, newTitle: updatedTitle, newInterval: updatedInterval)
                         try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
                         activeSheet = nil
                     }
@@ -210,52 +210,7 @@ struct TaskView: View {
         }
 
 
-        /*
-        // MARK: - Sheet eigene Aufgabe
-        .sheet(isPresented: $showPersonalTaskSheet) {
-            TaskSheetView(
-                title: "Neue persönliche Aufgabe",
-                taskTitle: $newTaskTitle,
-                selectedInterval: $personalTaskInterval,
-                onCancel: {
-                    newTaskTitle = ""
-                    showPersonalTaskSheet = false
-                },
-                onConfirm: {
-                    Task {
-                        await taskViewModel.addPersonalTask(title: newTaskTitle, interval: personalTaskInterval)
-                        try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
-                        newTaskTitle = ""
-                        showPersonalTaskSheet = false
-                        personalTaskInterval = .daily
-                    }
-                }
-            )
-        }
-
-
-        // MARK: - Sheet Gruppenaufgabe
-        .sheet(isPresented: $showPersonalTaskSheet) {
-            TaskSheetView(
-                title: "Neue persönliche Aufgabe",
-                taskTitle: $newTaskTitle,
-                selectedInterval: $personalTaskInterval,
-                onCancel: {
-                    newTaskTitle = ""
-                    showPersonalTaskSheet = false
-                },
-                onConfirm: {
-                    Task {
-                        await taskViewModel.addPersonalTask(title: newTaskTitle, interval: personalTaskInterval)
-                        try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
-                        newTaskTitle = ""
-                        showPersonalTaskSheet = false
-                        personalTaskInterval = .daily
-                    }
-                }
-            )
-        }
-         */
+        
         
         // MARK: - Sheet Aufagabe Bearbeiten
         .sheet(item: $editingTask) { task in
