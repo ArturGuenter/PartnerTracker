@@ -7,58 +7,54 @@
 
 import SwiftUI
 
-struct EditTaskSheet: View {
-    
-    @State var task: TaskItem
+struct EditTaskSheetWithInterval: View {
+    let task: TaskItem
     @State private var updatedTitle: String
-        var onSave: (String) -> Void
+    @State private var updatedInterval: TaskResetInterval
 
-        init(task: TaskItem, onSave: @escaping (String) -> Void) {
-            self.task = task
-            self.onSave = onSave
-            _updatedTitle = State(initialValue: task.title)
-        }
-    
+    var onSave: (String, TaskResetInterval) -> Void
+    var onCancel: () -> Void
+
+    init(task: TaskItem,
+         onSave: @escaping (String, TaskResetInterval) -> Void,
+         onCancel: @escaping () -> Void) {
+        self.task = task
+        self.onSave = onSave
+        self.onCancel = onCancel
+        _updatedTitle = State(initialValue: task.title)
+        _updatedInterval = State(initialValue: task.resetInterval)
+    }
+
     var body: some View {
-        NavigationStack {
-                   Form {
-                       Section(header: Text("Aufgabe bearbeiten")) {
-                           TextField("Titel", text: $updatedTitle)
-                       }
-                   }
-                   .navigationTitle("Bearbeiten")
-                   .toolbar {
-                       ToolbarItem(placement: .cancellationAction) {
-                           Button("Abbrechen") {
-                               onSave(task.title)
-                           }
-                       }
-                       ToolbarItem(placement: .confirmationAction) {
-                           Button("Speichern") {
-                               onSave(updatedTitle)
-                           }
-                           .disabled(updatedTitle.trimmingCharacters(in: .whitespaces).isEmpty)
-                       }
-                   }
-               }
+        NavigationView {
+            Form {
+                Section(header: Text("Titel")) {
+                    TextField("Titel", text: $updatedTitle)
+                }
+                Section(header: Text("Intervall")) {
+                    Picker("Intervall", selection: $updatedInterval) {
+                        ForEach(TaskResetInterval.allCases, id: \.self) { interval in
+                            Text(interval.rawValue.capitalized).tag(interval)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+            }
+            .navigationTitle("Aufgabe bearbeiten")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Abbrechen", action: onCancel)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Speichern") {
+                        onSave(updatedTitle, updatedInterval)
+                    }
+                    .disabled(updatedTitle.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+        }
     }
 }
 
-#Preview {
-    EditTaskSheet(
-        task: TaskItem(
-            id: "123",
-            title: "Beispiel-Aufgabe",
-            isDone: false,
-            ownerId: "demoUser",
-            groupId: nil,
-            createdAt: Date(),
-            resetInterval: TaskResetInterval.daily,
-            lastResetAt: Date()
-        ),
-        onSave: { newTitle in
-            print("Neuer Titel: \(newTitle)")
-        }
-    )
-}
+
 

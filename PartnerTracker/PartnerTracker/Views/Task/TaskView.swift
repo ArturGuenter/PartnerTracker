@@ -12,209 +12,182 @@ struct TaskView: View {
     @ObservedObject var groupViewModel: GroupViewModel
 
     @State private var activeSheet: TaskSheetType?
-
     @State private var newTaskTitle = ""
-    
-    @State private var editingTask: TaskItem?
-    
     @State private var personalTaskInterval: TaskResetInterval = .daily
     @State private var groupTaskInterval: TaskResetInterval = .daily
-    
-    @State private var selectedInterval: TaskResetInterval = .daily
-
-
-
 
     var body: some View {
         List {
-            // MARK: - Eigene Aufgaben
-            Section(header:
-                HStack {
-                    Text("Meine Aufgaben")
-                        .font(.headline)
-                    Spacer()
+            personalTasksSection
+            groupTasksSection
+        }
+        .listStyle(.insetGrouped)
+        .onAppear(perform: loadData)
+        .sheet(item: $activeSheet, content: { sheet in
+            sheetView(for: sheet)
+        })
+    }
+
+    // MARK: - Eigene Aufgaben
+    var personalTasksSection: some View {
+        Section(header:
+            HStack {
+                Text("Meine Aufgaben").font(.headline)
+                Spacer()
                 Button {
                     newTaskTitle = ""
-                    selectedInterval = .daily
+                    personalTaskInterval = .daily
                     activeSheet = .personal
                 } label: {
                     Label("Neue Aufgabe", systemImage: "plus.circle")
                 }
-
-                }
-            ) {
-                if taskViewModel.personalTasks.isEmpty {
-                    Text("Noch keine eigenen Aufgaben.")
-                        .foregroundColor(.gray)
-                } else {
-                    ForEach(taskViewModel.personalTasks) { task in
-                        HStack {
-                            Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
-                                .foregroundColor(task.isDone ? .green : .gray)
-                                .onTapGesture {
-                                    Task {
-                                        await taskViewModel.toggleTaskDone(task)
-                                    }
-                                }
-                            Text(task.title)
-                                .strikethrough(task.isDone)
-                                .foregroundColor(task.isDone ? .gray : .primary)
-                            Spacer()
-                            Button {
-                                editingTask = task
-                            } label: {
-                                Image(systemName: "pencil")
-                                    .foregroundColor(.blue)
-                            }
-                            .buttonStyle(BorderlessButtonStyle())
-
-                        }
-                        .padding(.vertical, 4)
-                        .swipeActions {
-                            Button(role: .destructive) {
-                                Task {
-                                    await taskViewModel.deleteTask(task)
-                                }
-                            } label: {
-                                Label("Löschen", systemImage: "trash")
-                            }
-                        }
-                    }
+            }
+        ) {
+            if taskViewModel.personalTasks.isEmpty {
+                Text("Noch keine eigenen Aufgaben.").foregroundColor(.gray)
+            } else {
+                ForEach(taskViewModel.personalTasks) { task in
+                    taskRow(task: task)
                 }
             }
+        }
+    }
 
-            // MARK: - Gruppenaufgaben
-            Section(header: Text("Gruppenaufgaben").font(.headline)) {
-                if groupViewModel.groups.isEmpty {
-                    Text("Du bist noch keiner Gruppe beigetreten.")
-                        .foregroundColor(.gray)
-                } else {
-                    ForEach(groupViewModel.groups) { group in
-                        Section(header:
-                            HStack {
-                                Text(group.name)
-                                    .font(.subheadline)
-                                    .bold()
-                                Spacer()
+    // MARK: - Gruppenaufgaben
+    var groupTasksSection: some View {
+        Section(header: Text("Gruppenaufgaben").font(.headline)) {
+            if groupViewModel.groups.isEmpty {
+                Text("Du bist noch keiner Gruppe beigetreten.").foregroundColor(.gray)
+            } else {
+                ForEach(groupViewModel.groups) { group in
+                    Section(header:
+                        HStack {
+                            Text(group.name).bold()
+                            Spacer()
                             Button {
                                 newTaskTitle = ""
-                                selectedInterval = .daily
+                                groupTaskInterval = .daily
                                 activeSheet = .group(group)
                             } label: {
                                 Image(systemName: "plus.circle")
                             }
-
-                            }
-                        ) {
-                            let tasks = taskViewModel.groupedTasks[group.name] ?? []
-                            if tasks.isEmpty {
-                                Text("Keine Aufgaben in dieser Gruppe.")
-                                    .foregroundColor(.gray)
-                            } else {
-                                ForEach(tasks) { task in
-                                    HStack {
-                                        Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
-                                            .foregroundColor(task.isDone ? .green : .gray)
-                                            .onTapGesture {
-                                                Task {
-                                                    await taskViewModel.toggleTaskDone(task)
-                                                }
-                                            }
-                                        Text(task.title)
-                                            .strikethrough(task.isDone)
-                                            .foregroundColor(task.isDone ? .gray : .primary)
-                                        Spacer()
-                                        Button {
-                                            
-                                            activeSheet = .edit(task)
-                                            
-                                        } label: {
-                                            Image(systemName: "pencil")
-                                                .foregroundColor(.blue)
-                                        }
-                                        .buttonStyle(BorderlessButtonStyle())
-                                    }
-                                    .padding(.vertical, 4)
-                                    .swipeActions {
-                                        if task.ownerId == taskViewModel.currentUserId {
-                                            Button(role: .destructive) {
-                                                Task {
-                                                    await taskViewModel.deleteTask(task)
-                                                }
-                                            } label: {
-                                                Label("Löschen", systemImage: "trash")
-                                            }
-                                        }
-                                    }
-                                }
+                        }
+                    ) {
+                        let tasks = taskViewModel.groupedTasks[group.name] ?? []
+                        if tasks.isEmpty {
+                            Text("Keine Aufgaben in dieser Gruppe.").foregroundColor(.gray)
+                        } else {
+                            ForEach(tasks) { task in
+                                taskRow(task: task)
                             }
                         }
                     }
                 }
             }
         }
-        .listStyle(.insetGrouped)
-        .onAppear {
-            Task {
-                do {
-                    try await taskViewModel.addDefaultTaskIfNeeded()
-                    try await groupViewModel.fetchGroupsForCurrentUser()
-                    try await taskViewModel.fetchTasks(groups: groupViewModel.groups)
-                } catch {
-                    print("Fehler beim Laden: \(error.localizedDescription)")
+    }
+
+    // MARK: - Aufgaben-Row
+    func taskRow(task: TaskItem) -> some View {
+        HStack {
+            Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
+                .foregroundColor(task.isDone ? .green : .gray)
+                .onTapGesture {
+                    Task {
+                        await taskViewModel.toggleTaskDone(task)
+                    }
+                }
+
+            Text(task.title)
+                .strikethrough(task.isDone)
+                .foregroundColor(task.isDone ? .gray : .primary)
+
+            Spacer()
+
+            Button {
+                activeSheet = .edit(task)
+            } label: {
+                Image(systemName: "pencil")
+                    .foregroundColor(.blue)
+            }
+            .buttonStyle(BorderlessButtonStyle())
+        }
+        .padding(.vertical, 4)
+        .swipeActions {
+            if task.ownerId == taskViewModel.currentUserId {
+                Button(role: .destructive) {
+                    Task {
+                        await taskViewModel.deleteTask(task)
+                    }
+                } label: {
+                    Label("Löschen", systemImage: "trash")
                 }
             }
         }
+    }
 
-        .sheet(item: $activeSheet) { sheet in
-            switch sheet {
-            case .personal:
-                TaskSheetView(
-                    title: "Eigene Aufgabe",
-                    taskTitle: $newTaskTitle,
-                    selectedInterval: $selectedInterval,
-                    onCancel: { activeSheet = nil },
-                    onConfirm: {
-                        Task {
-                            await taskViewModel.addPersonalTask(title: newTaskTitle, interval: selectedInterval)
-                            try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
-                            activeSheet = nil
-                        }
+    // MARK: - Sheet Handling 
+    @ViewBuilder
+    func sheetView(for sheet: TaskSheetType) -> some View {
+        switch sheet {
+        case .personal:
+            TaskSheetView(
+                title: "Eigene Aufgabe",
+                taskTitle: $newTaskTitle,
+                selectedInterval: $personalTaskInterval,
+                onCancel: { activeSheet = nil },
+                onConfirm: {
+                    Task {
+                        await taskViewModel.addPersonalTask(title: newTaskTitle, interval: personalTaskInterval)
+                        try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                        activeSheet = nil
                     }
-                )
+                }
+            )
 
-            case .group(let group):
-                TaskSheetView(
-                    title: "Neue Aufgabe für \(group.name)",
-                    taskTitle: $newTaskTitle,
-                    selectedInterval: $selectedInterval,
-                    onCancel: { activeSheet = nil },
-                    onConfirm: {
-                        Task {
-                            await taskViewModel.addGroupTask(title: newTaskTitle, group: group, interval: selectedInterval)
-                            try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
-                            activeSheet = nil
-                        }
+        case .group(let group):
+            TaskSheetView(
+                title: "Neue Aufgabe für \(group.name)",
+                taskTitle: $newTaskTitle,
+                selectedInterval: $groupTaskInterval,
+                onCancel: { activeSheet = nil },
+                onConfirm: {
+                    Task {
+                        await taskViewModel.addGroupTask(title: newTaskTitle, group: group, interval: groupTaskInterval)
+                        try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                        activeSheet = nil
                     }
-                )
+                }
+            )
 
-            case .edit(let task):
-                EditTaskSheet(task: task) { updatedTitle, updatedInterval in
+        case .edit(let task):
+            EditTaskSheetWithInterval(
+                task: task,
+                onSave: { updatedTitle, updatedInterval in
                     Task {
                         await taskViewModel.updateTask(task: task, newTitle: updatedTitle, newInterval: updatedInterval)
                         try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
                         activeSheet = nil
                     }
+                },
+                onCancel: {
+                    activeSheet = nil
                 }
+            )
+        }
+    }
+
+    // MARK: - Laden der Daten
+    func loadData() {
+        Task {
+            do {
+                try await taskViewModel.addDefaultTaskIfNeeded()
+                try await groupViewModel.fetchGroupsForCurrentUser()
+                try await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+            } catch {
+                print("Fehler beim Laden: \(error.localizedDescription)")
             }
         }
-
-
-        
-        
-       
-        
-
     }
 }
 
