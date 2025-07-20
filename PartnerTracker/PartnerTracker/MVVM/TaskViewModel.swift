@@ -299,20 +299,19 @@ class TaskViewModel: ObservableObject {
     }
 
     
-    func updateTaskTitle(task: TaskItem, newTitle: String) async {
-        let taskId = task.id
-
+    func updateTask(task: TaskItem, newTitle: String, newInterval: TaskResetInterval) async {
         do {
-            try await db.collection("tasks").document(taskId).updateData([
-                "title": newTitle
+            try await db.collection("tasks").document(task.id).updateData([
+                "title": newTitle,
+                "resetInterval": newInterval.rawValue
             ])
-            
-            // Lokale Daten aktualisieren
+
             if let groupId = task.groupId {
                 // Gruppenaufgabe aktualisieren
-                if var tasks = groupedTasks[groupId] {
+                if var tasks = groupedTasks.first(where: { $0.key == groupId })?.value {
                     if let index = tasks.firstIndex(where: { $0.id == task.id }) {
                         tasks[index].title = newTitle
+                        tasks[index].resetInterval = newInterval
                         groupedTasks[groupId] = tasks
                     }
                 }
@@ -320,12 +319,15 @@ class TaskViewModel: ObservableObject {
                 // Persönliche Aufgabe aktualisieren
                 if let index = personalTasks.firstIndex(where: { $0.id == task.id }) {
                     personalTasks[index].title = newTitle
+                    personalTasks[index].resetInterval = newInterval
                 }
             }
+
         } catch {
             print("Fehler beim Aktualisieren der Aufgabe: \(error.localizedDescription)")
         }
     }
+
 
 
     func checkAndResetTaskIfNeeded(_ task: TaskItem) async -> TaskItem {
