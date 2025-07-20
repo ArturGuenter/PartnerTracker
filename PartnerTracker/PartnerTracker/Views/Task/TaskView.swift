@@ -212,16 +212,7 @@ struct TaskView: View {
 
         
         
-        // MARK: - Sheet Aufagabe Bearbeiten
-        .sheet(item: $editingTask) { task in
-            EditTaskSheet(task: task) { updatedTitle in
-                Task {
-                    await taskViewModel.updateTaskTitle(task: task, newTitle: updatedTitle)
-                    try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
-                }
-                editingTask = nil
-            }
-        }
+       
         
 
     }
