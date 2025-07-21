@@ -15,5 +15,10 @@ struct TaskItem: Identifiable, Codable {
     let createdAt: Date
     var resetInterval: TaskResetInterval
     var lastResetAt: Date
+
+    var completedBy: [String] = []
+
+    
 }
+
 
