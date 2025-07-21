@@ -211,8 +211,10 @@ class TaskViewModel: ObservableObject {
             groupId: group.id,
             createdAt: Date(),
             resetInterval: interval,
-            lastResetAt: Date()
+            lastResetAt: Date(),
+            completedBy: []
         )
+
 
         do {
             try await db.collection("tasks").document(newTask.id).setData([
@@ -223,10 +225,11 @@ class TaskViewModel: ObservableObject {
                 "groupId": group.id,
                 "createdAt": Timestamp(date: newTask.createdAt),
                 "resetInterval": newTask.resetInterval.rawValue,
-                "lastResetAt": Timestamp(date: newTask.lastResetAt)
+                "lastResetAt": Timestamp(date: newTask.lastResetAt),
+                "completedBy": []
             ])
 
-            // ✅ Nur diese Gruppe neu laden
+            
             let groupSnapshot = try await db.collection("tasks")
                 .whereField("groupId", isEqualTo: group.id)
                 .getDocuments()
