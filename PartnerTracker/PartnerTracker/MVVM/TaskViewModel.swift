@@ -373,6 +373,40 @@ class TaskViewModel: ObservableObject {
             return task
         }
     }
+    
+    
+    func toggleGroupTaskDone(_ task: TaskItem, in group: Group) async {
+        guard let uid = currentUserId else { return }
+
+        var updatedTask = task
+
+        if task.completedBy.contains(uid) {
+            
+            updatedTask.completedBy.removeAll { $0 == uid }
+        } else {
+            updatedTask.completedBy.append(uid)
+        }
+
+        do {
+            try await db.collection("tasks").document(task.id).updateData([
+                "completedBy": updatedTask.completedBy
+            ])
+
+            
+            for (groupName, tasks) in groupedTasks {
+                if let index = tasks.firstIndex(where: { $0.id == task.id }) {
+                    var tasksCopy = tasks
+                    tasksCopy[index].completedBy = updatedTask.completedBy
+                    groupedTasks[groupName] = tasksCopy
+                    break
+                }
+            }
+
+        } catch {
+            print("Fehler beim Aktualisieren von completedBy: \(error)")
+        }
+    }
+
 
     
 }
