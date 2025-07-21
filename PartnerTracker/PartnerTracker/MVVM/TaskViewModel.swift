@@ -147,7 +147,8 @@ class TaskViewModel: ObservableObject {
             groupId: nil,
             createdAt: Date(),
             resetInterval: TaskResetInterval.daily,
-            lastResetAt: Date()
+            lastResetAt: Date(),
+            completedBy: []
         )
         
         try? await db.collection("tasks").document(defaultTask.id).setData([
@@ -158,7 +159,8 @@ class TaskViewModel: ObservableObject {
             "groupId": NSNull(),
             "createdAt": Timestamp(date: defaultTask.createdAt),
             "resetInterval": defaultTask.resetInterval.rawValue,
-            "lastResetAt": Timestamp(date: defaultTask.lastResetAt)
+            "lastResetAt": Timestamp(date: defaultTask.lastResetAt),
+            "completedBy": []
             
         ])
     }
@@ -177,7 +179,8 @@ class TaskViewModel: ObservableObject {
                 groupId: nil,
                 createdAt: Date(),
                 resetInterval: interval,
-                lastResetAt: Date()
+                lastResetAt: Date(),
+                completedBy: []
             )
 
         do {
@@ -189,7 +192,8 @@ class TaskViewModel: ObservableObject {
                 "groupId": NSNull(),
                 "createdAt": Timestamp(date: newTask.createdAt),
                 "resetInterval": newTask.resetInterval.rawValue,
-                "lastResetAt": Timestamp(date: newTask.lastResetAt)
+                "lastResetAt": Timestamp(date: newTask.lastResetAt),
+                "completedBy": []
             ])
             try await fetchTasks(groups: [])
         } catch {
