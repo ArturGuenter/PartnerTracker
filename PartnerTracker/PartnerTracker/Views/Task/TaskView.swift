@@ -89,42 +89,60 @@ struct TaskView: View {
 
     // MARK: - Aufgaben-Row
     func taskRow(task: TaskItem) -> some View {
-        HStack {
-            Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
-                .foregroundColor(task.isDone ? .green : .gray)
-                .onTapGesture {
-                    Task {
-                        await taskViewModel.toggleTaskDone(task)
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(task.isDone ? .green : .gray)
+                    .onTapGesture {
+                        Task {
+                            await taskViewModel.toggleTaskDone(task)
+                        }
                     }
-                }
 
-            Text(task.title)
-                .strikethrough(task.isDone)
-                .foregroundColor(task.isDone ? .gray : .primary)
+                Text(task.title)
+                    .strikethrough(task.isDone)
+                    .foregroundColor(task.isDone ? .gray : .primary)
 
-            Spacer()
+                Spacer()
 
-            Button {
-                activeSheet = .edit(task)
-            } label: {
-                Image(systemName: "pencil")
-                    .foregroundColor(.blue)
-            }
-            .buttonStyle(BorderlessButtonStyle())
-        }
-        .padding(.vertical, 4)
-        .swipeActions {
-            if task.ownerId == taskViewModel.currentUserId {
-                Button(role: .destructive) {
-                    Task {
-                        await taskViewModel.deleteTask(task)
-                    }
+                Button {
+                    activeSheet = .edit(task)
                 } label: {
-                    Label("Löschen", systemImage: "trash")
+                    Image(systemName: "pencil")
+                        .foregroundColor(.blue)
                 }
+                .buttonStyle(BorderlessButtonStyle())
+            }
+            .padding(.vertical, 4)
+            .swipeActions {
+                if task.ownerId == taskViewModel.currentUserId {
+                    Button(role: .destructive) {
+                        Task {
+                            await taskViewModel.deleteTask(task)
+                        }
+                    } label: {
+                        Label("Löschen", systemImage: "trash")
+                    }
+                }
+            }
+
+            // MARK: - Kreise mit Initialen für Gruppenaufgaben
+            if let groupId = task.groupId,
+               let group = groupViewModel.groups.first(where: { $0.id == groupId }) {
+                HStack(spacing: 8) {
+                    ForEach(group.memberIds, id: \.self) { memberId in
+                        GroupMemberCircle(
+                            memberId: memberId,
+                            completed: task.completedBy.contains(memberId),
+                            groupViewModel: groupViewModel
+                        )
+                    }
+                }
+                .padding(.top, 4)
             }
         }
     }
+
 
     // MARK: - Sheet Handling 
     @ViewBuilder
