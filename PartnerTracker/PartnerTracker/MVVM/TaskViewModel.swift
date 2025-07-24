@@ -250,38 +250,6 @@ class TaskViewModel: ObservableObject {
     }
 
 
-    func toggleTaskDone(_ task: TaskItem) async {
-        let newStatus = !task.isDone
-
-        do {
-            try await db.collection("tasks").document(task.id).updateData([
-                "isDone": newStatus
-            ])
-
-            if task.groupId == nil {
-                if let index = personalTasks.firstIndex(where: { $0.id == task.id }) {
-                    var updatedTask = personalTasks[index]
-                    updatedTask.isDone = newStatus
-                    personalTasks[index] = updatedTask
-                }
-            } else {
-                for (groupName, tasks) in groupedTasks {
-                    if let index = tasks.firstIndex(where: { $0.id == task.id }) {
-                        var updatedTask = tasks[index]
-                        updatedTask.isDone = newStatus
-                        var updatedTasks = tasks
-                        updatedTasks[index] = updatedTask
-                        groupedTasks[groupName] = updatedTasks
-                        break
-                    }
-                }
-            }
-
-        } catch {
-            print("Fehler beim Umschalten des Aufgabenstatus: \(error)")
-        }
-    }
-    
     
     func deleteTask(_ task: TaskItem) async {
         do {
@@ -384,7 +352,7 @@ class TaskViewModel: ObservableObject {
 
     }
     
-    
+    /*
     func toggleGroupTaskDone(_ task: TaskItem, in group: Group) async {
         guard let uid = currentUserId else { return }
 
@@ -417,8 +385,41 @@ class TaskViewModel: ObservableObject {
         }
     }
 
-
+*/
     
+    /*
+        func toggleTaskDone(_ task: TaskItem) async {
+            let newStatus = !task.isDone
+
+            do {
+                try await db.collection("tasks").document(task.id).updateData([
+                    "isDone": newStatus
+                ])
+
+                if task.groupId == nil {
+                    if let index = personalTasks.firstIndex(where: { $0.id == task.id }) {
+                        var updatedTask = personalTasks[index]
+                        updatedTask.isDone = newStatus
+                        personalTasks[index] = updatedTask
+                    }
+                } else {
+                    for (groupName, tasks) in groupedTasks {
+                        if let index = tasks.firstIndex(where: { $0.id == task.id }) {
+                            var updatedTask = tasks[index]
+                            updatedTask.isDone = newStatus
+                            var updatedTasks = tasks
+                            updatedTasks[index] = updatedTask
+                            groupedTasks[groupName] = updatedTasks
+                            break
+                        }
+                    }
+                }
+
+            } catch {
+                print("Fehler beim Umschalten des Aufgabenstatus: \(error)")
+            }
+        }
+        */
 }
 
 
