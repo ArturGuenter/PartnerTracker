@@ -22,10 +22,12 @@ class TaskViewModel: ObservableObject {
     }
     
     var overallCompletionRate: Double {
-        let allTasks = personalTasks + groupedTasks.flatMap { $0.value }
-        guard !allTasks.isEmpty else { return 0.0 }
-        return Double(allTasks.filter { $0.isDone }.count) / Double(allTasks.count)
+        let total = totalTaskCount
+        if total == 0 { return 0 }
+
+        return Double(doneTaskCount) / Double(total)
     }
+
 
     var personalCompletionRate: Double {
         guard !personalTasks.isEmpty else { return 0.0 }
@@ -33,14 +35,16 @@ class TaskViewModel: ObservableObject {
     }
     
     var groupCompletionRate: Double {
-        let groupTasks = groupedTasks.flatMap { $0.value }
-        guard !groupTasks.isEmpty else { return 0.0 }
-        return Double(groupTasks.filter { $0.isDone }.count) / Double(groupTasks.count)
+        let total = groupedTasks.values.flatMap { $0 }.count
+        if total == 0 { return 0 }
+        return Double(doneGroupTaskCount) / Double(total)
     }
+
     
     var doneTaskCount: Int {
-        (personalTasks + groupedTasks.flatMap { $0.value }).filter { $0.isDone }.count
+        donePersonalTaskCount + doneGroupTaskCount
     }
+
 
     var totalTaskCount: Int {
         personalTasks.count + groupedTasks.flatMap { $0.value }.count
