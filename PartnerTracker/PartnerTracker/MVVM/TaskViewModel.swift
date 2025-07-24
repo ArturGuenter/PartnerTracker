@@ -352,6 +352,53 @@ class TaskViewModel: ObservableObject {
 
     }
     
+   
+
+    func toggleTaskStatus(_ task: TaskItem, group: Group?) async {
+        guard let uid = currentUserId else { return }
+
+        let taskRef = db.collection("tasks").document(task.id)
+
+        if let group = group {
+            // Gruppenaufgabe
+            var updatedCompletedBy = task.completedBy
+
+            if updatedCompletedBy.contains(uid) {
+                updatedCompletedBy.removeAll { $0 == uid }
+            } else {
+                updatedCompletedBy.append(uid)
+            }
+
+            do {
+                try await taskRef.updateData([
+                    "completedBy": updatedCompletedBy
+                ])
+                if var tasks = groupedTasks[group.name],
+                   let index = tasks.firstIndex(where: { $0.id == task.id }) {
+                    tasks[index].completedBy = updatedCompletedBy
+                    groupedTasks[group.name] = tasks
+                }
+            } catch {
+                print("Fehler beim Aktualisieren der Gruppenaufgabe: \(error)")
+            }
+
+        } else {
+            // Persönliche Aufgabe
+            let newStatus = !task.isDone
+            do {
+                try await taskRef.updateData([
+                    "isDone": newStatus
+                ])
+                if let index = personalTasks.firstIndex(where: { $0.id == task.id }) {
+                    personalTasks[index].isDone = newStatus
+                }
+            } catch {
+                print("Fehler beim Aktualisieren der persönlichen Aufgabe: \(error)")
+            }
+        }
+    }
+
+    
     /*
     func toggleGroupTaskDone(_ task: TaskItem, in group: Group) async {
         guard let uid = currentUserId else { return }
