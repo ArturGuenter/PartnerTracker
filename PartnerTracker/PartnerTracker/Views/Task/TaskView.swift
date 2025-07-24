@@ -91,20 +91,31 @@ struct TaskView: View {
     func taskRow(task: TaskItem) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Image(systemName: task.isDone ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(task.isDone ? .green : .gray)
+                // Checkbox-Icon und Farbe
+                let isGroupTask = task.groupId != nil
+                let currentUserId = taskViewModel.currentUserId
+                let userHasCompleted = isGroupTask && currentUserId != nil && task.completedBy.contains(currentUserId!)
+                let showCheckmark = isGroupTask ? userHasCompleted : task.isDone
+                let iconName = showCheckmark ? "checkmark.circle.fill" : "circle"
+                let iconColor: Color = showCheckmark ? .green : .gray
+
+                Image(systemName: iconName)
+                    .foregroundColor(iconColor)
                     .onTapGesture {
                         Task {
-                            await taskViewModel.toggleTaskDone(task)
+                            let group = groupViewModel.groups.first(where: { $0.id == task.groupId })
+                            await taskViewModel.toggleTaskStatus(task, group: group)
                         }
                     }
 
+                // Titel
                 Text(task.title)
-                    .strikethrough(task.isDone)
-                    .foregroundColor(task.isDone ? .gray : .primary)
+                    .strikethrough(showCheckmark)
+                    .foregroundColor(showCheckmark ? .gray : .primary)
 
                 Spacer()
 
+                // Bearbeiten-Button
                 Button {
                     activeSheet = .edit(task)
                 } label: {
@@ -126,7 +137,7 @@ struct TaskView: View {
                 }
             }
 
-            // MARK: - Kreise mit Initialen für Gruppenaufgaben
+            // Initialen-Kreise für Gruppenmitglieder
             if let groupId = task.groupId,
                let group = groupViewModel.groups.first(where: { $0.id == groupId }) {
                 HStack(spacing: 8) {
@@ -142,6 +153,9 @@ struct TaskView: View {
             }
         }
     }
+
+
+
 
 
     // MARK: - Sheet Handling 
