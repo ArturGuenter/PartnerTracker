@@ -51,8 +51,16 @@ class TaskViewModel: ObservableObject {
     }
 
     var doneGroupTaskCount: Int {
-        groupedTasks.flatMap { $0.value }.filter { $0.isDone }.count
+        guard let userId = currentUserId else { return 0 }
+
+        return groupedTasks.values
+            .flatMap { $0 }
+            .filter { task in
+                task.completedBy.contains(userId)
+            }
+            .count
     }
+
 
     
     

@@ -78,8 +78,9 @@ struct TaskView: View {
                             Text("Keine Aufgaben in dieser Gruppe.").foregroundColor(.gray)
                         } else {
                             ForEach(tasks) { task in
-                                taskRow(task: task)
+                                taskRow(task: task, group: group)
                             }
+
                         }
                     }
                 }
@@ -88,34 +89,31 @@ struct TaskView: View {
     }
 
     // MARK: - Aufgaben-Row
-    func taskRow(task: TaskItem) -> some View {
+    func taskRow(task: TaskItem, group: Group? = nil) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                // Checkbox-Icon und Farbe
                 let isGroupTask = task.groupId != nil
                 let currentUserId = taskViewModel.currentUserId
                 let userHasCompleted = isGroupTask && currentUserId != nil && task.completedBy.contains(currentUserId!)
                 let showCheckmark = isGroupTask ? userHasCompleted : task.isDone
                 let iconName = showCheckmark ? "checkmark.circle.fill" : "circle"
-                let iconColor: Color = showCheckmark ? .green : .gray
+                let iconColor = showCheckmark ? Color.green : Color.gray
 
                 Image(systemName: iconName)
                     .foregroundColor(iconColor)
                     .onTapGesture {
                         Task {
-                            let group = groupViewModel.groups.first(where: { $0.id == task.groupId })
-                            await taskViewModel.toggleTaskStatus(task, group: group)
+                            let actualGroup = group ?? groupViewModel.groups.first(where: { $0.id == task.groupId })
+                            await taskViewModel.toggleTaskStatus(task, group: actualGroup)
                         }
                     }
 
-                // Titel
                 Text(task.title)
                     .strikethrough(showCheckmark)
                     .foregroundColor(showCheckmark ? .gray : .primary)
 
                 Spacer()
 
-                // Bearbeiten-Button
                 Button {
                     activeSheet = .edit(task)
                 } label: {
@@ -137,7 +135,6 @@ struct TaskView: View {
                 }
             }
 
-            // Initialen-Kreise für Gruppenmitglieder
             if let groupId = task.groupId,
                let group = groupViewModel.groups.first(where: { $0.id == groupId }) {
                 HStack(spacing: 8) {
@@ -153,6 +150,7 @@ struct TaskView: View {
             }
         }
     }
+
 
 
 
