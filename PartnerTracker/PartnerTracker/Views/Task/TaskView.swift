@@ -44,10 +44,18 @@ struct TaskView: View {
             }
         ) {
             if taskViewModel.personalTasks.isEmpty {
-                Text("Noch keine eigenen Aufgaben.").foregroundColor(.gray)
+                Text("Noch keine eigenen Aufgaben.")
+                    .foregroundColor(.gray)
             } else {
-                ForEach(taskViewModel.personalTasks) { task in
-                    taskRow(task: task)
+                ForEach(TaskResetInterval.allCases) { interval in
+                    let tasks = taskViewModel.personalTasks.filter { $0.resetInterval == interval }
+                    if !tasks.isEmpty {
+                        Section(header: Text(intervalHeader(interval))) {
+                            ForEach(tasks) { task in
+                                taskRow(task: task)
+                            }
+                        }
+                    }
                 }
             }
         }
