@@ -67,7 +67,14 @@ class TaskViewModel: ObservableObject {
 
 
     
-    
+    func personalTasks(for interval: TaskResetInterval) -> [TaskItem] {
+           personalTasks.filter { $0.resetInterval == interval }
+       }
+
+       
+       func groupTasks(for groupName: String, interval: TaskResetInterval) -> [TaskItem] {
+           (groupedTasks[groupName] ?? []).filter { $0.resetInterval == interval }
+       }
     
 
     func fetchTasks(groups: [Group]) async throws {
