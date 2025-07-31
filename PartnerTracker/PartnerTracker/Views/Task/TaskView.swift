@@ -65,7 +65,8 @@ struct TaskView: View {
     var groupTasksSection: some View {
         Section(header: Text("Gruppenaufgaben").font(.headline)) {
             if groupViewModel.groups.isEmpty {
-                Text("Du bist noch keiner Gruppe beigetreten.").foregroundColor(.gray)
+                Text("Du bist noch keiner Gruppe beigetreten.")
+                    .foregroundColor(.gray)
             } else {
                 ForEach(groupViewModel.groups) { group in
                     Section(header:
@@ -83,12 +84,19 @@ struct TaskView: View {
                     ) {
                         let tasks = taskViewModel.groupedTasks[group.name] ?? []
                         if tasks.isEmpty {
-                            Text("Keine Aufgaben in dieser Gruppe.").foregroundColor(.gray)
+                            Text("Keine Aufgaben in dieser Gruppe.")
+                                .foregroundColor(.gray)
                         } else {
-                            ForEach(tasks) { task in
-                                taskRow(task: task, group: group)
+                            ForEach(TaskResetInterval.allCases) { interval in
+                                let filteredTasks = tasks.filter { $0.resetInterval == interval }
+                                if !filteredTasks.isEmpty {
+                                    Section(header: Text(intervalHeader(interval))) {
+                                        ForEach(filteredTasks) { task in
+                                            taskRow(task: task, group: group)
+                                        }
+                                    }
+                                }
                             }
-
                         }
                     }
                 }
