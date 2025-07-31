@@ -104,6 +104,14 @@ struct TaskView: View {
         }
     }
 
+    func intervalHeader(_ interval: TaskResetInterval) -> String {
+        switch interval {
+        case .daily: return "Täglich"
+        case .weekly: return "Wöchentlich"
+        case .monthly: return "Monatlich"
+        }
+    }
+    
     // MARK: - Aufgaben-Row
     func taskRow(task: TaskItem, group: Group? = nil) -> some View {
         VStack(alignment: .leading, spacing: 6) {
