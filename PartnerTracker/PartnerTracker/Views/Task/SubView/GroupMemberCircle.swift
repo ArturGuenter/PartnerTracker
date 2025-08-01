@@ -12,18 +12,33 @@ struct GroupMemberCircle: View {
     let completed: Bool
     @ObservedObject var groupViewModel: GroupViewModel
 
+    @State private var showPopover = false
+
     var body: some View {
         let user = groupViewModel.userCache[memberId]
-        let initial = user.map { String($0.name.prefix(1)).uppercased() } ?? "?"
+        let initial = user?.name.first.map { String($0) } ?? "?"
 
-        return Text(initial)
-            .font(.caption)
-            .frame(width: 28, height: 28)
-            .background(completed ? Color.green : Color.gray.opacity(0.2))
-            .foregroundColor(completed ? .white : .primary)
-            .clipShape(Circle())
+        Circle()
+            .fill(completed ? Color.green : Color.gray.opacity(0.4))
+            .frame(width: 32, height: 32)
+            .overlay(
+                Text(initial)
+                    .font(.caption)
+                    .foregroundColor(.white)
+            )
+            .onLongPressGesture(minimumDuration: 0.1, pressing: { pressing in
+                withAnimation {
+                    showPopover = pressing
+                }
+            }, perform: {})
+            .popover(isPresented: $showPopover) {
+                Text(user?.name ?? "Unbekannt")
+                    .padding()
+                    .frame(width: 150)
+            }
     }
 }
+
 
 
 #Preview {
