@@ -377,24 +377,31 @@ class TaskViewModel: ObservableObject {
         guard let uid = currentUserId else { return }
 
         let taskRef = db.collection("tasks").document(task.id)
+        let today = Calendar.current.startOfDay(for: Date())
 
         if let group = group {
             // Gruppenaufgabe
             var updatedCompletedBy = task.completedBy
+            var updatedCompletionDates = task.completionDates
 
             if updatedCompletedBy.contains(uid) {
                 updatedCompletedBy.removeAll { $0 == uid }
+                // Optional: Letzten Eintrag von heute entfernen
+                updatedCompletionDates.removeAll { Calendar.current.isDate($0, inSameDayAs: today) }
             } else {
                 updatedCompletedBy.append(uid)
+                updatedCompletionDates.append(today)
             }
 
             do {
                 try await taskRef.updateData([
-                    "completedBy": updatedCompletedBy
+                    "completedBy": updatedCompletedBy,
+                    "completionDates": updatedCompletionDates.map { Timestamp(date: $0) }
                 ])
                 if var tasks = groupedTasks[group.name],
                    let index = tasks.firstIndex(where: { $0.id == task.id }) {
                     tasks[index].completedBy = updatedCompletedBy
+                    tasks[index].completionDates = updatedCompletionDates
                     groupedTasks[group.name] = tasks
                 }
             } catch {
@@ -404,12 +411,21 @@ class TaskViewModel: ObservableObject {
         } else {
             // Persönliche Aufgabe
             let newStatus = !task.isDone
+            var updatedCompletionDates = task.completionDates
+            if newStatus {
+                updatedCompletionDates.append(today)
+            } else {
+                updatedCompletionDates.removeAll { Calendar.current.isDate($0, inSameDayAs: today) }
+            }
+
             do {
                 try await taskRef.updateData([
-                    "isDone": newStatus
+                    "isDone": newStatus,
+                    "completionDates": updatedCompletionDates.map { Timestamp(date: $0) }
                 ])
                 if let index = personalTasks.firstIndex(where: { $0.id == task.id }) {
                     personalTasks[index].isDone = newStatus
+                    personalTasks[index].completionDates = updatedCompletionDates
                 }
             } catch {
                 print("Fehler beim Aktualisieren der persönlichen Aufgabe: \(error)")
@@ -417,75 +433,9 @@ class TaskViewModel: ObservableObject {
         }
     }
 
+
     
-    /*
-    func toggleGroupTaskDone(_ task: TaskItem, in group: Group) async {
-        guard let uid = currentUserId else { return }
-
-        var updatedTask = task
-
-        if task.completedBy.contains(uid) {
-            
-            updatedTask.completedBy.removeAll { $0 == uid }
-        } else {
-            updatedTask.completedBy.append(uid)
-        }
-
-        do {
-            try await db.collection("tasks").document(task.id).updateData([
-                "completedBy": updatedTask.completedBy
-            ])
-
-            
-            for (groupName, tasks) in groupedTasks {
-                if let index = tasks.firstIndex(where: { $0.id == task.id }) {
-                    var tasksCopy = tasks
-                    tasksCopy[index].completedBy = updatedTask.completedBy
-                    groupedTasks[groupName] = tasksCopy
-                    break
-                }
-            }
-
-        } catch {
-            print("Fehler beim Aktualisieren von completedBy: \(error)")
-        }
-    }
-
-*/
     
-    /*
-        func toggleTaskDone(_ task: TaskItem) async {
-            let newStatus = !task.isDone
-
-            do {
-                try await db.collection("tasks").document(task.id).updateData([
-                    "isDone": newStatus
-                ])
-
-                if task.groupId == nil {
-                    if let index = personalTasks.firstIndex(where: { $0.id == task.id }) {
-                        var updatedTask = personalTasks[index]
-                        updatedTask.isDone = newStatus
-                        personalTasks[index] = updatedTask
-                    }
-                } else {
-                    for (groupName, tasks) in groupedTasks {
-                        if let index = tasks.firstIndex(where: { $0.id == task.id }) {
-                            var updatedTask = tasks[index]
-                            updatedTask.isDone = newStatus
-                            var updatedTasks = tasks
-                            updatedTasks[index] = updatedTask
-                            groupedTasks[groupName] = updatedTasks
-                            break
-                        }
-                    }
-                }
-
-            } catch {
-                print("Fehler beim Umschalten des Aufgabenstatus: \(error)")
-            }
-        }
-        */
 }
 
 
