@@ -182,7 +182,8 @@ class TaskViewModel: ObservableObject {
             createdAt: Date(),
             resetInterval: TaskResetInterval.daily,
             lastResetAt: Date(),
-            completedBy: []
+            completedBy: [],
+            completionDates: []
         )
         
         try? await db.collection("tasks").document(defaultTask.id).setData([
@@ -215,7 +216,8 @@ class TaskViewModel: ObservableObject {
                 createdAt: Date(),
                 resetInterval: interval,
                 lastResetAt: Date(),
-                completedBy: []
+                completedBy: [],
+                completionDates: []
             )
 
         do {
@@ -252,7 +254,8 @@ class TaskViewModel: ObservableObject {
             createdAt: Date(),
             resetInterval: interval,
             lastResetAt: Date(),
-            completedBy: []
+            completedBy: [],
+            completionDates: []
         )
 
 
@@ -371,13 +374,15 @@ class TaskViewModel: ObservableObject {
                 try await db.collection("tasks").document(task.id).updateData([
                     "isDone": false,
                     "lastResetAt": Timestamp(date: now),
-                    "completedBy": []
+                    "completedBy": [],
+                    "completionDates": [] 
                 ])
 
                 var resetTask = task
                 resetTask.isDone = false
                 resetTask.lastResetAt = now
                 resetTask.completedBy = []
+                resetTask.completionDates = []
                 return resetTask
             } catch {
                 print("Fehler beim Zurücksetzen: \(error)")
