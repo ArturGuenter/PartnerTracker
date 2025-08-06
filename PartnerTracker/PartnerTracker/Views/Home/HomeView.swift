@@ -69,6 +69,15 @@ struct HomeView: View {
                             .accessibilityLabel("Abmelden")
                         }
                     }
+            
+                ActivityHeatmapView(data: taskViewModel.activitySummaryLast30Days)
+                    .frame(height: 160)
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(12)
+                    .padding()
+
+            
+            
                 }
         .onAppear {
             Task {
