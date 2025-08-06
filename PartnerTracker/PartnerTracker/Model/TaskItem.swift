@@ -17,7 +17,7 @@ struct TaskItem: Identifiable, Codable {
     var lastResetAt: Date
 
     var completedBy: [String] = []
-
+    var completionDates: [Date] = []
     
 }
 
