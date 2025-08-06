@@ -374,15 +374,13 @@ class TaskViewModel: ObservableObject {
                 try await db.collection("tasks").document(task.id).updateData([
                     "isDone": false,
                     "lastResetAt": Timestamp(date: now),
-                    "completedBy": [],
-                    "completionDates": [] 
+                    "completedBy": []
                 ])
 
                 var resetTask = task
                 resetTask.isDone = false
                 resetTask.lastResetAt = now
                 resetTask.completedBy = []
-                resetTask.completionDates = []
                 return resetTask
             } catch {
                 print("Fehler beim Zurücksetzen: \(error)")
@@ -391,6 +389,7 @@ class TaskViewModel: ObservableObject {
         } else {
             return task
         }
+
 
     }
     
