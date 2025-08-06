@@ -195,6 +195,7 @@ class TaskViewModel: ObservableObject {
             "resetInterval": defaultTask.resetInterval.rawValue,
             "lastResetAt": Timestamp(date: defaultTask.lastResetAt),
             "completedBy": [],
+            "completionDates": []
             
         ])
     }
@@ -227,7 +228,8 @@ class TaskViewModel: ObservableObject {
                 "createdAt": Timestamp(date: newTask.createdAt),
                 "resetInterval": newTask.resetInterval.rawValue,
                 "lastResetAt": Timestamp(date: newTask.lastResetAt),
-                "completedBy": []
+                "completedBy": [],
+                "completionDates": []
             ])
             try await fetchTasks(groups: [])
         } catch {
@@ -264,7 +266,8 @@ class TaskViewModel: ObservableObject {
                 "createdAt": Timestamp(date: newTask.createdAt),
                 "resetInterval": newTask.resetInterval.rawValue,
                 "lastResetAt": Timestamp(date: newTask.lastResetAt),
-                "completedBy": []
+                "completedBy": [],
+                "completionDates": []
             ])
 
             
