@@ -65,6 +65,21 @@ class TaskViewModel: ObservableObject {
             .count
     }
 
+    
+    var activitySummaryLast30Days: [Date: Int] {
+            var summary: [Date: Int] = [:]
+            let allTasks = personalTasks + groupedTasks.flatMap { $0.value }
+            let calendar = Calendar.current
+
+            for task in allTasks {
+                for date in task.completionDates {
+                    let day = calendar.startOfDay(for: date)
+                    summary[day, default: 0] += 1
+                }
+            }
+            return summary
+        }
+    
 
     
     func personalTasks(for interval: TaskResetInterval) -> [TaskItem] {
@@ -179,7 +194,7 @@ class TaskViewModel: ObservableObject {
             "createdAt": Timestamp(date: defaultTask.createdAt),
             "resetInterval": defaultTask.resetInterval.rawValue,
             "lastResetAt": Timestamp(date: defaultTask.lastResetAt),
-            "completedBy": []
+            "completedBy": [],
             
         ])
     }
