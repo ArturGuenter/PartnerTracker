@@ -98,7 +98,7 @@ class TaskViewModel: ObservableObject {
             return
         }
 
-        await addDefaultTaskIfNeeded()
+        
 
         // Persönliche Aufgaben laden und resetten
         let personalSnapshot = try await db.collection("tasks")
@@ -161,45 +161,8 @@ class TaskViewModel: ObservableObject {
     }
 
 
-/*
-    func addDefaultTaskIfNeeded() async {
-        guard let uid = currentUserId else { return }
 
-        let snapshot = try? await db.collection("tasks")
-            .whereField("ownerId", isEqualTo: uid)
-            .getDocuments()
-        
-        guard let snapshot = snapshot, snapshot.isEmpty else {
-            return
-        }
-        
-        let defaultTask = TaskItem(
-            id: UUID().uuidString,
-            title: "App öffnen",
-            isDone: false,
-            ownerId: uid,
-            groupId: nil,
-            createdAt: Date(),
-            resetInterval: TaskResetInterval.daily,
-            lastResetAt: Date(),
-            completedBy: [],
-            completionDates: []
-        )
-        
-        try? await db.collection("tasks").document(defaultTask.id).setData([
-            "id": defaultTask.id,
-            "title": defaultTask.title,
-            "isDone": defaultTask.isDone,
-            "ownerId": uid,
-            "groupId": NSNull(),
-            "createdAt": Timestamp(date: defaultTask.createdAt),
-            "resetInterval": defaultTask.resetInterval.rawValue,
-            "lastResetAt": Timestamp(date: defaultTask.lastResetAt),
-            "completedBy": [],
-            "completionDates": []
-            
-        ])
-    }*/
+    
 
     func addPersonalTask(title: String, interval:  TaskResetInterval) async {
         guard let uid = currentUserId else {

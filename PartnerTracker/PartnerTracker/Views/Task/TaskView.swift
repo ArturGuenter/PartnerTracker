@@ -235,7 +235,7 @@ struct TaskView: View {
     func loadData() {
         Task {
             do {
-                try await taskViewModel.addDefaultTaskIfNeeded()
+                
                 try await groupViewModel.fetchGroupsForCurrentUser()
                 try await taskViewModel.fetchTasks(groups: groupViewModel.groups)
             } catch {
