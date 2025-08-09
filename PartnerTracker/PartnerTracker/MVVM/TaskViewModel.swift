@@ -161,7 +161,7 @@ class TaskViewModel: ObservableObject {
     }
 
 
-
+/*
     func addDefaultTaskIfNeeded() async {
         guard let uid = currentUserId else { return }
 
@@ -199,7 +199,7 @@ class TaskViewModel: ObservableObject {
             "completionDates": []
             
         ])
-    }
+    }*/
 
     func addPersonalTask(title: String, interval:  TaskResetInterval) async {
         guard let uid = currentUserId else {
