@@ -80,6 +80,7 @@ class TaskViewModel: ObservableObject {
             return summary
         }
     
+    @Published var completionHistory: [Date: Int] = [:]
 
     
     func personalTasks(for interval: TaskResetInterval) -> [TaskItem] {
@@ -419,6 +420,8 @@ class TaskViewModel: ObservableObject {
     }
 
 
+    
+    
     
     
 }
