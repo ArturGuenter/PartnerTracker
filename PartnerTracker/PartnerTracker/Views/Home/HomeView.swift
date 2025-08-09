@@ -74,6 +74,7 @@ struct HomeView: View {
                 do {
                     try await groupViewModel.fetchGroupsForCurrentUser()
                     try await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                    await taskViewModel.fetchCompletionHistory()
                 } catch {
                     print("Fehler beim Laden der Daten: \(error.localizedDescription)")
                 }
