@@ -447,12 +447,18 @@ class TaskViewModel: ObservableObject {
             if let data = snapshot.data()?["history"] as? [String: Int] {
                 let formatter = DateFormatter()
                 formatter.dateFormat = "yyyy-MM-dd"
-                completionHistory = data.compactMapKeys { formatter.date(from: $0) }
+                completionHistory = Dictionary(uniqueKeysWithValues:
+                    data.compactMap { (key, value) in
+                        guard let date = formatter.date(from: key) else { return nil }
+                        return (Calendar.current.startOfDay(for: date), value)
+                    }
+                )
             }
         } catch {
             print("Fehler beim Laden der Historie: \(error)")
         }
     }
+
 
     
     
