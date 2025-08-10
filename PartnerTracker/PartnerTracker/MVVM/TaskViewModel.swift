@@ -427,20 +427,26 @@ class TaskViewModel: ObservableObject {
     
     func incrementCompletionCount(for date: Date) async {
         guard let uid = currentUserId else { return }
-        let dayString = DateFormatter.localizedString(from: date, dateStyle: .short, timeStyle: .none)
 
-        completionHistory[date, default: 0] += 1
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let dateKey = formatter.string(from: date)
 
-        
-        let ref = db.collection("completionHistory").document(uid)
+        let historyRef = db.collection("users")
+            .document(uid)
+            .collection("completionHistory")
+            .document(dateKey)
+
         do {
-            try await ref.setData([
-                "history.\(dayString)": completionHistory[date]!
-            ], merge: true)
+            try await historyRef.setData(
+                ["count": FieldValue.increment(Int64(1))],
+                merge: true
+            )
         } catch {
-            print("Fehler beim Speichern der Historie: \(error)")
+            print("Fehler beim Hochzählen der Historie: \(error)")
         }
     }
+
 
     func fetchCompletionHistory() async {
         guard let uid = currentUserId else { return }
