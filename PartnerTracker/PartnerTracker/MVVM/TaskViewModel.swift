@@ -83,6 +83,8 @@ class TaskViewModel: ObservableObject {
     @Published var completionHistory: [Date: Int] = [:]
 
     
+
+    
     func personalTasks(for interval: TaskResetInterval) -> [TaskItem] {
            personalTasks.filter { $0.resetInterval == interval }
        }
