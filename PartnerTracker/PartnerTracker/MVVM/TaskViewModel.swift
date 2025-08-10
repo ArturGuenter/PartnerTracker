@@ -374,11 +374,11 @@ class TaskViewModel: ObservableObject {
 
             if updatedCompletedBy.contains(uid) {
                 updatedCompletedBy.removeAll { $0 == uid }
-                // Optional: Letzten Eintrag von heute entfernen
                 updatedCompletionDates.removeAll { Calendar.current.isDate($0, inSameDayAs: today) }
             } else {
                 updatedCompletedBy.append(uid)
                 updatedCompletionDates.append(today)
+                await incrementCompletionCount(for: today) // Historie hochzählen
             }
 
             do {
@@ -402,6 +402,7 @@ class TaskViewModel: ObservableObject {
             var updatedCompletionDates = task.completionDates
             if newStatus {
                 updatedCompletionDates.append(today)
+                await incrementCompletionCount(for: today) // Historie hochzählen
             } else {
                 updatedCompletionDates.removeAll { Calendar.current.isDate($0, inSameDayAs: today) }
             }
@@ -420,6 +421,7 @@ class TaskViewModel: ObservableObject {
             }
         }
     }
+
 
 
     
