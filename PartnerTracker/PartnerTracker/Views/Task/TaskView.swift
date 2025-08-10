@@ -235,14 +235,15 @@ struct TaskView: View {
     func loadData() {
         Task {
             do {
-                
                 try await groupViewModel.fetchGroupsForCurrentUser()
                 try await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                await taskViewModel.fetchCompletionHistory() // <-- Hier laden
             } catch {
                 print("Fehler beim Laden: \(error.localizedDescription)")
             }
         }
     }
+
 }
 
 
