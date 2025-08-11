@@ -257,27 +257,22 @@ class TaskViewModel: ObservableObject {
 
 
     
-    func deleteTask(_ task: TaskItem) async {
-        do {
-            try await db.collection("tasks").document(task.id).delete()
+    func deleteTask(_ task: TaskItem, group: Group?) async {
+            let taskRef = db.collection("tasks").document(task.id)
+            do {
+                try await taskRef.delete()
 
-            if task.groupId == nil {
-                // Persönliche Aufgabe entfernen
-                self.personalTasks.removeAll { $0.id == task.id }
-            } else {
-                // Gruppenaufgabe entfernen
-                for (groupName, tasks) in groupedTasks {
-                    if tasks.contains(where: { $0.id == task.id }) {
-                        groupedTasks[groupName] = tasks.filter { $0.id != task.id }
-                        break
-                    }
+                if let group = group {
+                    groupedTasks[group.name]?.removeAll { $0.id == task.id }
+                } else {
+                    personalTasks.removeAll { $0.id == task.id }
                 }
-            }
 
-        } catch {
-            print("Fehler beim Löschen der Aufgabe: \(error.localizedDescription)")
+                
+            } catch {
+                print("Fehler beim Löschen der Aufgabe: \(error)")
+            }
         }
-    }
 
     
     func updateTask(task: TaskItem, newTitle: String, newInterval: TaskResetInterval) async {
