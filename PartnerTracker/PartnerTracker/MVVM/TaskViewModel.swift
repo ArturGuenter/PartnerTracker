@@ -425,27 +425,34 @@ class TaskViewModel: ObservableObject {
 
 
     
-    func incrementCompletionCount(for date: Date) async {
-        guard let uid = currentUserId else { return }
+    func incrementCompletionCount() async {
+            guard let uid = currentUserId else { return }
+            let ref = db.collection("completionHistory").document(uid)
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            let todayKey = formatter.string(from: Date())
 
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        let dateKey = formatter.string(from: date)
+            do {
+                try await db.runTransaction { transaction, errorPointer in
+                    let snapshot: DocumentSnapshot
+                    do {
+                        snapshot = try transaction.getDocument(ref)
+                    } catch let fetchError as NSError {
+                        errorPointer?.pointee = fetchError
+                        return nil
+                    }
 
-        let historyRef = db.collection("users")
-            .document(uid)
-            .collection("completionHistory")
-            .document(dateKey)
+                    var history = snapshot.data()?["history"] as? [String: Int] ?? [:]
+                    history[todayKey, default: 0] += 1
 
-        do {
-            try await historyRef.setData(
-                ["count": FieldValue.increment(Int64(1))],
-                merge: true
-            )
-        } catch {
-            print("Fehler beim Hochzählen der Historie: \(error)")
+                    transaction.setData(["history": history], forDocument: ref, merge: true)
+                    return nil
+                }
+                await fetchCompletionHistory()
+            } catch {
+                print("Fehler beim Erhöhen des Zählers: \(error)")
+            }
         }
-    }
 
 
     func fetchCompletionHistory() async {
