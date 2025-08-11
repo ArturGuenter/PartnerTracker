@@ -47,7 +47,7 @@ struct HomeView: View {
                     }
 
                     
-                    ActivityHeatmapView(data: taskViewModel.activitySummaryLast30Days)
+                    ActivityHeatmapView(data: taskViewModel.completionHistory)
                         .frame(height: 160)
                         .background(Color(.secondarySystemBackground))
                         .cornerRadius(12)

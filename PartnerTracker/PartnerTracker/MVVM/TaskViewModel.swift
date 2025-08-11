@@ -434,6 +434,7 @@ class TaskViewModel: ObservableObject {
 
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
         let dateKey = formatter.string(from: Calendar.current.startOfDay(for: date))
 
         let historyRef = db.collection("users")
@@ -442,10 +443,12 @@ class TaskViewModel: ObservableObject {
             .document(dateKey)
 
         do {
-            try await historyRef.setData(
-                ["count": FieldValue.increment(Int64(1))],
-                merge: true
-            )
+            try await historyRef.setData(["count": FieldValue.increment(Int64(1))], merge: true)
+            
+            DispatchQueue.main.async {
+                let day = Calendar.current.startOfDay(for: date)
+                self.completionHistory[day, default: 0] += 1
+            }
         } catch {
             print("Fehler beim Hochzählen der Historie: \(error)")
         }
@@ -453,25 +456,35 @@ class TaskViewModel: ObservableObject {
 
 
 
-    func fetchCompletionHistory() async {
-            guard let uid = currentUserId else { return }
-            let ref = db.collection("completionHistory").document(uid)
 
-            do {
-                let snapshot = try await ref.getDocument()
-                if let data = snapshot.data()?["history"] as? [String: Int] {
-                    let formatter = DateFormatter()
-                    formatter.dateFormat = "yyyy-MM-dd"
-                    completionHistory = data.reduce(into: [:]) { dict, element in
-                        if let date = formatter.date(from: element.key) {
-                            dict[date] = element.value
-                        }
-                    }
+    func fetchCompletionHistory() async {
+        guard let uid = currentUserId else { return }
+        do {
+            let snapshot = try await db.collection("users")
+                .document(uid)
+                .collection("completionHistory")
+                .getDocuments()
+
+            var history: [Date: Int] = [:]
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            formatter.timeZone = TimeZone(secondsFromGMT: 0)
+
+            for doc in snapshot.documents {
+                if let count = doc.data()["count"] as? Int,
+                   let date = formatter.date(from: doc.documentID) {
+                    history[Calendar.current.startOfDay(for: date)] = count
                 }
-            } catch {
-                print("Fehler beim Laden der Historie: \(error)")
             }
+
+            DispatchQueue.main.async {
+                self.completionHistory = history
+            }
+        } catch {
+            print("Fehler beim Laden der Historie: \(error)")
         }
+    }
+
 
     
     
