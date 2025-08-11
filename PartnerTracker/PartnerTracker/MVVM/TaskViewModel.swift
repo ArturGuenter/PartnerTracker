@@ -448,27 +448,25 @@ class TaskViewModel: ObservableObject {
     }
 
 
-    func fetchCompletionHistory() async -> [String: Int] {
-        guard let uid = currentUserId else { return [:] }
+    func fetchCompletionHistory() async {
+            guard let uid = currentUserId else { return }
+            let ref = db.collection("completionHistory").document(uid)
 
-        do {
-            let snapshot = try await db.collection("users")
-                .document(uid)
-                .collection("completionHistory")
-                .getDocuments()
-
-            var history: [String: Int] = [:]
-            for document in snapshot.documents {
-                if let count = document.data()["count"] as? Int {
-                    history[document.documentID] = count
+            do {
+                let snapshot = try await ref.getDocument()
+                if let data = snapshot.data()?["history"] as? [String: Int] {
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyy-MM-dd"
+                    completionHistory = data.reduce(into: [:]) { dict, element in
+                        if let date = formatter.date(from: element.key) {
+                            dict[date] = element.value
+                        }
+                    }
                 }
+            } catch {
+                print("Fehler beim Laden der Historie: \(error)")
             }
-            return history
-        } catch {
-            print("Fehler beim Laden der Historie: \(error)")
-            return [:]
         }
-    }
 
     
     
