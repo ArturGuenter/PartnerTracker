@@ -257,22 +257,31 @@ class TaskViewModel: ObservableObject {
 
 
     
-    func deleteTask(_ task: TaskItem, group: Group?) async {
-            let taskRef = db.collection("tasks").document(task.id)
-            do {
-                try await taskRef.delete()
+    func deleteTask(_ task: TaskItem) async {
+        guard let uid = currentUserId else { return }
 
-                if let group = group {
-                    groupedTasks[group.name]?.removeAll { $0.id == task.id }
-                } else {
-                    personalTasks.removeAll { $0.id == task.id }
-                }
+        let taskRef = db.collection("tasks").document(task.id)
 
+        do {
+           
+            try await taskRef.delete()
+
+        
+            if let groupName = groupedTasks.first(where: { $0.value.contains(where: { $0.id == task.id }) })?.key {
+            
+                groupedTasks[groupName]?.removeAll { $0.id == task.id }
+            } else {
                 
-            } catch {
-                print("Fehler beim Löschen der Aufgabe: \(error)")
+                personalTasks.removeAll { $0.id == task.id }
             }
+
+            
+
+        } catch {
+            print("Fehler beim Löschen der Aufgabe: \(error)")
         }
+    }
+
 
     
     func updateTask(task: TaskItem, newTitle: String, newInterval: TaskResetInterval) async {
@@ -373,7 +382,7 @@ class TaskViewModel: ObservableObject {
             } else {
                 updatedCompletedBy.append(uid)
                 updatedCompletionDates.append(today)
-                await incrementCompletionCount(for: today) // Historie hochzählen
+                await incrementCompletionCount(for: today)
             }
 
             do {
@@ -420,34 +429,28 @@ class TaskViewModel: ObservableObject {
 
 
     
-    func incrementCompletionCount() async {
-            guard let uid = currentUserId else { return }
-            let ref = db.collection("completionHistory").document(uid)
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            let todayKey = formatter.string(from: Date())
+    func incrementCompletionCount(for date: Date) async {
+        guard let uid = currentUserId else { return }
 
-            do {
-                try await db.runTransaction { transaction, errorPointer in
-                    let snapshot: DocumentSnapshot
-                    do {
-                        snapshot = try transaction.getDocument(ref)
-                    } catch let fetchError as NSError {
-                        errorPointer?.pointee = fetchError
-                        return nil
-                    }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let dateKey = formatter.string(from: Calendar.current.startOfDay(for: date))
 
-                    var history = snapshot.data()?["history"] as? [String: Int] ?? [:]
-                    history[todayKey, default: 0] += 1
+        let historyRef = db.collection("users")
+            .document(uid)
+            .collection("completionHistory")
+            .document(dateKey)
 
-                    transaction.setData(["history": history], forDocument: ref, merge: true)
-                    return nil
-                }
-                await fetchCompletionHistory()
-            } catch {
-                print("Fehler beim Erhöhen des Zählers: \(error)")
-            }
+        do {
+            try await historyRef.setData(
+                ["count": FieldValue.increment(Int64(1))],
+                merge: true
+            )
+        } catch {
+            print("Fehler beim Hochzählen der Historie: \(error)")
         }
+    }
+
 
 
     func fetchCompletionHistory() async {
