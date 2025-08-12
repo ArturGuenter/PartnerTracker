@@ -9,12 +9,18 @@ import SwiftUI
 
 struct ActivityHeatmapView: View {
     let data: [Date: Int]
-    let calendar = Calendar.current
+    
+    // UTC-Kalender
+    var utcCalendar: Calendar {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(secondsFromGMT: 0)!
+        return cal
+    }
 
     var body: some View {
-        let today = calendar.startOfDay(for: Date())
+        let today = utcCalendar.startOfDay(for: Date())
         let last30Days = (0..<30).compactMap {
-            calendar.date(byAdding: .day, value: -$0, to: today)
+            utcCalendar.date(byAdding: .day, value: -$0, to: today)
         }.reversed()
 
         LazyVGrid(columns: Array(repeating: GridItem(.fixed(18), spacing: 4), count: 7), spacing: 4) {
@@ -44,6 +50,7 @@ struct ActivityHeatmapView: View {
         }
     }
 }
+
 
 #Preview {
     ActivityHeatmapView(data: [Date() : 2])
