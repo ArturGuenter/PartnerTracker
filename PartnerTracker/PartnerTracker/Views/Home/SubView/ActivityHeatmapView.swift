@@ -10,7 +10,7 @@ import SwiftUI
 struct ActivityHeatmapView: View {
     let data: [Date: Int]
     
-    // UTC-Kalender
+    
     var utcCalendar: Calendar {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = TimeZone(secondsFromGMT: 0)!

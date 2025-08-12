@@ -432,15 +432,10 @@ class TaskViewModel: ObservableObject {
     func incrementCompletionCount(for date: Date) async {
         guard let uid = currentUserId else { return }
 
-        
-        var utcCalendar = Calendar(identifier: .gregorian)
-        utcCalendar.timeZone = TimeZone(secondsFromGMT: 0)!
-
-        
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         formatter.timeZone = TimeZone(secondsFromGMT: 0)
-        let dateKey = formatter.string(from: utcCalendar.startOfDay(for: date))
+        let dateKey = formatter.string(from: Calendar.current.startOfDay(for: date))
 
         let historyRef = db.collection("users")
             .document(uid)
@@ -448,14 +443,26 @@ class TaskViewModel: ObservableObject {
             .document(dateKey)
 
         do {
-            try await historyRef.setData(["count": FieldValue.increment(Int64(1))], merge: true)
+          
+            let snapshot = try await historyRef.getDocument()
+            let currentCount = snapshot.data()?["count"] as? Int ?? 0
+
+            
+            let change: Int64 = currentCount > 0 ? -1 : 1
+
+            try await historyRef.setData(["count": FieldValue.increment(change)], merge: true)
 
             DispatchQueue.main.async {
-                let day = utcCalendar.startOfDay(for: date)
-                self.completionHistory[day, default: 0] += 1
+                let day = Calendar.current.startOfDay(for: date)
+                self.completionHistory[day, default: 0] += Int(change)
+
+               
+                if self.completionHistory[day] ?? 0 < 0 {
+                    self.completionHistory[day] = 0
+                }
             }
         } catch {
-            print("Fehler beim Hochzählen der Historie: \(error)")
+            print("Fehler beim Anpassen der Historie: \(error)")
         }
     }
 
