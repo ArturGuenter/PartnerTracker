@@ -465,6 +465,7 @@ class TaskViewModel: ObservableObject {
 
     func fetchCompletionHistory() async {
         guard let uid = currentUserId else { return }
+
         do {
             let snapshot = try await db.collection("users")
                 .document(uid)
@@ -472,14 +473,21 @@ class TaskViewModel: ObservableObject {
                 .getDocuments()
 
             var history: [Date: Int] = [:]
+
+            // UTC-Kalender
+            var utcCalendar = Calendar(identifier: .gregorian)
+            utcCalendar.timeZone = TimeZone(secondsFromGMT: 0)!
+
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
             formatter.timeZone = TimeZone(secondsFromGMT: 0)
 
-            for doc in snapshot.documents {
-                if let count = doc.data()["count"] as? Int,
-                   let date = formatter.date(from: doc.documentID) {
-                    history[Calendar.current.startOfDay(for: date)] = count
+            for document in snapshot.documents {
+                let dateString = document.documentID
+                if let date = formatter.date(from: dateString) {
+                    let day = utcCalendar.startOfDay(for: date)
+                    let count = document.data()["count"] as? Int ?? 0
+                    history[day] = count
                 }
             }
 
