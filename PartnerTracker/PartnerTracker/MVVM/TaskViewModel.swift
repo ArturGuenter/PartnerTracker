@@ -432,10 +432,15 @@ class TaskViewModel: ObservableObject {
     func incrementCompletionCount(for date: Date) async {
         guard let uid = currentUserId else { return }
 
+        
+        var utcCalendar = Calendar(identifier: .gregorian)
+        utcCalendar.timeZone = TimeZone(secondsFromGMT: 0)!
+
+        
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         formatter.timeZone = TimeZone(secondsFromGMT: 0)
-        let dateKey = formatter.string(from: Calendar.current.startOfDay(for: date))
+        let dateKey = formatter.string(from: utcCalendar.startOfDay(for: date))
 
         let historyRef = db.collection("users")
             .document(uid)
@@ -444,15 +449,16 @@ class TaskViewModel: ObservableObject {
 
         do {
             try await historyRef.setData(["count": FieldValue.increment(Int64(1))], merge: true)
-            
+
             DispatchQueue.main.async {
-                let day = Calendar.current.startOfDay(for: date)
+                let day = utcCalendar.startOfDay(for: date)
                 self.completionHistory[day, default: 0] += 1
             }
         } catch {
             print("Fehler beim Hochzählen der Historie: \(error)")
         }
     }
+
 
 
 
@@ -485,9 +491,6 @@ class TaskViewModel: ObservableObject {
         }
     }
 
-
-    
-    
 }
 
 
