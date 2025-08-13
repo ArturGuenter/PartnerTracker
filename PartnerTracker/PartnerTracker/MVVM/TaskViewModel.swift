@@ -429,7 +429,7 @@ class TaskViewModel: ObservableObject {
 
 
     
-    func incrementCompletionCount(for date: Date) async {
+    func incrementCompletionCount(for date: Date, increment: Bool) async {
         guard let uid = currentUserId else { return }
 
         let formatter = DateFormatter()
@@ -442,21 +442,14 @@ class TaskViewModel: ObservableObject {
             .collection("completionHistory")
             .document(dateKey)
 
+        let change: Int64 = increment ? 1 : -1
+
         do {
-          
-            let snapshot = try await historyRef.getDocument()
-            let currentCount = snapshot.data()?["count"] as? Int ?? 0
-
-            
-            let change: Int64 = currentCount > 0 ? -1 : 1
-
             try await historyRef.setData(["count": FieldValue.increment(change)], merge: true)
 
             DispatchQueue.main.async {
                 let day = Calendar.current.startOfDay(for: date)
                 self.completionHistory[day, default: 0] += Int(change)
-
-               
                 if self.completionHistory[day] ?? 0 < 0 {
                     self.completionHistory[day] = 0
                 }
@@ -465,6 +458,7 @@ class TaskViewModel: ObservableObject {
             print("Fehler beim Anpassen der Historie: \(error)")
         }
     }
+
 
 
 
