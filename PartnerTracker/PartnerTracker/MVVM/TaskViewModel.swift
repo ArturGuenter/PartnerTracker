@@ -363,8 +363,6 @@ class TaskViewModel: ObservableObject {
 
     }
     
-   
-
     func toggleTaskStatus(_ task: TaskItem, group: Group?) async {
         guard let uid = currentUserId else { return }
 
@@ -377,12 +375,15 @@ class TaskViewModel: ObservableObject {
             var updatedCompletionDates = task.completionDates
 
             if updatedCompletedBy.contains(uid) {
+                // Rücknahme
                 updatedCompletedBy.removeAll { $0 == uid }
                 updatedCompletionDates.removeAll { Calendar.current.isDate($0, inSameDayAs: today) }
+                await incrementCompletionCount(for: today, increment: false)
             } else {
+                // Erledigen
                 updatedCompletedBy.append(uid)
                 updatedCompletionDates.append(today)
-                await incrementCompletionCount(for: today)
+                await incrementCompletionCount(for: today, increment: true)
             }
 
             do {
@@ -404,11 +405,13 @@ class TaskViewModel: ObservableObject {
             // Persönliche Aufgabe
             let newStatus = !task.isDone
             var updatedCompletionDates = task.completionDates
+
             if newStatus {
                 updatedCompletionDates.append(today)
-                await incrementCompletionCount(for: today) // Historie hochzählen
+                await incrementCompletionCount(for: today, increment: true)
             } else {
                 updatedCompletionDates.removeAll { Calendar.current.isDate($0, inSameDayAs: today) }
+                await incrementCompletionCount(for: today, increment: false)
             }
 
             do {
@@ -425,6 +428,7 @@ class TaskViewModel: ObservableObject {
             }
         }
     }
+
 
 
 
