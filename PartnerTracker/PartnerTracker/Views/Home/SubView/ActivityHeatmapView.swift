@@ -27,7 +27,7 @@ struct ActivityHeatmapView: View {
                
                HStack(spacing: 4) {
                    let weekdaySymbols = utcCalendar.shortWeekdaySymbols
-                   let firstWeekdayIndex = utcCalendar.firstWeekday - 1
+                   let firstWeekdayIndex = utcCalendar.firstWeekday
                    let orderedSymbols = Array(weekdaySymbols[firstWeekdayIndex...] + weekdaySymbols[..<firstWeekdayIndex])
                    
                    ForEach(0..<7, id: \.self) { index in
