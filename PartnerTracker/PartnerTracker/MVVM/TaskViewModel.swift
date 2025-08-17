@@ -436,10 +436,15 @@ class TaskViewModel: ObservableObject {
     func incrementCompletionCount(for date: Date, increment: Bool) async {
         guard let uid = currentUserId else { return }
 
+        // UTC-Key für Firestore
+        var utcCalendar = Calendar(identifier: .gregorian)
+        utcCalendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        let utcDay = utcCalendar.startOfDay(for: date)
+
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         formatter.timeZone = TimeZone(secondsFromGMT: 0)
-        let dateKey = formatter.string(from: Calendar.current.startOfDay(for: date))
+        let dateKey = formatter.string(from: utcDay)
 
         let historyRef = db.collection("users")
             .document(uid)
@@ -452,16 +457,18 @@ class TaskViewModel: ObservableObject {
             try await historyRef.setData(["count": FieldValue.increment(change)], merge: true)
 
             DispatchQueue.main.async {
-                let day = Calendar.current.startOfDay(for: date)
-                self.completionHistory[day, default: 0] += Int(change)
-                if self.completionHistory[day] ?? 0 < 0 {
-                    self.completionHistory[day] = 0
+                // Für die Anzeige → lokale Zeit
+                let localDay = Calendar.current.startOfDay(for: date)
+                self.completionHistory[localDay, default: 0] += Int(change)
+                if self.completionHistory[localDay] ?? 0 < 0 {
+                    self.completionHistory[localDay] = 0
                 }
             }
         } catch {
             print("Fehler beim Anpassen der Historie: \(error)")
         }
     }
+
 
 
 
