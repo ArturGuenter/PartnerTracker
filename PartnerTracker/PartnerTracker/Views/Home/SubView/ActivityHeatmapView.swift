@@ -7,16 +7,15 @@
 
 import SwiftUI
 
-
 struct ActivityHeatmapView: View {
     let data: [Date: Int]
     
     var calendar: Calendar {
-            var cal = Calendar(identifier: .gregorian)
-            cal.firstWeekday = 2 
-            cal.timeZone = TimeZone.current
-            return cal
-        }
+        var cal = Calendar(identifier: .gregorian)
+        cal.firstWeekday = 2 // Montag als Wochenstart
+        cal.timeZone = TimeZone.current // ✅ lokale Zeitzone statt UTC
+        return cal
+    }
     
     var currentMonthDates: [Date] {
         let today = calendar.startOfDay(for: Date())
@@ -46,10 +45,11 @@ struct ActivityHeatmapView: View {
             weeks.append(currentWeek)
         }
         
+        // Wochen auffüllen, damit jede Woche 7 Einträge hat
         return weeks.map { week in
             var paddedWeek = week
             while paddedWeek.count < 7 {
-                paddedWeek.append(Date.distantPast)
+                paddedWeek.append(Date.distantPast) // Platzhalter für leere Felder
             }
             return paddedWeek
         }
@@ -57,7 +57,7 @@ struct ActivityHeatmapView: View {
     
     var body: some View {
         HStack(alignment: .top, spacing: 4) {
-         
+            // Wochentage links
             VStack(spacing: 4) {
                 ForEach(0..<7, id: \.self) { offset in
                     let weekdaySymbols = calendar.shortWeekdaySymbols
@@ -68,7 +68,7 @@ struct ActivityHeatmapView: View {
                 }
             }
             
-        
+            // Wochen mit Kästchen
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 4) {
                     ForEach(weeksInMonth, id: \.self) { week in
@@ -78,7 +78,9 @@ struct ActivityHeatmapView: View {
                                 if date == Date.distantPast {
                                     Color.clear.frame(width: 18, height: 18)
                                 } else {
-                                    let count = data[calendar.startOfDay(for: date)] ?? 0
+                                    let localDay = calendar.startOfDay(for: date) // ✅ lokales Tages-Start
+                                    let count = data[localDay] ?? 0
+                                    
                                     Rectangle()
                                         .fill(color(for: count))
                                         .frame(width: 18, height: 18)
