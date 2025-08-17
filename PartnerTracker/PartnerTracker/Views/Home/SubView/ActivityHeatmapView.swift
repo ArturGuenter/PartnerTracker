@@ -12,11 +12,11 @@ struct ActivityHeatmapView: View {
     let data: [Date: Int]
     
     var calendar: Calendar {
-        var cal = Calendar(identifier: .gregorian)
-        cal.firstWeekday = 2 // Montag
-        cal.timeZone = TimeZone(secondsFromGMT: 0)!
-        return cal
-    }
+            var cal = Calendar(identifier: .gregorian)
+            cal.firstWeekday = 2 
+            cal.timeZone = TimeZone.current
+            return cal
+        }
     
     var currentMonthDates: [Date] {
         let today = calendar.startOfDay(for: Date())
