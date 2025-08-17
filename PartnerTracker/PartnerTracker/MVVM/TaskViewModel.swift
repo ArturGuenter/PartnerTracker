@@ -363,11 +363,12 @@ class TaskViewModel: ObservableObject {
 
     }
     
+    
     func toggleTaskStatus(_ task: TaskItem, group: Group?) async {
         guard let uid = currentUserId else { return }
 
         let taskRef = db.collection("tasks").document(task.id)
-        let today = Calendar.current.startOfDay(for: Date())
+        let todayLocal = Calendar.current.startOfDay(for: Date())
 
         if let group = group {
             // Gruppenaufgabe
@@ -377,13 +378,13 @@ class TaskViewModel: ObservableObject {
             if updatedCompletedBy.contains(uid) {
                 // Rücknahme
                 updatedCompletedBy.removeAll { $0 == uid }
-                updatedCompletionDates.removeAll { Calendar.current.isDate($0, inSameDayAs: today) }
-                await incrementCompletionCount(for: today, increment: false)
+                updatedCompletionDates.removeAll { Calendar.current.isDate($0, inSameDayAs: todayLocal) }
+                await incrementCompletionCount(for: todayLocal, increment: false)
             } else {
-                // Erledigen
+              
                 updatedCompletedBy.append(uid)
-                updatedCompletionDates.append(today)
-                await incrementCompletionCount(for: today, increment: true)
+                updatedCompletionDates.append(todayLocal)
+                await incrementCompletionCount(for: todayLocal, increment: true)
             }
 
             do {
@@ -407,11 +408,11 @@ class TaskViewModel: ObservableObject {
             var updatedCompletionDates = task.completionDates
 
             if newStatus {
-                updatedCompletionDates.append(today)
-                await incrementCompletionCount(for: today, increment: true)
+                updatedCompletionDates.append(todayLocal)
+                await incrementCompletionCount(for: todayLocal, increment: true)
             } else {
-                updatedCompletionDates.removeAll { Calendar.current.isDate($0, inSameDayAs: today) }
-                await incrementCompletionCount(for: today, increment: false)
+                updatedCompletionDates.removeAll { Calendar.current.isDate($0, inSameDayAs: todayLocal) }
+                await incrementCompletionCount(for: todayLocal, increment: false)
             }
 
             do {
@@ -430,13 +431,11 @@ class TaskViewModel: ObservableObject {
     }
 
 
-
-
     
     func incrementCompletionCount(for date: Date, increment: Bool) async {
         guard let uid = currentUserId else { return }
 
-        // UTC-Key für Firestore
+       
         var utcCalendar = Calendar(identifier: .gregorian)
         utcCalendar.timeZone = TimeZone(secondsFromGMT: 0)!
         let utcDay = utcCalendar.startOfDay(for: date)
@@ -457,7 +456,7 @@ class TaskViewModel: ObservableObject {
             try await historyRef.setData(["count": FieldValue.increment(change)], merge: true)
 
             DispatchQueue.main.async {
-                // Für die Anzeige → lokale Zeit
+               
                 let localDay = Calendar.current.startOfDay(for: date)
                 self.completionHistory[localDay, default: 0] += Int(change)
                 if self.completionHistory[localDay] ?? 0 < 0 {
@@ -468,11 +467,6 @@ class TaskViewModel: ObservableObject {
             print("Fehler beim Anpassen der Historie: \(error)")
         }
     }
-
-
-
-
-
 
 
     func fetchCompletionHistory() async {
@@ -486,18 +480,21 @@ class TaskViewModel: ObservableObject {
 
             var history: [Date: Int] = [:]
 
-            
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            formatter.timeZone = TimeZone(secondsFromGMT: 0)
-
             for document in snapshot.documents {
                 let dateString = document.documentID
-                if let utcDate = formatter.date(from: dateString) {
-                    
-                    let localDay = Calendar.current.startOfDay(for: utcDate)
-                    let count = document.data()["count"] as? Int ?? 0
-                    history[localDay] = count
+                let parts = dateString.split(separator: "-").compactMap { Int($0) }
+                if parts.count == 3 {
+                    var comps = DateComponents()
+                    comps.year = parts[0]
+                    comps.month = parts[1]
+                    comps.day = parts[2]
+
+                   
+                    if let localDay = Calendar.current.date(from: comps) {
+                        let count = document.data()["count"] as? Int ?? 0
+                        
+                        history[Calendar.current.startOfDay(for: localDay)] = count
+                    }
                 }
             }
 
