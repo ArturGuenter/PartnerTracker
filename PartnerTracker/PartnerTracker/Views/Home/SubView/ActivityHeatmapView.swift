@@ -13,7 +13,7 @@ struct ActivityHeatmapView: View {
     var calendar: Calendar {
         var cal = Calendar(identifier: .gregorian)
         cal.firstWeekday = 2 // Montag als Wochenstart
-        cal.timeZone = TimeZone.current // ✅ lokale Zeitzone statt UTC
+        cal.timeZone = TimeZone.current
         return cal
     }
     
@@ -45,11 +45,11 @@ struct ActivityHeatmapView: View {
             weeks.append(currentWeek)
         }
         
-        // Wochen auffüllen, damit jede Woche 7 Einträge hat
+     
         return weeks.map { week in
             var paddedWeek = week
             while paddedWeek.count < 7 {
-                paddedWeek.append(Date.distantPast) // Platzhalter für leere Felder
+                paddedWeek.append(Date.distantPast)
             }
             return paddedWeek
         }
@@ -68,7 +68,7 @@ struct ActivityHeatmapView: View {
                 }
             }
             
-            // Wochen mit Kästchen
+            
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 4) {
                     ForEach(weeksInMonth, id: \.self) { week in
@@ -78,8 +78,11 @@ struct ActivityHeatmapView: View {
                                 if date == Date.distantPast {
                                     Color.clear.frame(width: 18, height: 18)
                                 } else {
-                                    let localDay = calendar.startOfDay(for: date) // ✅ lokales Tages-Start
-                                    let count = data[localDay] ?? 0
+                                    let localDay = Calendar.current.startOfDay(for: date)
+
+                                    let normalizedDay = Calendar.current.startOfDay(for: date)
+                                    let count = data[normalizedDay] ?? 0
+
                                     
                                     Rectangle()
                                         .fill(color(for: count))
