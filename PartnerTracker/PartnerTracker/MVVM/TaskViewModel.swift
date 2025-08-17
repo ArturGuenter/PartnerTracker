@@ -486,20 +486,18 @@ class TaskViewModel: ObservableObject {
 
             var history: [Date: Int] = [:]
 
-            // UTC-Kalender
-            var utcCalendar = Calendar(identifier: .gregorian)
-            utcCalendar.timeZone = TimeZone(secondsFromGMT: 0)!
-
+            
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
             formatter.timeZone = TimeZone(secondsFromGMT: 0)
 
             for document in snapshot.documents {
                 let dateString = document.documentID
-                if let date = formatter.date(from: dateString) {
-                    let day = utcCalendar.startOfDay(for: date)
+                if let utcDate = formatter.date(from: dateString) {
+                    
+                    let localDay = Calendar.current.startOfDay(for: utcDate)
                     let count = document.data()["count"] as? Int ?? 0
-                    history[day] = count
+                    history[localDay] = count
                 }
             }
 
@@ -510,6 +508,7 @@ class TaskViewModel: ObservableObject {
             print("Fehler beim Laden der Historie: \(error)")
         }
     }
+
 
 }
 
