@@ -489,9 +489,9 @@ class TaskViewModel: ObservableObject {
                    
                     if let localDay = Calendar.current.date(from: comps) {
                         let count = document.data()["count"] as? Int ?? 0
-                        
                         history[Calendar.current.startOfDay(for: localDay)] = count
                     }
+
                 }
             }
 
