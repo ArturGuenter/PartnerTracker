@@ -466,17 +466,39 @@ class TaskViewModel: ObservableObject {
 
 
 
-    func fetchCompletionHistory() async {
+    func fetchCompletionHistory(monthsBack: Int = 0) async {
         guard let uid = currentUserId else { return }
 
+        let calendar = Calendar.current
+        let today = Date()
+        
+        
+        guard let targetMonth = calendar.date(byAdding: .month, value: -monthsBack, to: today),
+              let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: targetMonth)),
+              let range = calendar.range(of: .day, in: .month, for: targetMonth),
+              let monthEnd = calendar.date(byAdding: .day, value: range.count - 1, to: monthStart) else {
+            return
+        }
+        
+      
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        
+        let startKey = formatter.string(from: monthStart)
+        let endKey = formatter.string(from: monthEnd)
+        
         do {
+            
             let snapshot = try await db.collection("users")
                 .document(uid)
                 .collection("completionHistory")
+                .whereField(FieldPath.documentID(), isGreaterThanOrEqualTo: startKey)
+                .whereField(FieldPath.documentID(), isLessThanOrEqualTo: endKey)
                 .getDocuments()
-
+            
             var history: [Date: Int] = [:]
-
+            
             for document in snapshot.documents {
                 let dateString = document.documentID
                 let parts = dateString.split(separator: "-").compactMap { Int($0) }
@@ -485,23 +507,23 @@ class TaskViewModel: ObservableObject {
                     comps.year = parts[0]
                     comps.month = parts[1]
                     comps.day = parts[2]
-
-                   
-                    if let localDay = Calendar.current.date(from: comps) {
+                    
+                    if let localDay = calendar.date(from: comps) {
                         let count = document.data()["count"] as? Int ?? 0
-                        history[Calendar.current.startOfDay(for: localDay)] = count
+                        history[calendar.startOfDay(for: localDay)] = count
                     }
-
                 }
             }
-
+            
             DispatchQueue.main.async {
-                self.completionHistory = history
+                
+                self.completionHistory.merge(history) { _, new in new }
             }
         } catch {
             print("Fehler beim Laden der Historie: \(error)")
         }
     }
+
 
 
 }
