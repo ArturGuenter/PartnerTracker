@@ -68,21 +68,29 @@ struct ActivityHeatmapView: View {
                     }
                 }) {
                     Image(systemName: "chevron.left")
+                        .font(.title2)
+                        .padding(.horizontal, 8)
                 }
+
                 Spacer()
+
                 Text(monthTitle)
                     .font(.headline)
+
                 Spacer()
+
                 Button(action: {
                     if let next = calendar.date(byAdding: .month, value: 1, to: displayedMonth) {
                         displayedMonth = next
                     }
                 }) {
                     Image(systemName: "chevron.right")
+                        .font(.title2)              
+                        .padding(.horizontal, 8)
                 }
             }
             .padding(.horizontal)
-            
+
           
             HStack(alignment: .top, spacing: 4) {
                 

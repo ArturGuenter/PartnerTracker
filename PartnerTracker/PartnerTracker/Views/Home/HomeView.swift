@@ -48,10 +48,10 @@ struct HomeView: View {
 
                     
                     ActivityHeatmapView(data: taskViewModel.completionHistory)
-                        .frame(height: 160)
                         .background(Color(.secondarySystemBackground))
                         .cornerRadius(12)
                         .padding(.top, 20)
+
                 }
                 .padding()
             }
