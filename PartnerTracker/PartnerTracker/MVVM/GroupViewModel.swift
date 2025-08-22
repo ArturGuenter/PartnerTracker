@@ -106,5 +106,24 @@ class GroupViewModel: ObservableObject {
         }
         return user
     }
+    
+    
+
+    func deleteGroup(_ group: Group) async throws {
+        let groupRef = db.collection("groups").document(group.id)
+        
+        
+        let taskSnapshot = try await db.collection("tasks")
+            .whereField("groupId", isEqualTo: group.id)
+            .getDocuments()
+        
+        for doc in taskSnapshot.documents {
+            try await doc.reference.delete()
+        }
+        
+       
+        
+    }
+
 }
 
