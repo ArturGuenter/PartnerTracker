@@ -83,7 +83,7 @@ struct GroupView: View {
                                         Label("Löschen", systemImage: "trash")
                                     }
                                 }
-                            }
+                            
                         
                         }
                         
@@ -146,6 +146,21 @@ struct GroupView: View {
                 
                 
             }
+            .alert("Gruppe löschen?", isPresented: $showDeleteAlert) {
+                Button("Abbrechen", role: .cancel) {}
+                if let group = groupToDelete {
+                    Button("Löschen", role: .destructive) {
+                        Task {
+                            try? await groupViewModel.deleteGroup(group)
+                        }
+                    }
+                }
+            } message: {
+                if let group = groupToDelete {
+                    Text("Möchtest du die Gruppe „\(group.name)“ wirklich löschen? Alle Aufgaben in dieser Gruppe werden ebenfalls entfernt.")
+                }
+            }
+
             .onAppear {
                 Task {
                     try? await groupViewModel.fetchGroupsForCurrentUser()
