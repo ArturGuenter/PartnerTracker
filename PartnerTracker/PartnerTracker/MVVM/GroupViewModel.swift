@@ -110,22 +110,40 @@ class GroupViewModel: ObservableObject {
     
 
     func deleteGroup(_ group: Group) async throws {
+        print(" Starte Löschvorgang für Gruppe mit ID: \(group.id)")
+
         let groupRef = db.collection("groups").document(group.id)
+
+        do {
+            
+            print(" Lade Aufgaben für Gruppe \(group.id)...")
+            let taskSnapshot = try await db.collection("tasks")
+                .whereField("groupId", isEqualTo: group.id)
+                .getDocuments()
+            print(" \(taskSnapshot.documents.count) Aufgaben gefunden")
+
         
-        
-        let taskSnapshot = try await db.collection("tasks")
-            .whereField("groupId", isEqualTo: group.id)
-            .getDocuments()
-        
-        for doc in taskSnapshot.documents {
-            try await doc.reference.delete()
+            for doc in taskSnapshot.documents {
+                print(" Lösche Aufgabe mit ID: \(doc.documentID)")
+                try await doc.reference.delete()
+            }
+            print("Alle Aufgaben gelöscht")
+
+            
+            print(" Lösche Gruppe \(group.id)")
+            try await groupRef.delete()
+            print(" Gruppe erfolgreich gelöscht")
+
+            
+            self.groups.removeAll { $0.id == group.id }
+            print(" Gruppe aus ViewModel entfernt")
+
+        } catch {
+            print(" Fehler beim Löschen der Gruppe: \(error.localizedDescription)")
+            throw error
         }
-        
-       
-        try await groupRef.delete()
-        
-        self.groups.removeAll { $0.id == group.id }
     }
+
 
 }
 
