@@ -122,7 +122,9 @@ class GroupViewModel: ObservableObject {
         }
         
        
+        try await groupRef.delete()
         
+        self.groups.removeAll { $0.id == group.id }
     }
 
 }
