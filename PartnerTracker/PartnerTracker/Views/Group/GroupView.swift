@@ -14,7 +14,11 @@ struct GroupView: View {
         @State private var errorMessage = ""
     @State private var showAddGroupSheet = false
     @State private var showCopyConfirmation = false
+    @State private var groupToDelete: Group? = nil
+    @State private var showDeleteAlert = false
 
+    
+    
 
         var body: some View {
             NavigationStack {
