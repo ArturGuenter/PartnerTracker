@@ -75,7 +75,18 @@ struct GroupView: View {
                                 }
                                 .padding(.vertical, 6)
                             }
+                            .swipeActions {
+                                    Button(role: .destructive) {
+                                        groupToDelete = group
+                                        showDeleteAlert = true
+                                    } label: {
+                                        Label("Löschen", systemImage: "trash")
+                                    }
+                                }
+                            }
+                        
                         }
+                        
                         
 
                     }
