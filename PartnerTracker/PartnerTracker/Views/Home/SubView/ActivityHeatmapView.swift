@@ -144,6 +144,7 @@ struct ActivityHeatmapView: View {
     
     var monthTitle: String {
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "de_DE")
         formatter.dateFormat = "MMMM yyyy"
         return formatter.string(from: displayedMonth)
     }
