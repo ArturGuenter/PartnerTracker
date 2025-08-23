@@ -93,8 +93,10 @@ struct ActivityHeatmapView: View {
 
           
             HStack(alignment: .top, spacing: 4) {
+            
                 
                 VStack(spacing: 4) {
+                    
                     ForEach(0..<7, id: \.self) { offset in
                         let weekdaySymbols = calendar.shortWeekdaySymbols
                         let startIndex = (calendar.firstWeekday - 1 + offset) % 7
@@ -107,6 +109,7 @@ struct ActivityHeatmapView: View {
                 // Kästchen pro Woche
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 4) {
+                        
                         ForEach(weeksInMonth, id: \.self) { week in
                             VStack(spacing: 4) {
                                 ForEach(0..<7, id: \.self) { dayIndex in
@@ -135,7 +138,10 @@ struct ActivityHeatmapView: View {
             }
             .padding()
         }
+        .frame(maxWidth: .infinity, alignment: .center) 
+        .padding()
     }
+    
     
     var monthTitle: String {
         let formatter = DateFormatter()
