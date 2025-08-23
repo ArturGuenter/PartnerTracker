@@ -14,7 +14,7 @@ struct ActivityHeatmapView: View {
     
     var calendar: Calendar {
         var cal = Calendar(identifier: .gregorian)
-        cal.firstWeekday = 2 // Montag
+        cal.firstWeekday = 2
         cal.timeZone = TimeZone.current
         return cal
     }
@@ -59,7 +59,7 @@ struct ActivityHeatmapView: View {
     }
     
     var body: some View {
-        VStack {
+        HStack {
             
             HStack {
                 Button(action: {
@@ -85,7 +85,7 @@ struct ActivityHeatmapView: View {
                     }
                 }) {
                     Image(systemName: "chevron.right")
-                        .font(.title2)              
+                        .font(.title2)
                         .padding(.horizontal, 8)
                 }
             }
@@ -138,8 +138,7 @@ struct ActivityHeatmapView: View {
             }
             .padding()
         }
-        .frame(maxWidth: .infinity, alignment: .center) 
-        .padding()
+        
     }
     
     
