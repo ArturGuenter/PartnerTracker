@@ -163,7 +163,7 @@ struct GroupView: View {
 
             .onAppear {
                 Task {
-                    try? await groupViewModel.fetchGroupsForCurrentUser()
+                     groupViewModel.observeGroupsForCurrentUser()
                 }
             }
         }

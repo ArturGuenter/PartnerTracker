@@ -66,6 +66,48 @@ class GroupViewModel: ObservableObject {
         
         try await preloadGroupUsers(groups: fetchedGroups)
     }
+    
+    func observeGroupsForCurrentUser() {
+        
+        groupsListener?.remove()
+        
+        groupsListener = db.collection("groups")
+            .whereField("memberIds", arrayContains: currentUserId)
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    print("Fehler beim Abrufen der Gruppen: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else {
+                    print("Keine Gruppendokumente gefunden")
+                    return
+                }
+                
+                do {
+                    var fetchedGroups: [Group] = try documents.compactMap { doc in
+                        try doc.data(as: Group.self)
+                    }
+                    
+                    
+                    fetchedGroups.sort { (group1, group2) in
+                        let date1 = group1.createdAt ?? Date.distantPast
+                        let date2 = group2.createdAt ?? Date.distantPast
+                        return date1 > date2
+                    }
+                    
+                    Task { @MainActor in
+                        self.groups = fetchedGroups
+                        try? await self.preloadGroupUsers(groups: fetchedGroups)
+                    }
+                } catch {
+                    print("Fehler beim Dekodieren der Gruppen: \(error.localizedDescription)")
+                }
+            }
+    }
+
 
     // In Gruppe beitreten
     func joinGroup(groupId: String, password: String) async throws {
