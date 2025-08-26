@@ -187,6 +187,11 @@ class GroupViewModel: ObservableObject {
             throw error
         }
     }
+    
+    deinit {
+            groupsListener?.remove()
+            print("Listener im GroupViewModel entfernt")
+        }
 
 
 }
