@@ -162,9 +162,9 @@ struct GroupView: View {
             }
 
             .onAppear {
-                Task {
+                
                      groupViewModel.observeGroupsForCurrentUser()
-                }
+                
             }
         }
 

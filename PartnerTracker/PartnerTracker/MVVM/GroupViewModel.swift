@@ -109,7 +109,7 @@ class GroupViewModel: ObservableObject {
     }
 
 
-    // In Gruppe beitreten
+    
     func joinGroup(groupId: String, password: String) async throws {
         let groupRef = db.collection("groups").document(groupId)
         let snapshot = try await groupRef.getDocument()
@@ -127,7 +127,7 @@ class GroupViewModel: ObservableObject {
             "memberIds": FieldValue.arrayUnion([currentUserId])
         ])
 
-        try await fetchGroupsForCurrentUser()
+        
     }
 
     // MARK: - User Cache Handling
