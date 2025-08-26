@@ -13,6 +13,8 @@ import FirebaseAuth
 class GroupViewModel: ObservableObject {
     @Published var groups: [Group] = []
     @Published var userCache: [String: AppUser] = [:]
+    private var groupsListener: ListenerRegistration?
+
 
     private let db = Firestore.firestore()
 
