@@ -529,6 +529,66 @@ class TaskViewModel: ObservableObject {
     }
 
 
+    func listenToTasks(groups: [Group]) {
+        guard let uid = currentUserId else { return }
+
+        
+        personalListener?.remove()
+        personalListener = db.collection("tasks")
+            .whereField("ownerId", isEqualTo: uid)
+            .whereField("groupId", isEqualTo: NSNull())
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self = self else { return }
+                if let error = error {
+                    print(" Fehler beim Anhören persönlicher Aufgaben: \(error)")
+                    return
+                }
+                guard let documents = snapshot?.documents else { return }
+                
+                let loaded = documents.compactMap { try? $0.data(as: TaskItem.self) }
+                Task {
+                    var resetTasks: [TaskItem] = []
+                    for task in loaded {
+                        let checked = await self.checkAndResetTaskIfNeeded(task)
+                        resetTasks.append(checked)
+                    }
+                    DispatchQueue.main.async {
+                        self.personalTasks = resetTasks.sorted(by: { $0.createdAt > $1.createdAt })
+                    }
+                }
+            }
+
+        
+        for listener in groupListeners.values { listener.remove() }
+        groupListeners.removeAll()
+
+        for group in groups {
+            let listener = db.collection("tasks")
+                .whereField("groupId", isEqualTo: group.id)
+                .addSnapshotListener { [weak self] snapshot, error in
+                    guard let self = self else { return }
+                    if let error = error {
+                        print(" Fehler beim Anhören Gruppen-Aufgaben (\(group.name)): \(error)")
+                        return
+                    }
+                    guard let documents = snapshot?.documents else { return }
+                    
+                    let loaded = documents.compactMap { try? $0.data(as: TaskItem.self) }
+                    Task {
+                        var resetTasks: [TaskItem] = []
+                        for task in loaded {
+                            let checked = await self.checkAndResetTaskIfNeeded(task)
+                            resetTasks.append(checked)
+                        }
+                        DispatchQueue.main.async {
+                            self.groupedTasks[group.name] = resetTasks.sorted(by: { $0.createdAt > $1.createdAt })
+                        }
+                    }
+                }
+            groupListeners[group.id] = listener
+        }
+    }
+
 
 }
 
