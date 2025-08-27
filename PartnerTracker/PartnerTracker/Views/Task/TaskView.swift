@@ -193,7 +193,7 @@ struct TaskView: View {
                 onConfirm: {
                     Task {
                         await taskViewModel.addPersonalTask(title: newTaskTitle, interval: personalTaskInterval)
-                         taskViewModel.listenToTasks(groups: groupViewModel.groups)
+                         
                         activeSheet = nil
                     }
                 }
@@ -208,8 +208,7 @@ struct TaskView: View {
                 onConfirm: {
                     Task {
                         await taskViewModel.addGroupTask(title: newTaskTitle, group: group, interval: groupTaskInterval)
-                         taskViewModel.listenToTasks(groups: groupViewModel.groups)
-                        activeSheet = nil
+                                                 activeSheet = nil
                     }
                 }
             )
@@ -220,7 +219,7 @@ struct TaskView: View {
                 onSave: { updatedTitle, updatedInterval in
                     Task {
                         await taskViewModel.updateTask(task: task, newTitle: updatedTitle, newInterval: updatedInterval)
-                         taskViewModel.listenToTasks(groups: groupViewModel.groups)
+                         
                         activeSheet = nil
                     }
                 },
