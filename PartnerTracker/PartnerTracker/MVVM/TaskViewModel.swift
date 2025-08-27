@@ -17,6 +17,10 @@ class TaskViewModel: ObservableObject {
     private let db = Firestore.firestore()
     private let auth = Auth.auth()
     
+    private var personalListener: ListenerRegistration?
+    private var groupListeners: [String: ListenerRegistration] = [:]
+
+    
     var currentUserId: String? {
         auth.currentUser?.uid
     }
