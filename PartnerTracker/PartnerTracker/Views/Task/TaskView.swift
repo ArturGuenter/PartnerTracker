@@ -193,7 +193,7 @@ struct TaskView: View {
                 onConfirm: {
                     Task {
                         await taskViewModel.addPersonalTask(title: newTaskTitle, interval: personalTaskInterval)
-                        try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                         taskViewModel.listenToTasks(groups: groupViewModel.groups)
                         activeSheet = nil
                     }
                 }
@@ -208,7 +208,7 @@ struct TaskView: View {
                 onConfirm: {
                     Task {
                         await taskViewModel.addGroupTask(title: newTaskTitle, group: group, interval: groupTaskInterval)
-                        try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                         taskViewModel.listenToTasks(groups: groupViewModel.groups)
                         activeSheet = nil
                     }
                 }
@@ -220,7 +220,7 @@ struct TaskView: View {
                 onSave: { updatedTitle, updatedInterval in
                     Task {
                         await taskViewModel.updateTask(task: task, newTitle: updatedTitle, newInterval: updatedInterval)
-                        try? await taskViewModel.fetchTasks(groups: groupViewModel.groups)
+                         taskViewModel.listenToTasks(groups: groupViewModel.groups)
                         activeSheet = nil
                     }
                 },
@@ -236,8 +236,8 @@ struct TaskView: View {
         Task {
             do {
                 try await groupViewModel.fetchGroupsForCurrentUser()
-                try await taskViewModel.fetchTasks(groups: groupViewModel.groups)
-                await taskViewModel.fetchCompletionHistory() 
+                 taskViewModel.listenToTasks(groups: groupViewModel.groups)
+                await taskViewModel.fetchCompletionHistory()
             } catch {
                 print("Fehler beim Laden: \(error.localizedDescription)")
             }
