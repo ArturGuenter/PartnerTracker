@@ -47,6 +47,8 @@ struct GroupView: View {
                                             .foregroundColor(.gray)
                                     }
                                     
+                                    
+
                                     HStack {
                                         Text("ID: \(group.id)")
                                             .font(.caption2)
@@ -72,6 +74,11 @@ struct GroupView: View {
                                         }
                                         .buttonStyle(BorderlessButtonStyle())
                                     }
+                                    
+                                    Text("Mitgliederanzahl: \(group.memberIds.count)")
+                                                                            .font(.caption)
+                                                                            .foregroundColor(.gray)
+
                                 }
                                 .padding(.vertical, 6)
                             }
