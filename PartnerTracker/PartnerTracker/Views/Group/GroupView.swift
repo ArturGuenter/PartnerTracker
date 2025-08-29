@@ -125,8 +125,18 @@ struct GroupView: View {
                 }
                 
                 .sheet(isPresented: $showCreateGroupSheet) {
-                    GroupCreateView(groupViewModel: groupViewModel)
+                    GroupCreateView(groupViewModel: groupViewModel, onSuccess: {
+                        withAnimation {
+                            showSuccessToast = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            withAnimation {
+                                showSuccessToast = false
+                            }
+                        }
+                    })
                 }
+
                 .sheet(isPresented: $showAddGroupSheet) {
                     GroupAddView(groupViewModel: groupViewModel)
                 }
