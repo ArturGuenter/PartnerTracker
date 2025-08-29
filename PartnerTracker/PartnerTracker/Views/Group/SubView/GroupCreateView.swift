@@ -89,7 +89,6 @@ struct GroupCreateView: View {
             return
         }
 
-        // Passwort: Muss genau 4 Ziffern sein
         let passwordPattern = #"^\d{4}$"#
         if trimmedPassword.range(of: passwordPattern, options: .regularExpression) == nil {
             errorMessage = "Das Passwort muss aus genau 4 Ziffern bestehen."
@@ -99,6 +98,7 @@ struct GroupCreateView: View {
 
         do {
             try await groupViewModel.createGroup(name: trimmedName, password: trimmedPassword)
+            onSuccess?()   
             dismiss()
         } catch {
             errorMessage = error.localizedDescription

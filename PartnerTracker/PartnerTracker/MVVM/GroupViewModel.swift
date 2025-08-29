@@ -67,6 +67,8 @@ class GroupViewModel: ObservableObject {
         try await preloadGroupUsers(groups: fetchedGroups)
     }
     
+    
+    
     func observeGroupsForCurrentUser() {
         
         groupsListener?.remove()
