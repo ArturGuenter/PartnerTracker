@@ -14,6 +14,7 @@ struct GroupCreateView: View {
         @Environment(\.dismiss) var dismiss
         @State private var isLoading = false
     @State private var password: String = ""
+    var onSuccess: (() -> Void)? = nil
 
 
         var body: some View {
