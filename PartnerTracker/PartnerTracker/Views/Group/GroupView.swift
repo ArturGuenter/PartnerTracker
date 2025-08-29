@@ -103,6 +103,20 @@ struct GroupView: View {
                             .zIndex(1)
                             .padding(.top, 8)
                     }
+                    
+                    if showSuccessToast {
+                        Text("Gruppe erfolgreich erstellt!")
+                            .font(.caption)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color.green.opacity(0.85))
+                            .cornerRadius(12)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                            .zIndex(1)
+                            .padding(.top, 8)
+                    }
+
 
                 }
                 .navigationTitle("Meine Gruppen")
