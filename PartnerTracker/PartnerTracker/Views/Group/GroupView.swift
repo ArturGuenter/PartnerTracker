@@ -16,6 +16,8 @@ struct GroupView: View {
     @State private var showCopyConfirmation = false
     @State private var groupToDelete: Group? = nil
     @State private var showDeleteAlert = false
+    @State private var showSuccessToast = false
+
 
     
     
