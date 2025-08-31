@@ -69,7 +69,7 @@ class GroupViewModel: ObservableObject {
         fetchedGroups.sort { (group1, group2) in
             let date1 = group1.createdAt ?? Date.distantPast
             let date2 = group2.createdAt ?? Date.distantPast
-            return date1 > date2 // Neueste zuerst
+            return date1 > date2 
         }
 
         self.groups = fetchedGroups
