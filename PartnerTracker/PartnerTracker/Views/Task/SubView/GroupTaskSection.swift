@@ -60,7 +60,8 @@ struct GroupTaskSection: View {
             name: "Projektteam Alpha",
             memberIds: ["user1", "user2"],
             createdAt: Date(),
-            password: "1234"
+            password: "1234",
+            ownerId: "123"
         ),
         tasks: [
             TaskItem(

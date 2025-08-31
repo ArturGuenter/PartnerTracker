@@ -37,55 +37,70 @@ struct GroupView: View {
                             .foregroundColor(.secondary)
                             .padding()
                     } else {
-                        List(groupViewModel.groups, id: \.id) { group in
-                            HStack {
-                                NavigationLink(destination: GroupDetailView(group: group)) {
-                                    VStack(alignment: .leading, spacing: 6) {
-                                        Text(group.name)
-                                            .font(.headline)
+                        List {
+                            if !groupViewModel.ownedGroups.isEmpty {
+                                Section(header: Text("Eigene Gruppen")) {
+                                    ForEach(groupViewModel.ownedGroups, id: \.id) { group in
+                                        HStack {
+                                            NavigationLink(destination: GroupDetailView(group: group)) {
+                                                VStack(alignment: .leading, spacing: 6) {
+                                                    Text(group.name)
+                                                        .font(.headline)
 
-                                        if let createdAt = group.createdAt {
-                                            Text("Erstellt am \(createdAt.formatted(date: .abbreviated, time: .shortened))")
-                                                .font(.caption)
-                                                .foregroundColor(.gray)
+                                                    if let createdAt = group.createdAt {
+                                                        Text("Erstellt am \(createdAt.formatted(date: .abbreviated, time: .shortened))")
+                                                            .font(.caption)
+                                                            .foregroundColor(.gray)
+                                                    }
+
+                                                    Text("Mitgliederanzahl: \(group.memberIds.count)")
+                                                        .font(.caption)
+                                                        .foregroundColor(.gray)
+
+                                                    Text("ID: \(group.id)")
+                                                        .font(.caption2)
+                                                        .foregroundColor(.gray)
+                                                        .lineLimit(1)
+                                                        .truncationMode(.middle)
+                                                }
+                                                .padding(.vertical, 6)
+                                            }
+
+                                            Spacer()
+
+                                            Button(action: {
+                                                UIPasteboard.general.string = group.id
+                                                withAnimation { showCopyConfirmation = true }
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                                    withAnimation { showCopyConfirmation = false }
+                                                }
+                                            }) {
+                                                Image(systemName: "doc.on.doc")
+                                                    .foregroundColor(.blue)
+                                            }
+                                            .buttonStyle(BorderlessButtonStyle())
                                         }
-
-                                        Text("Mitgliederanzahl: \(group.memberIds.count)")
-                                            .font(.caption)
-                                            .foregroundColor(.gray)
-
-                                        Text("ID: \(group.id)")
-                                            .font(.caption2)
-                                            .foregroundColor(.gray)
-                                            .lineLimit(1)
-                                            .truncationMode(.middle)
+                                        .swipeActions {
+                                            Button(role: .destructive) {
+                                                groupToDelete = group
+                                                showDeleteAlert = true
+                                            } label: {
+                                                Label("Löschen", systemImage: "trash")
+                                            }
+                                        }
                                     }
-                                    .padding(.vertical, 6)
                                 }
-
-                                Spacer()
-
-                                Button(action: {
-                                    UIPasteboard.general.string = group.id
-                                    withAnimation { showCopyConfirmation = true }
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                        withAnimation { showCopyConfirmation = false }
-                                    }
-                                }) {
-                                    Image(systemName: "doc.on.doc")
-                                        .foregroundColor(.blue)
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
                             }
-                            .swipeActions {
-                                Button(role: .destructive) {
-                                    groupToDelete = group
-                                    showDeleteAlert = true
-                                } label: {
-                                    Label("Löschen", systemImage: "trash")
+
+                            if !groupViewModel.joinedGroups.isEmpty {
+                                Section(header: Text("Beigetretene Gruppen")) {
+                                    ForEach(groupViewModel.joinedGroups, id: \.id) { group in
+                                        
+                                    }
                                 }
                             }
                         }
+
 
                         
 

@@ -274,7 +274,8 @@ struct TaskView: View {
             name: "Projekt X",
             memberIds: ["demo"],
             createdAt: Date(),
-            password: "1234"
+            password: "1234",
+            ownerId: "123"
         )
     ]
     

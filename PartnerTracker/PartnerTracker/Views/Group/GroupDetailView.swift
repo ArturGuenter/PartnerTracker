@@ -81,5 +81,5 @@ struct GroupDetailView: View {
 
 
 #Preview {
-    GroupDetailView(group: Group(name: "sdf", memberIds: ["sadfff"], password: "fsffff"))
+    GroupDetailView(group: Group(name: "sdf", memberIds: ["sadfff"], password: "fsffff", ownerId: "111"))
 }
