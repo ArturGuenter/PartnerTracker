@@ -24,8 +24,18 @@ class GroupViewModel: ObservableObject {
         }
         return uid
     }
+    
+    var ownedGroups: [Group] {
+        groups.filter { $0.ownerId == currentUserId }
+    }
 
-    // Gruppe erstellen
+    var joinedGroups: [Group] {
+        groups.filter { $0.ownerId != currentUserId }
+    }
+
+
+   
+    
     func createGroup(name: String, password: String) async throws {
         let newGroupRef = db.collection("groups").document()
 
@@ -46,7 +56,7 @@ class GroupViewModel: ObservableObject {
         try await fetchGroupsForCurrentUser()
     }
 
-    // Gruppen + Userdaten laden
+    
     func fetchGroupsForCurrentUser() async throws {
         let snapshot = try await db.collection("groups")
             .whereField("memberIds", arrayContains: currentUserId)
