@@ -34,7 +34,8 @@ class GroupViewModel: ObservableObject {
             name: name,
             memberIds: [currentUserId],
             createdAt: nil,
-            password: password
+            password: password,
+            ownerId: currentUserId
         )
 
         var groupData = try Firestore.Encoder().encode(group)
