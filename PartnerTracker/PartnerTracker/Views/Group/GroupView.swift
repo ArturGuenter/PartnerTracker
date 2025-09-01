@@ -95,7 +95,29 @@ struct GroupView: View {
                             if !groupViewModel.joinedGroups.isEmpty {
                                 Section(header: Text("Beigetretene Gruppen")) {
                                     ForEach(groupViewModel.joinedGroups, id: \.id) { group in
-                                        
+                                        NavigationLink(destination: GroupDetailView(group: group)) {
+                                            VStack(alignment: .leading, spacing: 6) {
+                                                Text(group.name)
+                                                    .font(.headline)
+
+                                                if let createdAt = group.createdAt {
+                                                    Text("Erstellt am \(createdAt.formatted(date: .abbreviated, time: .shortened))")
+                                                        .font(.caption)
+                                                        .foregroundColor(.gray)
+                                                }
+
+                                                Text("Mitgliederanzahl: \(group.memberIds.count)")
+                                                    .font(.caption)
+                                                    .foregroundColor(.gray)
+
+                                                Text("ID: \(group.id)")
+                                                    .font(.caption2)
+                                                    .foregroundColor(.gray)
+                                                    .lineLimit(1)
+                                                    .truncationMode(.middle)
+                                            }
+                                            .padding(.vertical, 6)
+                                        }
                                     }
                                 }
                             }
