@@ -206,6 +206,33 @@ class GroupViewModel: ObservableObject {
             print("Listener im GroupViewModel entfernt")
         }
 
+    
+    
+    func removeMember(from group: Group, userId: String) async throws {
+     
+        guard currentUserId == group.ownerId else {
+            throw NSError(
+                domain: "Group",
+                code: 403,
+                userInfo: [NSLocalizedDescriptionKey: "Keine Berechtigung."]
+            )
+        }
+
+        guard userId != group.ownerId else {
+            throw NSError(
+                domain: "Group",
+                code: 400,
+                userInfo: [NSLocalizedDescriptionKey: "Der Besitzer kann sich nicht selbst entfernen."]
+            )
+        }
+
+        try await db.collection("groups")
+            .document(group.id)
+            .updateData([
+                "memberIds": FieldValue.arrayRemove([userId])
+            ])
+    }
+
 
 }
 
