@@ -42,7 +42,7 @@ struct GroupView: View {
                                 Section(header: Text("Eigene Gruppen")) {
                                     ForEach(groupViewModel.ownedGroups, id: \.id) { group in
                                         HStack {
-                                            NavigationLink(destination: GroupDetailView(group: group)) {
+                                            NavigationLink(destination: GroupDetailView(group: group, groupViewModel: groupViewModel)) {
                                                 VStack(alignment: .leading, spacing: 6) {
                                                     Text(group.name)
                                                         .font(.headline)
@@ -95,7 +95,7 @@ struct GroupView: View {
                             if !groupViewModel.joinedGroups.isEmpty {
                                 Section(header: Text("Beigetretene Gruppen")) {
                                     ForEach(groupViewModel.joinedGroups, id: \.id) { group in
-                                        NavigationLink(destination: GroupDetailView(group: group)) {
+                                        NavigationLink(destination: GroupDetailView(group: group, groupViewModel: groupViewModel)) {
                                             VStack(alignment: .leading, spacing: 6) {
                                                 Text(group.name)
                                                     .font(.headline)

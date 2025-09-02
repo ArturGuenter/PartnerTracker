@@ -21,7 +21,7 @@ struct GroupDetailView: View {
     @State private var memberToPromote: AppUser? = nil
     @State private var showPromoteAlert = false
     
-    @EnvironmentObject var groupViewModel: GroupViewModel
+    @ObservedObject var groupViewModel: GroupViewModel
     
     private var currentUserId: String {
         Auth.auth().currentUser?.uid ?? ""
@@ -96,7 +96,7 @@ struct GroupDetailView: View {
                 loadMembers()
             }
             
-            // Alert: Mitglied entfernen
+            
             .alert("Mitglied entfernen?", isPresented: $showRemoveAlert) {
                 Button("Abbrechen", role: .cancel) {}
                 
@@ -120,7 +120,7 @@ struct GroupDetailView: View {
                 }
             }
             
-            // Alert: Adminrechte übertragen
+            
             .alert("Adminrechte übertragen?", isPresented: $showPromoteAlert) {
                 Button("Abbrechen", role: .cancel) {}
                 
@@ -185,7 +185,7 @@ struct GroupDetailView: View {
         createdAt: Date(),
         password: "pw",
         ownerId: "uid1"
-    ))
-    .environmentObject(GroupViewModel())
+    ), groupViewModel: GroupViewModel())
+    
 }
 
