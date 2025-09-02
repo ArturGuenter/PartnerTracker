@@ -232,6 +232,23 @@ class GroupViewModel: ObservableObject {
                 "memberIds": FieldValue.arrayRemove([userId])
             ])
     }
+    
+    
+        func transferAdminRights(group: Group, newOwnerId: String) async throws {
+            
+            guard currentUserId == group.ownerId else {
+                throw NSError(
+                    domain: "Group",
+                    code: 403,
+                    userInfo: [NSLocalizedDescriptionKey: "Nur der aktuelle Admin kann Rechte übertragen."]
+                )
+            }
+            
+            
+            
+        }
+    
+
 
 
 }
