@@ -18,6 +18,9 @@ struct GroupDetailView: View {
     @State private var memberToRemove: AppUser? = nil
     @State private var showRemoveAlert = false
     
+    @State private var memberToPromote: AppUser? = nil
+    @State private var showPromoteAlert = false
+    
     @EnvironmentObject var groupViewModel: GroupViewModel
     
     private var currentUserId: String {
