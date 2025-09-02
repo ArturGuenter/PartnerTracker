@@ -245,7 +245,24 @@ class GroupViewModel: ObservableObject {
             }
             
             
+            guard group.memberIds.contains(newOwnerId) else {
+                throw NSError(
+                    domain: "Group",
+                    code: 404,
+                    userInfo: [NSLocalizedDescriptionKey: "Der neue Admin muss Mitglied der Gruppe sein."]
+                )
+            }
+
             
+            let groupRef = db.collection("groups").document(group.id)
+            try await groupRef.updateData([
+                "ownerId": newOwnerId
+            ])
+
+            
+            if let index = groups.firstIndex(where: { $0.id == group.id }) {
+                groups[index].ownerId = newOwnerId
+            }
         }
     
 
