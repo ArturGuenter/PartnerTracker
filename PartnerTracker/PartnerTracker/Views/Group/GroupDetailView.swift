@@ -179,16 +179,8 @@ struct GroupDetailView: View {
     }
 }
 
-
+/*
 #Preview {
-    GroupDetailView(group: Group(
-        id: "123",
-        name: "Testgruppe",
-        memberIds: ["uid1", "uid2"],
-        createdAt: Date(),
-        password: "pw",
-        ownerId: "uid1"
-    ), groupViewModel: GroupViewModel())
-    
+    GroupDetailView(groupId: "123", groupViewModel: GroupViewModel())
 }
-
+*/
