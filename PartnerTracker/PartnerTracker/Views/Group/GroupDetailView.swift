@@ -32,72 +32,64 @@ struct GroupDetailView: View {
     }
     
     var body: some View {
-        VStack {
-            if let group = group {
-                if isLoading {
-                    ProgressView("Lade Mitglieder …").padding()
-                } else if !errorMessage.isEmpty {
-                    Text(errorMessage).foregroundColor(.red)
-                } else if members.isEmpty {
-                    Text("Keine Mitglieder gefunden.").foregroundColor(.gray)
-                } else {
-                    List(members) { member in
-                        HStack {
-                            VStack(alignment: .leading) {
-                                HStack {
-                                    Text("\(member.name) \(member.surname)")
-                                        .font(.headline)
-                                    
-                                    if member.id == group.ownerId {
-                                        Text("Admin")
-                                            .font(.caption)
-                                            .foregroundColor(.blue)
-                                            .padding(.horizontal, 6)
-                                            .padding(.vertical, 2)
-                                            .background(Color.blue.opacity(0.15))
-                                            .cornerRadius(6)
+            VStack {
+                if let group = group {
+                    if isLoading {
+                        ProgressView("Lade Mitglieder …").padding()
+                    } else if !errorMessage.isEmpty {
+                        Text(errorMessage).foregroundColor(.red)
+                    } else if members.isEmpty {
+                        Text("Keine Mitglieder gefunden.").foregroundColor(.gray)
+                    } else {
+                        List(members) { member in
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    HStack {
+                                        Text("\(member.name) \(member.surname)")
+                                            .font(.headline)
+                                        
+                                        if member.id == group.ownerId {
+                                            Text("Admin")
+                                                .font(.caption)
+                                                .foregroundColor(.blue)
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 2)
+                                                .background(Color.blue.opacity(0.15))
+                                                .cornerRadius(6)
+                                        }
                                     }
+                                    Text(member.email)
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
                                 }
-                                Text(member.email)
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                            }
-                            
-                            Spacer()
-                            
-                            if currentUserId == group.ownerId && member.id != group.ownerId {
-                                HStack {
-                                    Button {
-                                        memberToPromote = member
-                                        showPromoteAlert = true
-                                    } label: {
-                                        Image(systemName: "crown.fill")
-                                            .foregroundColor(.yellow)
-                                    }
-                                    .buttonStyle(BorderlessButtonStyle())
-                                    
-                                    Button {
-                                        memberToRemove = member
-                                        showRemoveAlert = true
-                                    } label: {
-                                        Image(systemName: "person.fill.xmark")
-                                            .foregroundColor(.red)
-                                    }
-                                    .buttonStyle(BorderlessButtonStyle())
+                                
+                                Spacer()
+                                
+                                if currentUserId == group.ownerId && member.id != group.ownerId {
+                                    MemberActionButtons(
+                                        member: member,
+                                        onPromote: {
+                                            memberToPromote = member
+                                            showPromoteAlert = true
+                                        },
+                                        onRemove: {
+                                            memberToRemove = member
+                                            showRemoveAlert = true
+                                        }
+                                    )
                                 }
                             }
                         }
                     }
+                } else {
+                    Text("Gruppe nicht gefunden")
                 }
-            } else {
-                Text("Gruppe nicht gefunden")
             }
-        }
-        .navigationTitle(group?.name ?? "Gruppe")
-        .onAppear {
-            groupViewModel.observeGroupsForCurrentUser()
-            loadMembers()
-        }
+            .navigationTitle(group?.name ?? "Gruppe")
+            .onAppear {
+                groupViewModel.observeGroupsForCurrentUser()
+                loadMembers()
+            }
         
         // Mitglied entfernen
         .alert("Mitglied entfernen?", isPresented: $showRemoveAlert) {

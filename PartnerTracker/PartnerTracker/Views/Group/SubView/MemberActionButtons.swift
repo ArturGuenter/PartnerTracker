@@ -30,5 +30,14 @@ struct MemberActionButtons: View {
 }
 
 #Preview {
-    MemberActionButtons()
+    MemberActionButtons(
+        member: AppUser(id: "1", surname: "Mustermann", name: "Max", email: "max@example.com"),
+        onPromote: {
+            print("Promote gedrückt")
+        },
+        onRemove: {
+            print("Remove gedrückt")
+        }
+    )
 }
+
