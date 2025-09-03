@@ -255,37 +255,41 @@ class GroupViewModel: ObservableObject {
 
     
     
-        func transferAdminRights(group: Group, newOwnerId: String) async throws {
-            
-            guard currentUserId == group.ownerId else {
-                throw NSError(
-                    domain: "Group",
-                    code: 403,
-                    userInfo: [NSLocalizedDescriptionKey: "Nur der aktuelle Admin kann Rechte übertragen."]
-                )
-            }
-            
-            
-            guard group.memberIds.contains(newOwnerId) else {
-                throw NSError(
-                    domain: "Group",
-                    code: 404,
-                    userInfo: [NSLocalizedDescriptionKey: "Der neue Admin muss Mitglied der Gruppe sein."]
-                )
-            }
+    func transferAdminRights(group: Group, newOwnerId: String) async throws {
+        print("Übertrage Adminrechte von \(group.ownerId) auf \(newOwnerId)")
 
-            
-            let groupRef = db.collection("groups").document(group.id)
-            try await groupRef.updateData([
-                "ownerId": newOwnerId
-            ])
-
-            
-            if let index = groups.firstIndex(where: { $0.id == group.id }) {
-                groups[index].ownerId = newOwnerId
-            }
+        guard currentUserId == group.ownerId else {
+            throw NSError(
+                domain: "Group",
+                code: 403,
+                userInfo: [NSLocalizedDescriptionKey: "Nur der aktuelle Admin kann Rechte übertragen."]
+            )
         }
-    
+
+        guard group.memberIds.contains(newOwnerId) else {
+            throw NSError(
+                domain: "Group",
+                code: 404,
+                userInfo: [NSLocalizedDescriptionKey: "Der neue Admin muss Mitglied der Gruppe sein."]
+            )
+        }
+
+        guard newOwnerId != group.ownerId else {
+            throw NSError(
+                domain: "Group",
+                code: 400,
+                userInfo: [NSLocalizedDescriptionKey: "Der Benutzer ist bereits Admin."]
+            )
+        }
+
+        let groupRef = db.collection("groups").document(group.id)
+        try await groupRef.updateData([
+            "ownerId": newOwnerId
+        ])
+
+        print("Adminrechte erfolgreich übertragen auf \(newOwnerId)")
+    }
+
 
 
 
