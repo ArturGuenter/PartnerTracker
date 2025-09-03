@@ -33,22 +33,7 @@ class GroupViewModel: ObservableObject {
         groups.filter { $0.ownerId != currentUserId }
     }
 
-    //Listener
-    func observeGroupsForCurrentUser() {
-            guard let uid = Auth.auth().currentUser?.uid else { return }
-
-            db.collection("groups")
-                .whereField("memberIds", arrayContains: uid)
-                .addSnapshotListener { snapshot, error in
-                    if let error = error {
-                        print("Fehler beim Laden: \(error)")
-                        return
-                    }
-                    self.groups = snapshot?.documents.compactMap {
-                        try? $0.data(as: Group.self)
-                    } ?? []
-                }
-        }
+    
    
     
     
