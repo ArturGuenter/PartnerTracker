@@ -102,9 +102,9 @@ struct GroupDetailView: View {
         // Mitglied entfernen
         .alert("Mitglied entfernen?", isPresented: $showRemoveAlert) {
             Button("Abbrechen", role: .cancel) {}
-            if let member = memberToRemove {
-                Button("Entfernen", role: .destructive) {
-                    Task {
+            Button("Entfernen", role: .destructive) {
+                Task {
+                    if let member = memberToRemove {
                         do {
                             try await groupViewModel.removeMember(groupId: groupId, userId: member.id)
                             await MainActor.run {
@@ -121,13 +121,14 @@ struct GroupDetailView: View {
                 Text("Möchtest du „\(member.name) \(member.surname)“ wirklich entfernen?")
             }
         }
+
         
         // Adminrechte übertragen
         .alert("Adminrechte übertragen?", isPresented: $showPromoteAlert) {
             Button("Abbrechen", role: .cancel) {}
-            if let member = memberToPromote {
-                Button("Übertragen", role: .destructive) {
-                    Task {
+            Button("Übertragen", role: .destructive) {
+                Task {
+                    if let member = memberToPromote {
                         do {
                             try await groupViewModel.transferAdminRights(groupId: groupId, newOwnerId: member.id)
                         } catch {
@@ -141,6 +142,7 @@ struct GroupDetailView: View {
                 Text("Möchtest du die Adminrechte an „\(member.name) \(member.surname)“ übertragen? Danach bist du kein Admin mehr.")
             }
         }
+
     }
     
     private func loadMembers() {
@@ -179,8 +181,8 @@ struct GroupDetailView: View {
     }
 }
 
-/*
+
 #Preview {
     GroupDetailView(groupId: "123", groupViewModel: GroupViewModel())
 }
-*/
+
