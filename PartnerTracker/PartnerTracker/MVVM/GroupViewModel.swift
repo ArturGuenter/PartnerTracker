@@ -51,6 +51,8 @@ class GroupViewModel: ObservableObject {
         }
    
     
+    
+    
     func createGroup(name: String, password: String) async throws {
         let newGroupRef = db.collection("groups").document()
 
@@ -224,7 +226,8 @@ class GroupViewModel: ObservableObject {
     
     
     func removeMember(from group: Group, userId: String) async throws {
-     
+        print("Entferne Mitglied \(userId) aus Gruppe \(group.id)")
+
         guard currentUserId == group.ownerId else {
             throw NSError(
                 domain: "Group",
@@ -246,7 +249,10 @@ class GroupViewModel: ObservableObject {
             .updateData([
                 "memberIds": FieldValue.arrayRemove([userId])
             ])
+
+        print("Mitglied \(userId) erfolgreich entfernt")
     }
+
     
     
         func transferAdminRights(group: Group, newOwnerId: String) async throws {
