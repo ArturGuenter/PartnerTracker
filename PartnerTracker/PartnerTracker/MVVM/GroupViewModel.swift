@@ -210,8 +210,20 @@ class GroupViewModel: ObservableObject {
 
     
     
-    func removeMember(from group: Group, userId: String) async throws {
-        print("Entferne Mitglied \(userId) aus Gruppe \(group.id)")
+    // MARK: - Mitglied entfernen
+    func removeMember(groupId: String, userId: String) async throws {
+        print("Entferne Mitglied \(userId) aus Gruppe \(groupId)")
+
+        let groupRef = db.collection("groups").document(groupId)
+        let snapshot = try await groupRef.getDocument()
+
+        guard let group = try? snapshot.data(as: Group.self) else {
+            throw NSError(
+                domain: "Group",
+                code: 404,
+                userInfo: [NSLocalizedDescriptionKey: "Gruppe nicht gefunden."]
+            )
+        }
 
         guard currentUserId == group.ownerId else {
             throw NSError(
@@ -229,19 +241,27 @@ class GroupViewModel: ObservableObject {
             )
         }
 
-        try await db.collection("groups")
-            .document(group.id)
-            .updateData([
-                "memberIds": FieldValue.arrayRemove([userId])
-            ])
+        try await groupRef.updateData([
+            "memberIds": FieldValue.arrayRemove([userId])
+        ])
 
         print("Mitglied \(userId) erfolgreich entfernt")
     }
 
-    
-    
-    func transferAdminRights(group: Group, newOwnerId: String) async throws {
-        print("Übertrage Adminrechte von \(group.ownerId) auf \(newOwnerId)")
+    // MARK: - Adminrechte übertragen
+    func transferAdminRights(groupId: String, newOwnerId: String) async throws {
+        print("Übertrage Adminrechte auf \(newOwnerId) in Gruppe \(groupId)")
+
+        let groupRef = db.collection("groups").document(groupId)
+        let snapshot = try await groupRef.getDocument()
+
+        guard let group = try? snapshot.data(as: Group.self) else {
+            throw NSError(
+                domain: "Group",
+                code: 404,
+                userInfo: [NSLocalizedDescriptionKey: "Gruppe nicht gefunden."]
+            )
+        }
 
         guard currentUserId == group.ownerId else {
             throw NSError(
@@ -267,13 +287,13 @@ class GroupViewModel: ObservableObject {
             )
         }
 
-        let groupRef = db.collection("groups").document(group.id)
         try await groupRef.updateData([
             "ownerId": newOwnerId
         ])
 
         print("Adminrechte erfolgreich übertragen auf \(newOwnerId)")
     }
+
 
 
 

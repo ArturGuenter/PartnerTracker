@@ -8,236 +8,154 @@
 import SwiftUI
 
 struct GroupView: View {
-    @ObservedObject var groupViewModel : GroupViewModel
-        @State private var showCreateGroupSheet = false
-        @State private var isLoading = true
-        @State private var errorMessage = ""
+    @ObservedObject var groupViewModel: GroupViewModel
+
+    @State private var showCreateGroupSheet = false
+    @State private var isLoading = true
+    @State private var errorMessage = ""
     @State private var showAddGroupSheet = false
     @State private var showCopyConfirmation = false
     @State private var groupToDelete: Group? = nil
     @State private var showDeleteAlert = false
     @State private var showSuccessToast = false
 
-
-    
-    
-
-        var body: some View {
-            NavigationStack {
-                VStack {
-                    if isLoading {
-                        ProgressView("Lade Gruppen …")
-                            .padding()
-                    } else if !errorMessage.isEmpty {
-                        Text(errorMessage)
-                            .foregroundColor(.red)
-                            .padding()
-                    } else if groupViewModel.groups.isEmpty {
-                        Text("Du bist noch keiner Gruppe beigetreten.")
-                            .foregroundColor(.secondary)
-                            .padding()
-                    } else {
-                        List {
-                            if !groupViewModel.ownedGroups.isEmpty {
-                                Section(header: Text("Eigene Gruppen")) {
-                                    ForEach(groupViewModel.ownedGroups, id: \.id) { group in
-                                        HStack {
-                                            NavigationLink(destination: GroupDetailView(group: group, groupViewModel: groupViewModel)) {
-                                                VStack(alignment: .leading, spacing: 6) {
-                                                    Text(group.name)
-                                                        .font(.headline)
-
-                                                    if let createdAt = group.createdAt {
-                                                        Text("Erstellt am \(createdAt.formatted(date: .abbreviated, time: .shortened))")
-                                                            .font(.caption)
-                                                            .foregroundColor(.gray)
-                                                    }
-
-                                                    Text("Mitgliederanzahl: \(group.memberIds.count)")
-                                                        .font(.caption)
-                                                        .foregroundColor(.gray)
-
-                                                    Text("ID: \(group.id)")
-                                                        .font(.caption2)
-                                                        .foregroundColor(.gray)
-                                                        .lineLimit(1)
-                                                        .truncationMode(.middle)
-                                                }
-                                                .padding(.vertical, 6)
-                                            }
-
-                                            Spacer()
-
-                                            Button(action: {
+    var body: some View {
+        NavigationStack {
+            VStack {
+                if isLoading {
+                    ProgressView("Lade Gruppen …").padding()
+                } else if !errorMessage.isEmpty {
+                    Text(errorMessage).foregroundColor(.red).padding()
+                } else if groupViewModel.groups.isEmpty {
+                    Text("Du bist noch keiner Gruppe beigetreten.")
+                        .foregroundColor(.secondary).padding()
+                } else {
+                    List {
+                        if !groupViewModel.ownedGroups.isEmpty {
+                            Section(header: Text("Eigene Gruppen")) {
+                                ForEach(groupViewModel.ownedGroups, id: \.id) { group in
+                                    NavigationLink(
+                                        destination: GroupDetailView(
+                                            groupId: group.id,
+                                            groupViewModel: groupViewModel
+                                        )
+                                    ) {
+                                        GroupRowView(
+                                            group: group,
+                                            showCopyButton: true,
+                                            onCopy: {
                                                 UIPasteboard.general.string = group.id
                                                 withAnimation { showCopyConfirmation = true }
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                                                     withAnimation { showCopyConfirmation = false }
                                                 }
-                                            }) {
-                                                Image(systemName: "doc.on.doc")
-                                                    .foregroundColor(.blue)
                                             }
-                                            .buttonStyle(BorderlessButtonStyle())
-                                        }
-                                        .swipeActions {
-                                            Button(role: .destructive) {
-                                                groupToDelete = group
-                                                showDeleteAlert = true
-                                            } label: {
-                                                Label("Löschen", systemImage: "trash")
-                                            }
-                                        }
+                                        )
                                     }
-                                }
-                            }
-
-                            if !groupViewModel.joinedGroups.isEmpty {
-                                Section(header: Text("Beigetretene Gruppen")) {
-                                    ForEach(groupViewModel.joinedGroups, id: \.id) { group in
-                                        NavigationLink(destination: GroupDetailView(group: group, groupViewModel: groupViewModel)) {
-                                            VStack(alignment: .leading, spacing: 6) {
-                                                Text(group.name)
-                                                    .font(.headline)
-
-                                                if let createdAt = group.createdAt {
-                                                    Text("Erstellt am \(createdAt.formatted(date: .abbreviated, time: .shortened))")
-                                                        .font(.caption)
-                                                        .foregroundColor(.gray)
-                                                }
-
-                                                Text("Mitgliederanzahl: \(group.memberIds.count)")
-                                                    .font(.caption)
-                                                    .foregroundColor(.gray)
-
-                                                Text("ID: \(group.id)")
-                                                    .font(.caption2)
-                                                    .foregroundColor(.gray)
-                                                    .lineLimit(1)
-                                                    .truncationMode(.middle)
-                                            }
-                                            .padding(.vertical, 6)
+                                    .swipeActions {
+                                        Button(role: .destructive) {
+                                            groupToDelete = group
+                                            showDeleteAlert = true
+                                        } label: {
+                                            Label("Löschen", systemImage: "trash")
                                         }
                                     }
                                 }
                             }
                         }
 
-
-                        
-
-                    }
-                    
-                    if showCopyConfirmation {
-                        Text("Gruppen-ID kopiert!")
-                            .font(.caption)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(Color.black.opacity(0.8))
-                            .cornerRadius(12)
-                            .transition(.move(edge: .top).combined(with: .opacity))
-                            .zIndex(1)
-                            .padding(.top, 8)
-                    }
-                    
-                    if showSuccessToast {
-                        Text("Gruppe erfolgreich erstellt!")
-                            .font(.caption)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(Color.green.opacity(0.85))
-                            .cornerRadius(12)
-                            .transition(.move(edge: .top).combined(with: .opacity))
-                            .zIndex(1)
-                            .padding(.top, 8)
-                    }
-
-
-                }
-                .navigationTitle("Meine Gruppen")
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            showAddGroupSheet = true
-                        } label: {
-                            Image(systemName: "person.3.fill")
-                        }
-                    }
-
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            showCreateGroupSheet = true
-                        } label: {
-                            Image(systemName: "plus")
-                        }
-                    }
-                }
-                
-                .sheet(isPresented: $showCreateGroupSheet) {
-                    GroupCreateView(groupViewModel: groupViewModel, onSuccess: {
-                        withAnimation {
-                            showSuccessToast = true
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                            withAnimation {
-                                showSuccessToast = false
+                        if !groupViewModel.joinedGroups.isEmpty {
+                            Section(header: Text("Beigetretene Gruppen")) {
+                                ForEach(groupViewModel.joinedGroups, id: \.id) { group in
+                                    NavigationLink(
+                                        destination: GroupDetailView(
+                                            groupId: group.id,
+                                            groupViewModel: groupViewModel
+                                        )
+                                    ) {
+                                        GroupRowView(group: group, showCopyButton: false, onCopy: nil)
+                                    }
+                                }
                             }
                         }
-                    })
-                }
-
-                .sheet(isPresented: $showAddGroupSheet) {
-                    GroupAddView(groupViewModel: groupViewModel)
-                }
-                .onAppear {
-                    #if DEBUG
-                    // Verhindert Aufruf im Preview
-                    if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
-                        return
-                    }
-                    #endif
-
-                    Task {
-                        await loadGroups()
                     }
                 }
 
-                
-                
-            }
-            .alert("Gruppe löschen?", isPresented: $showDeleteAlert) {
-                Button("Abbrechen", role: .cancel) {}
-                if let group = groupToDelete {
-                    Button("Löschen", role: .destructive) {
-                        Task {
-                            try? await groupViewModel.deleteGroup(group)
-                        }
-                    }
+                if showCopyConfirmation {
+                    Text("Gruppen-ID kopiert!")
+                        .font(.caption)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 12).padding(.vertical, 8)
+                        .background(Color.black.opacity(0.8))
+                        .cornerRadius(12)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .zIndex(1).padding(.top, 8)
                 }
-            } message: {
-                if let group = groupToDelete {
-                    Text("Möchtest du die Gruppe „\(group.name)“ wirklich löschen? Alle Aufgaben in dieser Gruppe werden ebenfalls entfernt.")
+
+                if showSuccessToast {
+                    Text("Gruppe erfolgreich erstellt!")
+                        .font(.caption)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 12).padding(.vertical, 8)
+                        .background(Color.green.opacity(0.85))
+                        .cornerRadius(12)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .zIndex(1).padding(.top, 8)
                 }
             }
-
-            .onAppear {
-                
-                     groupViewModel.observeGroupsForCurrentUser()
-                
+            .navigationTitle("Meine Gruppen")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showAddGroupSheet = true } label: {
+                        Image(systemName: "person.3.fill")
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showCreateGroupSheet = true } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $showCreateGroupSheet) {
+                GroupCreateView(groupViewModel: groupViewModel, onSuccess: {
+                    withAnimation { showSuccessToast = true }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        withAnimation { showSuccessToast = false }
+                    }
+                })
+            }
+            .sheet(isPresented: $showAddGroupSheet) {
+                GroupAddView(groupViewModel: groupViewModel)
+            }
+            .task {
+                // aufrufen statt onAppear -> läuft nur einmal, wenn View erscheint
+                await loadGroups()
+                groupViewModel.observeGroupsForCurrentUser()
             }
         }
-
-        private func loadGroups() async {
-            do {
-                try await groupViewModel.fetchGroupsForCurrentUser()
-            } catch {
-                errorMessage = error.localizedDescription
+        .alert("Gruppe löschen?", isPresented: $showDeleteAlert) {
+            Button("Abbrechen", role: .cancel) {}
+            if let group = groupToDelete {
+                Button("Löschen", role: .destructive) {
+                    Task { try? await groupViewModel.deleteGroup(group) }
+                }
             }
-            isLoading = false
+        } message: {
+            if let group = groupToDelete {
+                Text("Möchtest du die Gruppe „\(group.name)“ wirklich löschen? Alle Aufgaben in dieser Gruppe werden ebenfalls entfernt.")
+            }
         }
     }
+
+    private func loadGroups() async {
+        do {
+            try await groupViewModel.fetchGroupsForCurrentUser()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        isLoading = false
+    }
+}
 
 #Preview {
     GroupView(groupViewModel: GroupViewModel())
