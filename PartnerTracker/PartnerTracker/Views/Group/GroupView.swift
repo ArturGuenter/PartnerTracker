@@ -142,7 +142,15 @@ struct GroupView: View {
             }
         } message: {
             if let group = groupToDelete {
-                Text("Möchtest du die Gruppe „\(group.name)“ wirklich löschen? Alle Aufgaben in dieser Gruppe werden ebenfalls entfernt.")
+                if group.ownerId == groupViewModel.currentUserId {
+                    Text("""
+                    Du bist der Admin dieser Gruppe. 
+                    Wenn du die Gruppe löscht, wird sie für alle Mitglieder unwiderruflich entfernt. 
+                    Falls die Gruppe bestehen bleiben soll, übertrage vorher die Adminrechte.
+                    """)
+                } else {
+                    Text("Möchtest du die Gruppe „\(group.name)“ wirklich verlassen und alle deine zugehörigen Aufgaben entfernen?")
+                }
             }
         }
     }
