@@ -203,6 +203,18 @@ class GroupViewModel: ObservableObject {
         }
     }
     
+    func leaveGroup(_ group: Group) async throws {
+        try await db.collection("groups")
+            .document(group.id)
+            .updateData([
+                "memberIds": FieldValue.arrayRemove([currentUserId])
+            ])
+
+        self.groups.removeAll { $0.id == group.id }
+        print("Nutzer \(currentUserId) hat die Gruppe \(group.id) verlassen")
+    }
+
+    
     deinit {
             groupsListener?.remove()
             print("Listener im GroupViewModel entfernt")

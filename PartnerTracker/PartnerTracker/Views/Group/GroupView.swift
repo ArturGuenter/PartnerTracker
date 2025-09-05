@@ -136,7 +136,7 @@ struct GroupView: View {
                 GroupAddView(groupViewModel: groupViewModel)
             }
             .task {
-                // aufrufen statt onAppear -> läuft nur einmal, wenn View erscheint
+                
                 await loadGroups()
                 groupViewModel.observeGroupsForCurrentUser()
             }
