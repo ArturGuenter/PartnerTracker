@@ -75,6 +75,14 @@ struct GroupView: View {
                                     ) {
                                         GroupRowView(group: group, showCopyButton: false, onCopy: nil)
                                     }
+                                    .swipeActions {
+                                        Button(role: .destructive) {
+                                            groupToDelete = group
+                                            showDeleteAlert = true
+                                        } label: {
+                                            Label("Verlassen", systemImage: "rectangle.portrait.and.arrow.right")
+                                        }
+                                    }
                                 }
                             }
                         }
