@@ -168,7 +168,7 @@ struct GroupView: View {
                     Falls die Gruppe bestehen bleiben soll, übertrage vorher die Adminrechte.
                     """)
                 } else {
-                    Text("Möchtest du die Gruppe „\(group.name)“ wirklich verlassen? Deine Aufgaben in dieser Gruppe gehen dabei verloren.")
+                    Text("Möchtest du die Gruppe „\(group.name)“ wirklich verlassen? Deine Aufgaben in dieser Gruppe gehen dabei verloren!")
                 }
             }
         }
