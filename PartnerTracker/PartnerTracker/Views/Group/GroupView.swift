@@ -141,26 +141,38 @@ struct GroupView: View {
                 groupViewModel.observeGroupsForCurrentUser()
             }
         }
-        .alert("Gruppe löschen?", isPresented: $showDeleteAlert) {
+        .alert(
+            groupToDelete?.ownerId == groupViewModel.currentUserId
+                ? "Gruppe löschen?"
+                : "Gruppe verlassen?",
+            isPresented: $showDeleteAlert
+        ) {
             Button("Abbrechen", role: .cancel) {}
             if let group = groupToDelete {
-                Button("Löschen", role: .destructive) {
-                    Task { try? await groupViewModel.deleteGroup(group) }
+                if group.ownerId == groupViewModel.currentUserId {
+                    Button("Löschen", role: .destructive) {
+                        Task { try? await groupViewModel.deleteGroup(group) }
+                    }
+                } else {
+                    Button("Verlassen", role: .destructive) {
+                        Task { try? await groupViewModel.leaveGroup(group) }
+                    }
                 }
             }
         } message: {
             if let group = groupToDelete {
                 if group.ownerId == groupViewModel.currentUserId {
                     Text("""
-                    Du bist der Admin dieser Gruppe. 
-                    Wenn du die Gruppe löscht, wird sie für alle Mitglieder unwiderruflich entfernt. 
+                    Du bist der Admin dieser Gruppe.
+                    Wenn du die Gruppe löschst, wird sie für alle Mitglieder unwiderruflich entfernt.
                     Falls die Gruppe bestehen bleiben soll, übertrage vorher die Adminrechte.
                     """)
                 } else {
-                    Text("Möchtest du die Gruppe „\(group.name)“ wirklich verlassen und alle deine zugehörigen Aufgaben entfernen?")
+                    Text("Möchtest du die Gruppe „\(group.name)“ wirklich verlassen? Deine Aufgaben in dieser Gruppe gehen dabei verloren.")
                 }
             }
         }
+
     }
 
     private func loadGroups() async {
