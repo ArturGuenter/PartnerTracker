@@ -444,7 +444,7 @@ class TaskViewModel: ObservableObject {
         
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
-        formatter.timeZone = Calendar.current.timeZone  // <-- lokal
+        formatter.timeZone = Calendar.current.timeZone
         let dateKey = formatter.string(from: localDay)
         
         let historyRef = db.collection("users")
