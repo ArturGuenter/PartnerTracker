@@ -6,7 +6,10 @@
 //
 
 import Foundation
+import UserNotifications
+
 @MainActor
 class NotificationViewModel: ObservableObject {
-     
+    private var debounceTimers: [String: Task<Void, Never>] = [:]
+    
 }
