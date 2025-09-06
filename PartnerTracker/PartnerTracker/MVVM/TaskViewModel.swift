@@ -404,6 +404,10 @@ class TaskViewModel: ObservableObject {
                     tasks[index].completionDates = updatedCompletionDates
                     groupedTasks[group.name] = tasks
                 }
+                if let notificationVM = notificationViewModel {
+                                notificationVM.handleGroupStatusChange(group: group, tasks: groupedTasks[group.name] ?? [])
+                            }
+                            
             } catch {
                 print("Fehler beim Aktualisieren der Gruppenaufgabe: \(error)")
             }
