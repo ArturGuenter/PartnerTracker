@@ -58,4 +58,16 @@ class NotificationViewModel: ObservableObject {
            }
        }
     
+    
+    private func requestAuthorization() {
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+                if let error = error {
+                    print("Fehler bei Benachrichtigungs-Erlaubnis: \(error)")
+                } else {
+                    print("Benachrichtigungen erlaubt: \(granted)")
+                }
+            }
+        }
+    
+    
 }
