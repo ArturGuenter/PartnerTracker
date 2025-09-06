@@ -11,6 +11,7 @@ import FirebaseAuth
 
 @MainActor
 class TaskViewModel: ObservableObject {
+    var notificationViewModel: NotificationViewModel?
     @Published var personalTasks: [TaskItem] = []
     @Published var groupedTasks: [String: [TaskItem]] = [:]
     
@@ -19,6 +20,7 @@ class TaskViewModel: ObservableObject {
     
     private var personalListener: ListenerRegistration?
     private var groupListeners: [String: ListenerRegistration] = [:]
+    
     
     
     var currentUserId: String? {
