@@ -47,6 +47,8 @@ class NotificationViewModel: ObservableObject {
            content.body = "Alle Aufgaben in der Gruppe „\(group.name)“ sind abgeschlossen."
            content.sound = .default
 
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        
            let request = UNNotificationRequest(
                identifier: UUID().uuidString,
                content: content,
