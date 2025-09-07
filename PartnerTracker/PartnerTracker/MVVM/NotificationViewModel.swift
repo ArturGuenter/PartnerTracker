@@ -18,7 +18,10 @@ class NotificationViewModel: ObservableObject {
 
         
         func handleGroupStatusChange(group: Group, tasks: [TaskItem]) {
-            let allDone = tasks.allSatisfy { !$0.completedBy.isEmpty }
+            let allDone = tasks.allSatisfy { task in
+                    Set(group.memberIds).isSubset(of: Set(task.completedBy))
+                }
+
 
             if allDone {
                 debounceTimers[group.id]?.cancel()
