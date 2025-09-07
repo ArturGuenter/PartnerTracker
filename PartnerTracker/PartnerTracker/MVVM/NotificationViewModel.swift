@@ -52,7 +52,7 @@ class NotificationViewModel: ObservableObject {
            let request = UNNotificationRequest(
                identifier: UUID().uuidString,
                content: content,
-               trigger: nil
+               trigger: trigger
            )
 
            do {
@@ -65,14 +65,14 @@ class NotificationViewModel: ObservableObject {
     
     
     private func requestAuthorization() {
-            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-                if let error = error {
-                    print("Fehler bei Benachrichtigungs-Erlaubnis: \(error)")
-                } else {
-                    print("Benachrichtigungen erlaubt: \(granted)")
-                }
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            if let error = error {
+                print("Fehler bei Benachrichtigungs-Erlaubnis: \(error)")
+            } else {
+                print("Benachrichtigungen erlaubt: \(granted)")
             }
         }
+    }
     
     
 }
