@@ -15,7 +15,7 @@ struct CircularProgressBar: View {
     var completed: Int
     var total: Int
     var size: CGFloat
-    var progressColor: Color = .blue   
+    var progressColor: Color = .blue
     
     var body: some View {
         VStack {
@@ -28,9 +28,10 @@ struct CircularProgressBar: View {
                 Circle()
                     .trim(from: 0.0, to: CGFloat(min(progress, 1.0)))
                     .stroke(style: StrokeStyle(lineWidth: 15, lineCap: .round))
-                    .foregroundColor(progressColor)
+                    .foregroundColor(progressColor)  // volle Farbe
                     .rotationEffect(Angle(degrees: -90))
                     .animation(.easeOut, value: progress)
+
                 
                 VStack {
                     Text("\(Int(progress * 100))%")
