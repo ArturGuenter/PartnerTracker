@@ -15,15 +15,15 @@ struct CircularProgressBar: View {
     var completed: Int
     var total: Int
     var size: CGFloat
-    var progressColor: Color = .blue   // <-- NEU, Standardfarbe ist Blau
+    var progressColor: Color = .blue   
     
     var body: some View {
         VStack {
             ZStack {
                 Circle()
                     .stroke(lineWidth: 15)
-                    .opacity(0.2)
-                    .foregroundColor(progressColor)
+                    .foregroundColor(.gray.opacity(0.2))
+
                 
                 Circle()
                     .trim(from: 0.0, to: CGFloat(min(progress, 1.0)))
