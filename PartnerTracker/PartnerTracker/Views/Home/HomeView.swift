@@ -30,18 +30,19 @@ struct HomeView: View {
                 ScrollView {
                     VStack(spacing: 24) {
                         
-                        // Gesamtaufgaben - große Karte
+                        
                         CircularProgressBar(
                             progress: taskViewModel.overallCompletionRate,
                             title: "Alle Aufgaben",
                             completed: taskViewModel.doneTaskCount,
                             total: taskViewModel.totalTaskCount,
                             size: 200,
-                            progressColor: .blue
+                            progressColor: .blue    
                         )
+
                         .cardStyle()
                         
-                        // Persönlich / Gruppe nebeneinander
+                        
                         HStack(spacing: 16) {
                             CircularProgressBar(
                                 progress: taskViewModel.personalCompletionRate,
@@ -64,7 +65,7 @@ struct HomeView: View {
                             .cardStyle()
                         }
                         
-                        // Heatmap in Karte
+                        
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Aktivität")
                                 .font(.headline)
