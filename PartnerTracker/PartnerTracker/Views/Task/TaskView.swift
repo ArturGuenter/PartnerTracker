@@ -18,11 +18,13 @@ struct TaskView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                personalTasksSection
-                groupTasksSection
+            ScrollView {
+                VStack(spacing: 24) {
+                    personalTasksSection
+                    groupTasksSection
+                }
+                .padding()
             }
-            .listStyle(.insetGrouped)
             .navigationTitle("Aufgaben")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear(perform: loadData)
@@ -34,7 +36,22 @@ struct TaskView: View {
 
     // MARK: - Eigene Aufgaben
     var personalTasksSection: some View {
-        Section {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Meine Aufgaben")
+                    .font(.title2.bold())
+                Spacer()
+                Button {
+                    newTaskTitle = ""
+                    personalTaskInterval = .daily
+                    activeSheet = .personal
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundColor(.blue)
+                        .imageScale(.large)
+                }
+            }
+
             if taskViewModel.personalTasks.isEmpty {
                 Text("Noch keine eigenen Aufgaben.")
                     .foregroundColor(.gray)
@@ -42,25 +59,19 @@ struct TaskView: View {
                 ForEach(TaskResetInterval.allCases) { interval in
                     let tasks = taskViewModel.personalTasks.filter { $0.resetInterval == interval }
                     if !tasks.isEmpty {
-                        Section(header: Text(intervalHeader(interval))) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(intervalHeader(interval))
+                                .font(.headline)
+                                .foregroundColor(color(for: interval))
+
                             ForEach(tasks) { task in
-                                taskCard(task: task)
+                                taskCard(task: task, interval: interval)
                             }
                         }
+                        .padding()
+                        .background(color(for: interval).opacity(0.1))
+                        .cornerRadius(12)
                     }
-                }
-            }
-        } header: {
-            HStack {
-                Text("Meine Aufgaben").font(.headline)
-                Spacer()
-                Button {
-                    newTaskTitle = ""
-                    personalTaskInterval = .daily
-                    activeSheet = .personal
-                } label: {
-                    Label("Neue Aufgabe", systemImage: "plus.circle.fill")
-                        .labelStyle(.iconOnly)
                 }
             }
         }
@@ -68,13 +79,31 @@ struct TaskView: View {
 
     // MARK: - Gruppenaufgaben
     var groupTasksSection: some View {
-        Section {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Gruppenaufgaben")
+                .font(.title2.bold())
+
             if groupViewModel.groups.isEmpty {
                 Text("Du bist noch keiner Gruppe beigetreten.")
                     .foregroundColor(.gray)
             } else {
                 ForEach(groupViewModel.groups) { group in
-                    Section {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text(group.name)
+                                .font(.headline)
+                            Spacer()
+                            Button {
+                                newTaskTitle = ""
+                                groupTaskInterval = .daily
+                                activeSheet = .group(group)
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(.orange)
+                                    .imageScale(.large)
+                            }
+                        }
+
                         let tasks = taskViewModel.groupedTasks[group.name] ?? []
                         if tasks.isEmpty {
                             Text("Keine Aufgaben in dieser Gruppe.")
@@ -83,42 +112,39 @@ struct TaskView: View {
                             ForEach(TaskResetInterval.allCases) { interval in
                                 let filteredTasks = tasks.filter { $0.resetInterval == interval }
                                 if !filteredTasks.isEmpty {
-                                    Section(header: Text(intervalHeader(interval))) {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text(intervalHeader(interval))
+                                            .font(.headline)
+                                            .foregroundColor(color(for: interval))
+
                                         ForEach(filteredTasks) { task in
-                                            taskCard(task: task, group: group)
+                                            taskCard(task: task, group: group, interval: interval)
                                         }
                                     }
+                                    .padding()
+                                    .background(color(for: interval).opacity(0.1))
+                                    .cornerRadius(12)
                                 }
                             }
                         }
-                    } header: {
-                        HStack {
-                            Text(group.name).bold()
-                            Spacer()
-                            Button {
-                                newTaskTitle = ""
-                                groupTaskInterval = .daily
-                                activeSheet = .group(group)
-                            } label: {
-                                Image(systemName: "plus.circle.fill")
-                            }
-                        }
                     }
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(16)
+                    .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
                 }
             }
-        } header: {
-            Text("Gruppenaufgaben").font(.headline)
         }
     }
 
     // MARK: - TaskCard
-    func taskCard(task: TaskItem, group: Group? = nil) -> some View {
+    func taskCard(task: TaskItem, group: Group? = nil, interval: TaskResetInterval? = nil) -> some View {
         let isGroupTask = task.groupId != nil
         let currentUserId = taskViewModel.currentUserId
         let userHasCompleted = isGroupTask && currentUserId != nil && task.completedBy.contains(currentUserId!)
         let showCheckmark = isGroupTask ? userHasCompleted : task.isDone
         let iconName = showCheckmark ? "checkmark.circle.fill" : "circle"
-        let iconColor = showCheckmark ? Color.green : Color.gray
+        let iconColor = showCheckmark ? Color.green : .gray
 
         return VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -146,7 +172,6 @@ struct TaskView: View {
                 .buttonStyle(.plain)
             }
 
-            // Gruppenmitglieder mit Status
             if let groupId = task.groupId,
                let group = groupViewModel.groups.first(where: { $0.id == groupId }) {
                 HStack(spacing: 8) {
@@ -163,18 +188,7 @@ struct TaskView: View {
         .padding()
         .background(Color(.systemBackground))
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
-        .swipeActions {
-            if task.ownerId == taskViewModel.currentUserId {
-                Button(role: .destructive) {
-                    Task {
-                        await taskViewModel.deleteTask(task)
-                    }
-                } label: {
-                    Label("Löschen", systemImage: "trash")
-                }
-            }
-        }
+        .shadow(color: color(for: interval ?? .daily).opacity(0.2), radius: 3, x: 0, y: 2)
     }
 
     // MARK: - Sheet Handling
@@ -225,6 +239,15 @@ struct TaskView: View {
         }
     }
 
+    // MARK: - Farben für Intervalle
+    func color(for interval: TaskResetInterval) -> Color {
+        switch interval {
+        case .daily: return .blue
+        case .weekly: return .orange
+        case .monthly: return .purple
+        }
+    }
+
     // MARK: - Interval Header
     func intervalHeader(_ interval: TaskResetInterval) -> String {
         switch interval {
@@ -247,7 +270,6 @@ struct TaskView: View {
         }
     }
 }
-
 
 
 
