@@ -173,7 +173,7 @@ class TaskViewModel: ObservableObject {
     
     
     
-    func addPersonalTask(title: String, interval:  TaskResetInterval) async {
+    func addPersonalTask(title: String, interval: TaskResetInterval) async {
         guard let uid = currentUserId else {
             print("⚠️ Kein eingeloggter Benutzer – persönliche Aufgabe wird nicht gespeichert.")
             return
@@ -205,11 +205,12 @@ class TaskViewModel: ObservableObject {
                 "completedBy": [],
                 "completionDates": []
             ])
-            try await fetchTasks(groups: [])
+            // ❌ kein fetchTasks(groups: []) mehr
         } catch {
             print("Fehler beim Hinzufügen eigener Aufgabe: \(error)")
         }
     }
+
     
     func addGroupTask(title: String, group: Group, interval: TaskResetInterval) async {
         guard let uid = currentUserId else {
