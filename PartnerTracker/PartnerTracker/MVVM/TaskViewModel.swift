@@ -596,6 +596,16 @@ class TaskViewModel: ObservableObject {
         }
     }
     
+    func allGroupTasksByInterval() -> [TaskResetInterval: [(TaskItem, String)]] {
+        var result: [TaskResetInterval: [(TaskItem, String)]] = [:]
+        for (groupName, tasks) in groupedTasks {
+            for task in tasks {
+                result[task.resetInterval, default: []].append((task, groupName))
+            }
+        }
+        return result
+    }
+
     
     deinit {
         personalListener?.remove()
@@ -603,6 +613,9 @@ class TaskViewModel: ObservableObject {
             listener.remove()
         }
     }
+    
+    
+    
     
 }
 
