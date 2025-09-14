@@ -166,8 +166,7 @@ struct GroupView: View {
                         NavigationLink(
                             destination: GroupDetailView(
                                 groupId: group.id,
-                                groupViewModel: groupViewModel,
-                                taskViewModel: taskViewModel
+                                groupViewModel: groupViewModel
                             )
                         ) {
                             GroupRowView(
@@ -200,8 +199,7 @@ struct GroupView: View {
                         NavigationLink(
                             destination: GroupDetailView(
                                 groupId: group.id,
-                                groupViewModel: groupViewModel,
-                                taskViewModel: taskViewModel
+                                groupViewModel: groupViewModel
                             )
                         ) {
                             GroupRowView(group: group, showCopyButton: false, onCopy: nil)
