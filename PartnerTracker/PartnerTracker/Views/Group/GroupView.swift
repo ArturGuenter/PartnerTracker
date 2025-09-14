@@ -38,16 +38,17 @@ struct GroupView: View {
                             ForEach(TaskResetInterval.allCases, id: \.self) { interval in
                                 if let tasks = taskViewModel.allGroupTasksByInterval()[interval] {
                                     Section(header: Text(interval.displayName)) {
-                                        ForEach(tasks, id: \.0.id) { (task, groupName) in
+                                        ForEach(tasks) { item in
                                             HStack {
-                                                Text(task.title)
+                                                Text(item.task.title)
                                                 Spacer()
-                                                Text(groupName)
+                                                Text(item.groupName)
                                                     .foregroundColor(.gray)
                                             }
                                         }
                                     }
                                 }
+
                             }
                         }
                     } else {

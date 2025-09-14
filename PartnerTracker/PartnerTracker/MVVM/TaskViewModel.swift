@@ -596,15 +596,17 @@ class TaskViewModel: ObservableObject {
         }
     }
     
-    func allGroupTasksByInterval() -> [TaskResetInterval: [(TaskItem, String)]] {
-        var result: [TaskResetInterval: [(TaskItem, String)]] = [:]
+    func allGroupTasksByInterval() -> [TaskResetInterval: [IntervalTask]] {
+        var result: [TaskResetInterval: [IntervalTask]] = [:]
         for (groupName, tasks) in groupedTasks {
             for task in tasks {
-                result[task.resetInterval, default: []].append((task, groupName))
+                result[task.resetInterval, default: []]
+                    .append(IntervalTask(id: task.id, task: task, groupName: groupName))
             }
         }
         return result
     }
+
 
     
     deinit {
