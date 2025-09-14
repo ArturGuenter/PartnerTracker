@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+
+
 struct GroupView: View {
     @ObservedObject var groupViewModel: GroupViewModel
     @ObservedObject var taskViewModel: TaskViewModel
@@ -15,10 +17,9 @@ struct GroupView: View {
     @State private var isLoading = true
     @State private var errorMessage = ""
     @State private var showAddGroupSheet = false
-    @State private var showCopyConfirmation = false
+    @State private var showSuccessToast = false
     @State private var groupToDelete: Group? = nil
     @State private var showDeleteAlert = false
-    @State private var showSuccessToast = false
     @State private var sortByInterval = false
 
     var body: some View {
@@ -33,21 +34,10 @@ struct GroupView: View {
                         .foregroundColor(.secondary).padding()
                 } else {
                     if sortByInterval {
-                        renderGroupedTasksByInterval()
+                        renderTasksByInterval()
                     } else {
                         renderGroupsList()
                     }
-                }
-
-                if showCopyConfirmation {
-                    Text("Gruppen-ID kopiert!")
-                        .font(.caption)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 12).padding(.vertical, 8)
-                        .background(Color.black.opacity(0.8))
-                        .cornerRadius(12)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                        .zIndex(1).padding(.top, 8)
                 }
 
                 if showSuccessToast {
@@ -130,7 +120,7 @@ struct GroupView: View {
         }
     }
 
-    // MARK: - Load groups
+    // MARK: - Laden der Gruppen
     private func loadGroups() async {
         do {
             try await groupViewModel.fetchGroupsForCurrentUser()
@@ -140,46 +130,15 @@ struct GroupView: View {
         isLoading = false
     }
 
-    // MARK: - Render grouped tasks by interval
-    @ViewBuilder
-    private func renderGroupedTasksByInterval() -> some View {
-        let groupedTasks = taskViewModel.allGroupTasksByInterval()
-        let intervalsWithTasks: [(TaskResetInterval, [IntervalTask])] = TaskResetInterval.allCases.compactMap { interval in
-            guard let tasks = groupedTasks[interval] else { return nil }
-            return (interval, tasks)
-        }
-
-        List {
-            ForEach(intervalsWithTasks, id: \.0) { (interval, tasks) in
-                IntervalSection(interval: interval, tasks: tasks)
-            }
-        }
-    }
-
-    // MARK: - Render groups list
+    // MARK: - Normale Gruppenliste
     @ViewBuilder
     private func renderGroupsList() -> some View {
         List {
             if !groupViewModel.ownedGroups.isEmpty {
                 Section(header: Text("Eigene Gruppen")) {
                     ForEach(groupViewModel.ownedGroups, id: \.id) { group in
-                        NavigationLink(
-                            destination: GroupDetailView(
-                                groupId: group.id,
-                                groupViewModel: groupViewModel
-                            )
-                        ) {
-                            GroupRowView(
-                                group: group,
-                                showCopyButton: true,
-                                onCopy: {
-                                    UIPasteboard.general.string = group.id
-                                    withAnimation { showCopyConfirmation = true }
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                        withAnimation { showCopyConfirmation = false }
-                                    }
-                                }
-                            )
+                        NavigationLink(destination: GroupDetailView(groupId: group.id, groupViewModel: groupViewModel)) {
+                            GroupRowView(group: group)
                         }
                         .swipeActions {
                             Button(role: .destructive) {
@@ -196,13 +155,8 @@ struct GroupView: View {
             if !groupViewModel.joinedGroups.isEmpty {
                 Section(header: Text("Beigetretene Gruppen")) {
                     ForEach(groupViewModel.joinedGroups, id: \.id) { group in
-                        NavigationLink(
-                            destination: GroupDetailView(
-                                groupId: group.id,
-                                groupViewModel: groupViewModel
-                            )
-                        ) {
-                            GroupRowView(group: group, showCopyButton: false, onCopy: nil)
+                        NavigationLink(destination: GroupDetailView(groupId: group.id, groupViewModel: groupViewModel)) {
+                            GroupRowView(group: group)
                         }
                         .swipeActions {
                             Button(role: .destructive) {
@@ -217,21 +171,24 @@ struct GroupView: View {
             }
         }
     }
-}
 
-// Unter-View für Intervall-Abschnitte
-struct IntervalSection: View {
-    let interval: TaskResetInterval
-    let tasks: [IntervalTask]
-
-    var body: some View {
-        Section(header: Text(interval.displayName)) {
-            ForEach(tasks) { item in
-                HStack {
-                    Text(item.task.title)
-                    Spacer()
-                    Text(item.groupName)
-                        .foregroundColor(.gray)
+    // MARK: - Aufgaben nach Intervallen sortiert anzeigen
+    @ViewBuilder
+    private func renderTasksByInterval() -> some View {
+        let grouped = taskViewModel.allGroupTasksByInterval()
+        List {
+            ForEach(TaskResetInterval.allCases, id: \.self) { interval in
+                if let tasks = grouped[interval], !tasks.isEmpty {
+                    Section(header: Text(interval.rawValue)) {
+                        ForEach(tasks) { item in
+                            HStack {
+                                Text(item.task.title)
+                                Spacer()
+                                Text(item.groupName)
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -241,4 +198,5 @@ struct IntervalSection: View {
 #Preview {
     GroupView(groupViewModel: GroupViewModel(), taskViewModel: TaskViewModel())
 }
+
 
