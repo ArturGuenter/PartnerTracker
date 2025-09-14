@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 struct GroupView: View {
     @ObservedObject var groupViewModel: GroupViewModel
     @ObservedObject var taskViewModel: TaskViewModel
@@ -34,21 +33,12 @@ struct GroupView: View {
                         .foregroundColor(.secondary).padding()
                 } else {
                     if sortByInterval {
+                        let grouped = taskViewModel.allGroupTasksByInterval()
                         List {
                             ForEach(TaskResetInterval.allCases, id: \.self) { interval in
-                                if let tasks = taskViewModel.allGroupTasksByInterval()[interval] {
-                                    Section(header: Text(interval.displayName)) {
-                                        ForEach(tasks) { item in
-                                            HStack {
-                                                Text(item.task.title)
-                                                Spacer()
-                                                Text(item.groupName)
-                                                    .foregroundColor(.gray)
-                                            }
-                                        }
-                                    }
+                                if let tasks = grouped[interval] {
+                                    IntervalSection(interval: interval, tasks: tasks)
                                 }
-
                             }
                         }
                     } else {
@@ -215,7 +205,25 @@ struct GroupView: View {
     }
 }
 
+/// Unter-View für Intervall-Abschnitte
+struct IntervalSection: View {
+    let interval: TaskResetInterval
+    let tasks: [IntervalTask]
+
+    var body: some View {
+        Section(header: Text(interval.rawValue)) {
+            ForEach(tasks) { item in
+                HStack {
+                    Text(item.task.title)
+                    Spacer()
+                    Text(item.groupName)
+                        .foregroundColor(.gray)
+                }
+            }
+        }
+    }
+}
+
 #Preview {
     GroupView(groupViewModel: GroupViewModel(), taskViewModel: TaskViewModel())
 }
-
