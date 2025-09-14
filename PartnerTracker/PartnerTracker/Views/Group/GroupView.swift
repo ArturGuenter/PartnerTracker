@@ -33,74 +33,9 @@ struct GroupView: View {
                         .foregroundColor(.secondary).padding()
                 } else {
                     if sortByInterval {
-                        let grouped = taskViewModel.allGroupTasksByInterval()
-                        List {
-                            ForEach(TaskResetInterval.allCases, id: \.self) { interval in
-                                if let tasks = grouped[interval] {
-                                    IntervalSection(interval: interval, tasks: tasks)
-                                }
-                            }
-                        }
+                        renderGroupedTasksByInterval()
                     } else {
-                        List {
-                            if !groupViewModel.ownedGroups.isEmpty {
-                                Section(header: Text("Eigene Gruppen")) {
-                                    ForEach(groupViewModel.ownedGroups, id: \.id) { group in
-                                        NavigationLink(
-                                            destination: GroupDetailView(
-                                                groupId: group.id,
-                                                groupViewModel: groupViewModel,
-                                                taskViewModel: taskViewModel
-                                            )
-                                        ) {
-                                            GroupRowView(
-                                                group: group,
-                                                showCopyButton: true,
-                                                onCopy: {
-                                                    UIPasteboard.general.string = group.id
-                                                    withAnimation { showCopyConfirmation = true }
-                                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                                        withAnimation { showCopyConfirmation = false }
-                                                    }
-                                                }
-                                            )
-                                        }
-                                        .swipeActions {
-                                            Button(role: .destructive) {
-                                                groupToDelete = group
-                                                showDeleteAlert = true
-                                            } label: {
-                                                Label("Löschen", systemImage: "trash")
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            if !groupViewModel.joinedGroups.isEmpty {
-                                Section(header: Text("Beigetretene Gruppen")) {
-                                    ForEach(groupViewModel.joinedGroups, id: \.id) { group in
-                                        NavigationLink(
-                                            destination: GroupDetailView(
-                                                groupId: group.id,
-                                                groupViewModel: groupViewModel,
-                                                taskViewModel: taskViewModel
-                                            )
-                                        ) {
-                                            GroupRowView(group: group, showCopyButton: false, onCopy: nil)
-                                        }
-                                        .swipeActions {
-                                            Button(role: .destructive) {
-                                                groupToDelete = group
-                                                showDeleteAlert = true
-                                            } label: {
-                                                Label("Verlassen", systemImage: "rectangle.portrait.and.arrow.right")
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        renderGroupsList()
                     }
                 }
 
@@ -195,6 +130,7 @@ struct GroupView: View {
         }
     }
 
+    // MARK: - Load groups
     private func loadGroups() async {
         do {
             try await groupViewModel.fetchGroupsForCurrentUser()
@@ -203,15 +139,95 @@ struct GroupView: View {
         }
         isLoading = false
     }
+
+    // MARK: - Render grouped tasks by interval
+    @ViewBuilder
+    private func renderGroupedTasksByInterval() -> some View {
+        let groupedTasks = taskViewModel.allGroupTasksByInterval()
+        let intervalsWithTasks: [(TaskResetInterval, [IntervalTask])] = TaskResetInterval.allCases.compactMap { interval in
+            guard let tasks = groupedTasks[interval] else { return nil }
+            return (interval, tasks)
+        }
+
+        List {
+            ForEach(intervalsWithTasks, id: \.0) { (interval, tasks) in
+                IntervalSection(interval: interval, tasks: tasks)
+            }
+        }
+    }
+
+    // MARK: - Render groups list
+    @ViewBuilder
+    private func renderGroupsList() -> some View {
+        List {
+            if !groupViewModel.ownedGroups.isEmpty {
+                Section(header: Text("Eigene Gruppen")) {
+                    ForEach(groupViewModel.ownedGroups, id: \.id) { group in
+                        NavigationLink(
+                            destination: GroupDetailView(
+                                groupId: group.id,
+                                groupViewModel: groupViewModel,
+                                taskViewModel: taskViewModel
+                            )
+                        ) {
+                            GroupRowView(
+                                group: group,
+                                showCopyButton: true,
+                                onCopy: {
+                                    UIPasteboard.general.string = group.id
+                                    withAnimation { showCopyConfirmation = true }
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                        withAnimation { showCopyConfirmation = false }
+                                    }
+                                }
+                            )
+                        }
+                        .swipeActions {
+                            Button(role: .destructive) {
+                                groupToDelete = group
+                                showDeleteAlert = true
+                            } label: {
+                                Label("Löschen", systemImage: "trash")
+                            }
+                        }
+                    }
+                }
+            }
+
+            if !groupViewModel.joinedGroups.isEmpty {
+                Section(header: Text("Beigetretene Gruppen")) {
+                    ForEach(groupViewModel.joinedGroups, id: \.id) { group in
+                        NavigationLink(
+                            destination: GroupDetailView(
+                                groupId: group.id,
+                                groupViewModel: groupViewModel,
+                                taskViewModel: taskViewModel
+                            )
+                        ) {
+                            GroupRowView(group: group, showCopyButton: false, onCopy: nil)
+                        }
+                        .swipeActions {
+                            Button(role: .destructive) {
+                                groupToDelete = group
+                                showDeleteAlert = true
+                            } label: {
+                                Label("Verlassen", systemImage: "rectangle.portrait.and.arrow.right")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
-/// Unter-View für Intervall-Abschnitte
+// Unter-View für Intervall-Abschnitte
 struct IntervalSection: View {
     let interval: TaskResetInterval
     let tasks: [IntervalTask]
 
     var body: some View {
-        Section(header: Text(interval.rawValue)) {
+        Section(header: Text(interval.displayName)) {
             ForEach(tasks) { item in
                 HStack {
                     Text(item.task.title)
@@ -227,3 +243,4 @@ struct IntervalSection: View {
 #Preview {
     GroupView(groupViewModel: GroupViewModel(), taskViewModel: TaskViewModel())
 }
+
