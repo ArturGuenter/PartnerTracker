@@ -9,6 +9,7 @@ import SwiftUI
 
 struct GroupView: View {
     @ObservedObject var groupViewModel: GroupViewModel
+    @ObservedObject var taskViewModel: TaskViewModel
 
     @State private var showCreateGroupSheet = false
     @State private var isLoading = true
