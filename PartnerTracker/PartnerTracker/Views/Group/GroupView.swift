@@ -138,7 +138,7 @@ struct GroupView: View {
                 Section(header: Text("Eigene Gruppen")) {
                     ForEach(groupViewModel.ownedGroups, id: \.id) { group in
                         NavigationLink(destination: GroupDetailView(groupId: group.id, groupViewModel: groupViewModel)) {
-                            GroupRowView(group: group)
+                            GroupRowView(group: group, showCopyButton: false, onCopy: nil)
                         }
                         .swipeActions {
                             Button(role: .destructive) {
@@ -156,7 +156,7 @@ struct GroupView: View {
                 Section(header: Text("Beigetretene Gruppen")) {
                     ForEach(groupViewModel.joinedGroups, id: \.id) { group in
                         NavigationLink(destination: GroupDetailView(groupId: group.id, groupViewModel: groupViewModel)) {
-                            GroupRowView(group: group)
+                            GroupRowView(group: group, showCopyButton: false, onCopy: nil)
                         }
                         .swipeActions {
                             Button(role: .destructive) {
