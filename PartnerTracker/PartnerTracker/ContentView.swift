@@ -28,7 +28,7 @@ struct ContentView: View {
                 }
                 .tag(2)
 
-            GroupView(groupViewModel: groupViewModel)
+            GroupView(groupViewModel: groupViewModel, taskViewModel: taskViewModel)
                 .tabItem {
                     Label("Gruppe", systemImage: "person.3.fill")
                 }
