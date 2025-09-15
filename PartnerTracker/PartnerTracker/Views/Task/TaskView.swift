@@ -77,7 +77,9 @@ struct TaskView: View {
                     .foregroundColor(.gray)
             } else {
                 ForEach(TaskResetInterval.allCases) { interval in
-                    let tasks = taskViewModel.personalTasks.filter { $0.resetInterval == interval }
+                    let tasks = taskViewModel.personalTasks
+                        .filter { $0.resetInterval == interval }
+                        .sorted { $0.createdAt < $1.createdAt }
                     if !tasks.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(intervalHeader(interval))
@@ -130,7 +132,11 @@ struct TaskView: View {
                                 .foregroundColor(.gray)
                         } else {
                             ForEach(TaskResetInterval.allCases) { interval in
-                                let filteredTasks = tasks.filter { $0.resetInterval == interval }
+                                // hier sortieren
+                                let filteredTasks = tasks
+                                    .filter { $0.resetInterval == interval }
+                                    .sorted { $0.createdAt < $1.createdAt }
+
                                 if !filteredTasks.isEmpty {
                                     VStack(alignment: .leading, spacing: 8) {
                                         Text(intervalHeader(interval))
