@@ -15,6 +15,9 @@ struct TaskView: View {
     @State private var newTaskTitle = ""
     @State private var personalTaskInterval: TaskResetInterval = .daily
     @State private var groupTaskInterval: TaskResetInterval = .daily
+    
+    @State private var sortByInterval = false
+
 
     var body: some View {
         NavigationStack {

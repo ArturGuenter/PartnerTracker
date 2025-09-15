@@ -11,9 +11,9 @@ enum TaskResetInterval: String, CaseIterable, Codable, Identifiable {
     case daily
     case weekly
     case monthly
-    
+
     var id: String { rawValue }
-    
+
     var displayName: String {
         switch self {
         case .daily: return "Täglich"
@@ -22,4 +22,5 @@ enum TaskResetInterval: String, CaseIterable, Codable, Identifiable {
         }
     }
 }
+
 

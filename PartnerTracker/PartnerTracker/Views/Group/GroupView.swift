@@ -179,7 +179,7 @@ struct GroupView: View {
         List {
             ForEach(TaskResetInterval.allCases, id: \.self) { interval in
                 if let tasks = grouped[interval], !tasks.isEmpty {
-                    Section(header: Text(interval.rawValue)) {
+                    Section(header: Text(interval.displayName)) {
                         ForEach(tasks) { item in
                             HStack {
                                 Text(item.task.title)
@@ -193,6 +193,7 @@ struct GroupView: View {
             }
         }
     }
+
 }
 
 #Preview {
