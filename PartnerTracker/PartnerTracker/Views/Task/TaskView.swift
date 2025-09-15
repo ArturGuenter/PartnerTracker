@@ -21,12 +21,16 @@ struct TaskView: View {
 
     var body: some View {
         NavigationStack {
+            if sortByInterval{
+                renderTaskByInterval()
+            }else {
             ScrollView {
                 VStack(spacing: 24) {
                     personalTasksSection
                     groupTasksSection
                 }
                 .padding()
+            }
             }
             .navigationTitle("Aufgaben")
             .navigationBarTitleDisplayMode(.inline)
@@ -251,6 +255,8 @@ struct TaskView: View {
             )
         }
     }
+    
+    
 
     // MARK: - Farben für Intervalle
     func color(for interval: TaskResetInterval) -> Color {
