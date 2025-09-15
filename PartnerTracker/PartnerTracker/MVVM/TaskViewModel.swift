@@ -607,6 +607,25 @@ class TaskViewModel: ObservableObject {
         return result
     }
 
+    func allTasksByInterval(groups: [Group]) -> [TaskResetInterval: [(TaskItem, String)]] {
+        var result: [TaskResetInterval: [(TaskItem, String)]] = [:]
+
+        // Eigene Aufgaben
+        for task in personalTasks {
+            result[task.resetInterval, default: []].append((task, "Meine Aufgaben"))
+        }
+
+        // Gruppenaufgaben
+        for group in groups {
+            let tasks = groupedTasks[group.name] ?? []
+            for task in tasks {
+                result[task.resetInterval, default: []].append((task, group.name))
+            }
+        }
+
+        return result
+    }
+
 
     
     deinit {
