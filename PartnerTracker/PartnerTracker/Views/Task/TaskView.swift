@@ -35,6 +35,16 @@ struct TaskView: View {
                 sheetView(for: sheet)
             }
         }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    sortByInterval.toggle()
+                } label: {
+                    Image(systemName: sortByInterval ? "list.bullet" : "line.3.horizontal.decrease.circle")
+                }
+            }
+        }
+
     }
 
     // MARK: - Eigene Aufgaben
