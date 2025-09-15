@@ -21,16 +21,18 @@ struct TaskView: View {
 
     var body: some View {
         NavigationStack {
-            if sortByInterval{
-                renderTaskByInterval()
-            }else {
-            ScrollView {
-                VStack(spacing: 24) {
-                    personalTasksSection
-                    groupTasksSection
+            VStack {
+                if sortByInterval {
+                    renderTasksByInterval()
+                } else {
+                    ScrollView {
+                        VStack(spacing: 24) {
+                            personalTasksSection
+                            groupTasksSection
+                        }
+                        .padding()
+                    }
                 }
-                .padding()
-            }
             }
             .navigationTitle("Aufgaben")
             .navigationBarTitleDisplayMode(.inline)
@@ -38,18 +40,19 @@ struct TaskView: View {
             .sheet(item: $activeSheet) { sheet in
                 sheetView(for: sheet)
             }
-        }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    sortByInterval.toggle()
-                } label: {
-                    Image(systemName: sortByInterval ? "list.bullet" : "line.3.horizontal.decrease.circle")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        sortByInterval.toggle()
+                    } label: {
+                        Image(systemName: sortByInterval ? "list.bullet" : "line.3.horizontal.decrease.circle")
+                    }
                 }
             }
         }
-
+        
     }
+
 
     // MARK: - Eigene Aufgaben
     var personalTasksSection: some View {
@@ -256,7 +259,42 @@ struct TaskView: View {
         }
     }
     
-    
+    @ViewBuilder
+    private func renderTasksByInterval() -> some View {
+        let grouped = taskViewModel.allTasksByInterval(groups: groupViewModel.groups)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                ForEach(TaskResetInterval.allCases, id: \.self) { interval in
+                    if let tasks = grouped[interval], !tasks.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(intervalHeader(interval))
+                                .font(.headline)
+                                .foregroundColor(color(for: interval))
+
+                            ForEach(tasks, id: \.0.id) { task, groupName in
+                                VStack(alignment: .leading) {
+                                    HStack {
+                                        Text(task.title)
+                                        Spacer()
+                                        Text(groupName)
+                                            .foregroundColor(.gray)
+                                    }
+                                }
+                                .padding()
+                                .background(color(for: interval).opacity(0.1))
+                                .cornerRadius(8)
+                            }
+                        }
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(12)
+                    }
+                }
+            }
+            .padding()
+        }
+    }
+
 
     // MARK: - Farben für Intervalle
     func color(for interval: TaskResetInterval) -> Color {
