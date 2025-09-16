@@ -271,7 +271,7 @@ struct TaskView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 ForEach(TaskResetInterval.allCases, id: \.self) { interval in
-                    // eigene Aufgaben für dieses Interval, sortiert (neueste zuerst)
+                    // eigene Aufgaben
                     let personalForInterval = taskViewModel.personalTasks
                         .filter { $0.resetInterval == interval }
                         .sorted {
@@ -279,7 +279,7 @@ struct TaskView: View {
                             return $0.createdAt > $1.createdAt
                         }
 
-                    // gruppenübergreifend: für jede Gruppe alle Tasks dieses Intervalls zusammenführen
+                    // gruppenaufgaben (alle Gruppen zusammen)
                     let groupedForInterval: [(task: TaskItem, group: Group)] = groupViewModel.groups.flatMap { group in
                         (taskViewModel.groupedTasks[group.name] ?? [])
                             .filter { $0.resetInterval == interval }
@@ -289,33 +289,31 @@ struct TaskView: View {
                         return a.task.createdAt > b.task.createdAt
                     }
 
-                    // Wenn nichts da ist: nächste Interval
-                    if personalForInterval.isEmpty && groupedForInterval.isEmpty { continue }
+                    // nur anzeigen, wenn überhaupt Aufgaben da sind
+                    if !(personalForInterval.isEmpty && groupedForInterval.isEmpty) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(intervalHeader(interval))
+                                .font(.headline)
+                                .foregroundColor(color(for: interval))
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(intervalHeader(interval))
-                            .font(.headline)
-                            .foregroundColor(color(for: interval))
+                            if !personalForInterval.isEmpty {
+                                ForEach(personalForInterval, id: \.id) { task in
+                                    taskCard(task: task, group: nil, interval: interval)
+                                }
+                            }
 
-                        // eigene Aufgaben zuerst (falls gewünscht)
-                        if !personalForInterval.isEmpty {
-                            ForEach(personalForInterval, id: \.id) { task in
-                                taskCard(task: task, group: nil, interval: interval)
+                            if !groupedForInterval.isEmpty {
+                                ForEach(groupedForInterval, id: \.task.id) { element in
+                                    taskCard(task: element.task, group: element.group, interval: interval)
+                                }
                             }
                         }
-
-                        // dann gruppenaufgaben (zeige GroupName in taskCard via group param)
-                        if !groupedForInterval.isEmpty {
-                            ForEach(groupedForInterval, id: \.task.id) { element in
-                                taskCard(task: element.task, group: element.group, interval: interval)
-                            }
-                        }
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
                     }
-                    .padding()
-                    .background(Color(.secondarySystemBackground))
-                    .cornerRadius(12)
-                    .padding(.horizontal)
-                } // ForEach intervals
+                }
             }
             .padding(.vertical)
         }
