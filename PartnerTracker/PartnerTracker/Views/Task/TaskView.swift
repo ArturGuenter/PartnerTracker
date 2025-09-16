@@ -143,9 +143,10 @@ struct TaskView: View {
                                             .font(.headline)
                                             .foregroundColor(color(for: interval))
 
-                                        ForEach(filteredTasks) { task in
+                                        ForEach(filteredTasks.sorted { $0.createdAt < $1.createdAt }, id: \.id) { task in
                                             taskCard(task: task, group: group, interval: interval)
                                         }
+
                                     }
                                     .padding()
                                     .background(color(for: interval).opacity(0.1))
@@ -269,68 +270,58 @@ struct TaskView: View {
     private func renderTasksByInterval() -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                
-                // MARK: Eigene Aufgaben
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Meine Aufgaben")
-                        .font(.title2.bold())
-                    
-                    ForEach(TaskResetInterval.allCases, id: \.self) { interval in
-                        let tasks = taskViewModel.personalTasks.filter { $0.resetInterval == interval }
-                        if !tasks.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(intervalHeader(interval))
-                                    .font(.headline)
-                                    .foregroundColor(color(for: interval))
-                                
-                                ForEach(tasks) { task in
-                                    taskCard(task: task, interval: interval)
-                                }
-                            }
-                            .padding()
-                            .background(color(for: interval).opacity(0.1))
-                            .cornerRadius(12)
+                ForEach(TaskResetInterval.allCases, id: \.self) { interval in
+                    // eigene Aufgaben für dieses Interval, sortiert (neueste zuerst)
+                    let personalForInterval = taskViewModel.personalTasks
+                        .filter { $0.resetInterval == interval }
+                        .sorted {
+                            if $0.createdAt == $1.createdAt { return $0.id < $1.id }
+                            return $0.createdAt > $1.createdAt
                         }
+
+                    // gruppenübergreifend: für jede Gruppe alle Tasks dieses Intervalls zusammenführen
+                    let groupedForInterval: [(task: TaskItem, group: Group)] = groupViewModel.groups.flatMap { group in
+                        (taskViewModel.groupedTasks[group.name] ?? [])
+                            .filter { $0.resetInterval == interval }
+                            .map { (task: $0, group: group) }
+                    }.sorted { a, b in
+                        if a.task.createdAt == b.task.createdAt { return a.task.id < b.task.id }
+                        return a.task.createdAt > b.task.createdAt
                     }
-                }
-                
-                // MARK: Gruppenaufgaben
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Gruppenaufgaben")
-                        .font(.title2.bold())
-                    
-                    ForEach(groupViewModel.groups) { group in
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(group.name)
-                                .font(.headline)
-                            
-                            ForEach(TaskResetInterval.allCases, id: \.self) { interval in
-                                let tasks = taskViewModel.groupedTasks[group.name]?.filter { $0.resetInterval == interval } ?? []
-                                if !tasks.isEmpty {
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text(intervalHeader(interval))
-                                            .font(.subheadline)
-                                            .foregroundColor(color(for: interval))
-                                        
-                                        ForEach(tasks) { task in
-                                            taskCard(task: task, group: group, interval: interval)
-                                        }
-                                    }
-                                    .padding()
-                                    .background(color(for: interval).opacity(0.1))
-                                    .cornerRadius(12)
-                                }
+
+                    // Wenn nichts da ist: nächste Interval
+                    if personalForInterval.isEmpty && groupedForInterval.isEmpty { continue }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(intervalHeader(interval))
+                            .font(.headline)
+                            .foregroundColor(color(for: interval))
+
+                        // eigene Aufgaben zuerst (falls gewünscht)
+                        if !personalForInterval.isEmpty {
+                            ForEach(personalForInterval, id: \.id) { task in
+                                taskCard(task: task, group: nil, interval: interval)
                             }
                         }
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(16)
+
+                        // dann gruppenaufgaben (zeige GroupName in taskCard via group param)
+                        if !groupedForInterval.isEmpty {
+                            ForEach(groupedForInterval, id: \.task.id) { element in
+                                taskCard(task: element.task, group: element.group, interval: interval)
+                            }
+                        }
                     }
-                }
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(12)
+                    .padding(.horizontal)
+                } // ForEach intervals
             }
-            .padding()
+            .padding(.vertical)
         }
     }
+
+
 
 
 

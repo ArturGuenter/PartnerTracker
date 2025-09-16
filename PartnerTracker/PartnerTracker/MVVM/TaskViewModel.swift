@@ -627,6 +627,7 @@ class TaskViewModel: ObservableObject {
     }
 
 
+
     
     deinit {
         personalListener?.remove()
