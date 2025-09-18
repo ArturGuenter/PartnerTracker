@@ -289,22 +289,54 @@ struct TaskView: View {
                         return a.task.createdAt > b.task.createdAt
                     }
 
-                    // nur anzeigen, wenn überhaupt Aufgaben da sind
-                    if !(personalForInterval.isEmpty && groupedForInterval.isEmpty) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(intervalHeader(interval))
-                                .font(.headline)
-                                .foregroundColor(color(for: interval))
+                    // nur anzeigen, wenn überhaupt Aufgaben da sind oder Buttons gebraucht werden
+                    if !(personalForInterval.isEmpty && groupedForInterval.isEmpty) || true {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text(intervalHeader(interval))
+                                    .font(.headline)
+                                    .foregroundColor(color(for: interval))
+                                Spacer()
+                                // Button für persönliche Aufgabe
+                                Button {
+                                    newTaskTitle = ""
+                                    personalTaskInterval = interval
+                                    activeSheet = .personal
+                                } label: {
+                                    Image(systemName: "plus.circle.fill")
+                                        .foregroundColor(.blue)
+                                        .imageScale(.large)
+                                }
+                            }
 
+                            // persönliche Aufgaben
                             if !personalForInterval.isEmpty {
                                 ForEach(personalForInterval, id: \.id) { task in
                                     taskCard(task: task, group: nil, interval: interval)
                                 }
                             }
 
-                            if !groupedForInterval.isEmpty {
-                                ForEach(groupedForInterval, id: \.task.id) { element in
-                                    taskCard(task: element.task, group: element.group, interval: interval)
+                            // gruppenaufgaben pro Gruppe
+                            ForEach(groupViewModel.groups) { group in
+                                let tasksForGroup = groupedForInterval.filter { $0.group.id == group.id }
+                                if !tasksForGroup.isEmpty {
+                                    HStack {
+                                        Text(group.name)
+                                            .font(.subheadline.bold())
+                                        Spacer()
+                                        Button {
+                                            newTaskTitle = ""
+                                            groupTaskInterval = interval
+                                            activeSheet = .group(group)
+                                        } label: {
+                                            Image(systemName: "plus.circle.fill")
+                                                .foregroundColor(.orange)
+                                                .imageScale(.medium)
+                                        }
+                                    }
+                                    ForEach(tasksForGroup, id: \.task.id) { element in
+                                        taskCard(task: element.task, group: element.group, interval: interval)
+                                    }
                                 }
                             }
                         }
