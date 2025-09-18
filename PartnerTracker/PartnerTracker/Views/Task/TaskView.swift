@@ -15,31 +15,177 @@ struct TaskView: View {
     @State private var newTaskTitle = ""
     @State private var personalTaskInterval: TaskResetInterval = .daily
     @State private var groupTaskInterval: TaskResetInterval = .daily
-    
-    @State private var sortByInterval = false
 
+    @State private var sortByInterval = false
 
     var body: some View {
         NavigationStack {
-            VStack {
+            List {
                 if sortByInterval {
-                    renderTasksByInterval()
-                } else {
-                    ScrollView {
-                        VStack(spacing: 24) {
-                            personalTasksSection
-                            groupTasksSection
+                    // Ansicht: gruppiert nach Intervall (Täglich/Wöchentlich/Monatlich)
+                    ForEach(TaskResetInterval.allCases, id: \.self) { interval in
+                        let personalForInterval = taskViewModel.personalTasks
+                            .filter { $0.resetInterval == interval }
+                            .sorted {
+                                if $0.createdAt == $1.createdAt { return $0.id < $1.id }
+                                return $0.createdAt > $1.createdAt
+                            }
+
+                        let groupedForInterval: [(task: TaskItem, group: Group)] = groupViewModel.groups.flatMap { group in
+                            (taskViewModel.groupedTasks[group.name] ?? [])
+                                .filter { $0.resetInterval == interval }
+                                .map { (task: $0, group: group) }
+                        }.sorted { a, b in
+                            if a.task.createdAt == b.task.createdAt { return a.task.id < b.task.id }
+                            return a.task.createdAt > b.task.createdAt
                         }
-                        .padding()
+
+                        if personalForInterval.isEmpty && groupedForInterval.isEmpty {
+                            // nichts anzeigen, wenn keine Tasks im Intervall vorhanden
+                        } else {
+                            Section(header: HStack {
+                                Text(intervalHeader(interval))
+                                    .font(.headline)
+                                Spacer()
+                                // Add-Button für persönliche Aufgabe in diesem Intervall
+                                Button {
+                                    newTaskTitle = ""
+                                    personalTaskInterval = interval
+                                    activeSheet = .personal
+                                } label: {
+                                    Image(systemName: "plus.circle.fill")
+                                }
+                                .buttonStyle(.plain)
+                            }) {
+                                // persönliche Aufgaben (falls vorhanden)
+                                ForEach(personalForInterval, id: \.id) { task in
+                                    taskCard(task: task, group: nil, interval: interval)
+                                        .swipeActions {
+                                            Button(role: .destructive) {
+                                                Task { await taskViewModel.deleteTask(task) }
+                                            } label: { Label("Löschen", systemImage: "trash") }
+                                        }
+                                }
+
+                                // gruppenübergreifend anzeigen: pro Gruppe eigene Unterüberschrift + Tasks
+                                ForEach(groupViewModel.groups, id: \.id) { group in
+                                    let tasksForGroup = groupedForInterval.filter { $0.group.id == group.id }
+                                    if !tasksForGroup.isEmpty {
+                                        // Gruppentitel + Add-Button (für neue Gruppenaufgabe in diesem Intervall)
+                                        HStack {
+                                            Text(group.name)
+                                                .font(.subheadline).bold()
+                                            Spacer()
+                                            Button {
+                                                newTaskTitle = ""
+                                                groupTaskInterval = interval
+                                                activeSheet = .group(group)
+                                            } label: {
+                                                Image(systemName: "plus.circle.fill")
+                                            }
+                                            .buttonStyle(.plain)
+                                        }
+                                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+
+                                        ForEach(tasksForGroup, id: \.task.id) { element in
+                                            taskCard(task: element.task, group: element.group, interval: interval)
+                                                .swipeActions {
+                                                    Button(role: .destructive) {
+                                                        Task { await taskViewModel.deleteTask(element.task) }
+                                                    } label: { Label("Löschen", systemImage: "trash") }
+                                                }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Standardansicht: "Meine Aufgaben" getrennt von "Gruppenaufgaben"
+
+                    // persönliche Aufgaben: pro Intervall eigene Section
+                    ForEach(TaskResetInterval.allCases, id: \.self) { interval in
+                        let tasks = taskViewModel.personalTasks
+                            .filter { $0.resetInterval == interval }
+                            .sorted { $0.createdAt > $1.createdAt }
+
+                        if !tasks.isEmpty {
+                            Section(header: HStack {
+                                Text("Meine Aufgaben — \(intervalHeader(interval))")
+                                Spacer()
+                                Button {
+                                    newTaskTitle = ""
+                                    personalTaskInterval = interval
+                                    activeSheet = .personal
+                                } label: {
+                                    Image(systemName: "plus.circle.fill")
+                                }
+                                .buttonStyle(.plain)
+                            }) {
+                                ForEach(tasks, id: \.id) { task in
+                                    taskCard(task: task, group: nil, interval: interval)
+                                        .swipeActions {
+                                            Button(role: .destructive) {
+                                                Task { await taskViewModel.deleteTask(task) }
+                                            } label: { Label("Löschen", systemImage: "trash") }
+                                        }
+                                }
+                            }
+                        }
+                    }
+
+                    // gruppenaufgaben: pro Gruppe eine Section, darin nach Intervallen gruppiert
+                    ForEach(groupViewModel.groups, id: \.id) { group in
+                        Section(header: HStack {
+                            Text(group.name)
+                                .font(.headline)
+                            Spacer()
+                            Button {
+                                newTaskTitle = ""
+                                groupTaskInterval = .daily
+                                activeSheet = .group(group)
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                            }
+                            .buttonStyle(.plain)
+                        }) {
+                            let tasks = taskViewModel.groupedTasks[group.name] ?? []
+                            if tasks.isEmpty {
+                                Text("Keine Aufgaben in dieser Gruppe.")
+                                    .foregroundColor(.gray)
+                            } else {
+                                ForEach(TaskResetInterval.allCases, id: \.self) { interval in
+                                    let filteredTasks = tasks
+                                        .filter { $0.resetInterval == interval }
+                                        .sorted { $0.createdAt > $1.createdAt }
+
+                                    if !filteredTasks.isEmpty {
+                                        // Interval-Header (kleiner)
+                                        Text(intervalHeader(interval))
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                            .padding(.vertical, 4)
+
+                                        ForEach(filteredTasks, id: \.id) { task in
+                                            taskCard(task: task, group: group, interval: interval)
+                                                .swipeActions {
+                                                    Button(role: .destructive) {
+                                                        Task { await taskViewModel.deleteTask(task) }
+                                                    } label: { Label("Löschen", systemImage: "trash") }
+                                                }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-            }
+            } // List
+            .listStyle(.insetGrouped)
             .navigationTitle("Aufgaben")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear(perform: loadData)
-            .sheet(item: $activeSheet) { sheet in
-                sheetView(for: sheet)
-            }
+            .sheet(item: $activeSheet) { sheet in sheetView(for: sheet) }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -50,7 +196,6 @@ struct TaskView: View {
                 }
             }
         }
-        
     }
 
 
