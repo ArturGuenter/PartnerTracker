@@ -132,7 +132,7 @@ struct TaskView: View {
                                 .foregroundColor(.gray)
                         } else {
                             ForEach(TaskResetInterval.allCases) { interval in
-                                // hier sortieren
+                                
                                 let filteredTasks = tasks
                                     .filter { $0.resetInterval == interval }
                                     .sorted { $0.createdAt < $1.createdAt }
@@ -216,6 +216,15 @@ struct TaskView: View {
         .background(Color(.systemBackground))
         .cornerRadius(12)
         .shadow(color: color(for: interval ?? .daily).opacity(0.2), radius: 3, x: 0, y: 2)
+        .swipeActions {
+            Button(role: .destructive) {
+                Task {
+                    await taskViewModel.deleteTask(task)
+                }
+            } label: {
+                Label("Löschen", systemImage: "trash")
+            }
+        }
     }
 
     // MARK: - Sheet Handling
