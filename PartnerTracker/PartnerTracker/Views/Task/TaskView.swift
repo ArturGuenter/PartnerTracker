@@ -41,22 +41,24 @@ struct TaskView: View {
                         }
 
                         if personalForInterval.isEmpty && groupedForInterval.isEmpty {
-                            // nichts anzeigen, wenn keine Tasks im Intervall vorhanden
+                            
                         } else {
-                            Section(header: HStack {
-                                Text(intervalHeader(interval))
-                                    .font(.headline)
-                                Spacer()
-                                // Add-Button für persönliche Aufgabe in diesem Intervall
-                                Button {
-                                    newTaskTitle = ""
-                                    personalTaskInterval = interval
-                                    activeSheet = .personal
-                                } label: {
-                                    Image(systemName: "plus.circle.fill")
+                            Section(header:
+                                HStack {
+                                    Text(intervalHeader(interval))
+                                        .font(.headline)
+                                        .foregroundColor(color(for: interval))
+                                    Spacer()
+                                    Button {
+                                        newTaskTitle = ""
+                                        personalTaskInterval = interval
+                                        activeSheet = .personal
+                                    } label: {
+                                        Image(systemName: "plus.circle.fill")
+                                            .foregroundColor(color(for: interval))
+                                    }
                                 }
-                                .buttonStyle(.plain)
-                            }) {
+                            ) {
                                 // persönliche Aufgaben (falls vorhanden)
                                 ForEach(personalForInterval, id: \.id) { task in
                                     taskCard(task: task, group: nil, interval: interval)
@@ -98,10 +100,11 @@ struct TaskView: View {
                                     }
                                 }
                             }
+                            .listRowBackground(color(for: interval).opacity(0.05))
                         }
                     }
                 } else {
-                    // Standardansicht: "Meine Aufgaben" getrennt von "Gruppenaufgaben"
+                   
 
                     // persönliche Aufgaben: pro Intervall eigene Section
                     ForEach(TaskResetInterval.allCases, id: \.self) { interval in
@@ -168,19 +171,24 @@ struct TaskView: View {
 
                                         ForEach(filteredTasks, id: \.id) { task in
                                             taskCard(task: task, group: group, interval: interval)
+                                                .listRowBackground(color(for: interval).opacity(0.1))
                                                 .swipeActions {
-                                                    Button(role: .destructive) {
+                                                    Button {
                                                         Task { await taskViewModel.deleteTask(task) }
-                                                    } label: { Label("Löschen", systemImage: "trash") }
+                                                    } label: {
+                                                        Label("Löschen", systemImage: "trash")
+                                                    }
+                                                    .tint(.red)
                                                 }
                                         }
+
                                     }
                                 }
                             }
                         }
                     }
                 }
-            } // List
+            }
             .listStyle(.insetGrouped)
             .navigationTitle("Aufgaben")
             .navigationBarTitleDisplayMode(.inline)
