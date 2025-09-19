@@ -115,6 +115,8 @@ struct TaskView: View {
                         if !tasks.isEmpty {
                             Section(header: HStack {
                                 Text("Meine Aufgaben — \(intervalHeader(interval))")
+                                    .foregroundColor(color(for: interval))
+                                    .font(.headline)
                                 Spacer()
                                 Button {
                                     newTaskTitle = ""
@@ -122,18 +124,14 @@ struct TaskView: View {
                                     activeSheet = .personal
                                 } label: {
                                     Image(systemName: "plus.circle.fill")
+                                        .foregroundColor(color(for: interval))
                                 }
-                                .buttonStyle(.plain)
                             }) {
                                 ForEach(tasks, id: \.id) { task in
                                     taskCard(task: task, group: nil, interval: interval)
-                                        .swipeActions {
-                                            Button(role: .destructive) {
-                                                Task { await taskViewModel.deleteTask(task) }
-                                            } label: { Label("Löschen", systemImage: "trash") }
-                                        }
                                 }
                             }
+                            .listRowBackground(color(for: interval).opacity(0.05))
                         }
                     }
 
