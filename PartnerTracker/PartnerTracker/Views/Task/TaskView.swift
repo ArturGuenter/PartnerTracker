@@ -147,8 +147,8 @@ struct TaskView: View {
                                 activeSheet = .group(group)
                             } label: {
                                 Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(.orange)
                             }
-                            .buttonStyle(.plain)
                         }) {
                             let tasks = taskViewModel.groupedTasks[group.name] ?? []
                             if tasks.isEmpty {
@@ -161,30 +161,30 @@ struct TaskView: View {
                                         .sorted { $0.createdAt > $1.createdAt }
 
                                     if !filteredTasks.isEmpty {
-                                        // Interval-Header (kleiner)
-                                        Text(intervalHeader(interval))
-                                            .font(.subheadline)
-                                            .foregroundColor(.secondary)
-                                            .padding(.vertical, 4)
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            Text(intervalHeader(interval))
+                                                .font(.subheadline.bold())
+                                                .foregroundColor(color(for: interval))
 
-                                        ForEach(filteredTasks, id: \.id) { task in
-                                            taskCard(task: task, group: group, interval: interval)
-                                                .listRowBackground(color(for: interval).opacity(0.1))
-                                                .swipeActions {
-                                                    Button {
-                                                        Task { await taskViewModel.deleteTask(task) }
-                                                    } label: {
-                                                        Label("Löschen", systemImage: "trash")
+                                            ForEach(filteredTasks, id: \.id) { task in
+                                                taskCard(task: task, group: group, interval: interval)
+                                                    .swipeActions {
+                                                        Button(role: .destructive) {
+                                                            Task { await taskViewModel.deleteTask(task) }
+                                                        } label: {
+                                                            Label("Löschen", systemImage: "trash")
+                                                        }
                                                     }
-                                                    .tint(.red)
-                                                }
+                                            }
                                         }
-
+                                        .padding(.vertical, 4)
+                                        .listRowBackground(color(for: interval).opacity(0.05))
                                     }
                                 }
                             }
                         }
                     }
+
                 }
             }
             .listStyle(.insetGrouped)
