@@ -272,30 +272,34 @@ class TaskViewModel: ObservableObject {
     
     
     
-    func deleteTask(_ task: TaskItem) async {
+    func deleteTask(_ task: TaskItem, group: Group? = nil) async throws {
         guard let uid = currentUserId else { return }
-        
+
+        // Wenn Gruppenaufgabe → nur Admin darf löschen
+        if let group = group, uid != group.ownerId {
+            throw NSError(
+                domain: "Task",
+                code: 403,
+                userInfo: [NSLocalizedDescriptionKey: "Nur der Gruppenadmin darf Aufgaben löschen."]
+            )
+        }
+
         let taskRef = db.collection("tasks").document(task.id)
-        
+
         do {
-            
             try await taskRef.delete()
-            
-            
+
             if let groupName = groupedTasks.first(where: { $0.value.contains(where: { $0.id == task.id }) })?.key {
-                
                 groupedTasks[groupName]?.removeAll { $0.id == task.id }
             } else {
-                
                 personalTasks.removeAll { $0.id == task.id }
             }
-            
-            
-            
         } catch {
             print("Fehler beim Löschen der Aufgabe: \(error)")
+            throw error
         }
     }
+
     
     
     
