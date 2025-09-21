@@ -212,12 +212,21 @@ class TaskViewModel: ObservableObject {
     }
 
     
-    func addGroupTask(title: String, group: Group, interval: TaskResetInterval) async {
+    func addGroupTask(title: String, group: Group, interval: TaskResetInterval) async throws {
         guard let uid = currentUserId else {
             print("⚠️ Kein eingeloggter Benutzer – Gruppenaufgabe wird nicht gespeichert.")
             return
         }
-        
+
+        // 🔒 Nur Admin darf Aufgaben hinzufügen
+        guard uid == group.ownerId else {
+            throw NSError(
+                domain: "Task",
+                code: 403,
+                userInfo: [NSLocalizedDescriptionKey: "Nur der Gruppenadmin darf Aufgaben erstellen."]
+            )
+        }
+
         let newTask = TaskItem(
             id: UUID().uuidString,
             title: title,
@@ -230,8 +239,7 @@ class TaskViewModel: ObservableObject {
             completedBy: [],
             completionDates: []
         )
-        
-        
+
         do {
             try await db.collection("tasks").document(newTask.id).setData([
                 "id": newTask.id,
@@ -245,22 +253,22 @@ class TaskViewModel: ObservableObject {
                 "completedBy": [],
                 "completionDates": []
             ])
-            
-            
+
             let groupSnapshot = try await db.collection("tasks")
                 .whereField("groupId", isEqualTo: group.id)
                 .getDocuments()
-            
+
             let groupTasks = try groupSnapshot.documents.compactMap {
                 try $0.data(as: TaskItem.self)
             }.sorted(by: { $0.createdAt > $1.createdAt })
-            
+
             self.groupedTasks[group.name] = groupTasks
-            
         } catch {
             print("Fehler beim Hinzufügen Gruppen-Aufgabe: \(error)")
+            throw error
         }
     }
+
     
     
     
