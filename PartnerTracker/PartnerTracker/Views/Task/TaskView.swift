@@ -64,17 +64,12 @@ struct TaskView: View {
                                     taskCard(task: task, group: nil, interval: interval)
                                         .swipeActions {
                                             Button(role: .destructive) {
-                                                Task {
-                                                    do {
-                                                        try await taskViewModel.deleteTask(task)
-                                                    } catch {
-                                                        print("Fehler beim Löschen: \(error)")
-                                                    }
-                                                }
+                                                deleteTaskSafely(task)
                                             } label: {
                                                 Label("Löschen", systemImage: "trash")
                                             }
                                         }
+
 
                                 }
 
@@ -102,17 +97,12 @@ struct TaskView: View {
                                             taskCard(task: element.task, group: element.group, interval: interval)
                                                 .swipeActions {
                                                     Button(role: .destructive) {
-                                                        Task {
-                                                            do {
-                                                                try await taskViewModel.deleteTask(task)
-                                                            } catch {
-                                                                print("Fehler beim Löschen: \(error)")
-                                                            }
-                                                        }
+                                                        deleteTaskSafely(task)
                                                     } label: {
                                                         Label("Löschen", systemImage: "trash")
                                                     }
                                                 }
+
 
                                         }
                                     }
@@ -188,17 +178,12 @@ struct TaskView: View {
                                                 taskCard(task: task, group: group, interval: interval)
                                                     .swipeActions {
                                                         Button(role: .destructive) {
-                                                            Task {
-                                                                do {
-                                                                    try await taskViewModel.deleteTask(task)
-                                                                } catch {
-                                                                    print("Fehler beim Löschen: \(error)")
-                                                                }
-                                                            }
+                                                            deleteTaskSafely(task)
                                                         } label: {
                                                             Label("Löschen", systemImage: "trash")
                                                         }
                                                     }
+
 
                                             }
                                         }
@@ -568,6 +553,17 @@ struct TaskView: View {
             } catch {
                 print("Fehler beim Laden: \(error.localizedDescription)")
             }
+        }
+    }
+}
+
+
+private func deleteTaskSafely(_ task: TaskItem) {
+    Task {
+        do {
+            try await taskViewModel.deleteTask(task)
+        } catch {
+            print("Fehler beim Löschen: \(error)")
         }
     }
 }
