@@ -64,9 +64,18 @@ struct TaskView: View {
                                     taskCard(task: task, group: nil, interval: interval)
                                         .swipeActions {
                                             Button(role: .destructive) {
-                                                Task { await taskViewModel.deleteTask(task) }
-                                            } label: { Label("Löschen", systemImage: "trash") }
+                                                Task {
+                                                    do {
+                                                        try await taskViewModel.deleteTask(task)
+                                                    } catch {
+                                                        print("Fehler beim Löschen: \(error)")
+                                                    }
+                                                }
+                                            } label: {
+                                                Label("Löschen", systemImage: "trash")
+                                            }
                                         }
+
                                 }
 
                                 // gruppenübergreifend anzeigen: pro Gruppe eigene Unterüberschrift + Tasks
@@ -93,9 +102,18 @@ struct TaskView: View {
                                             taskCard(task: element.task, group: element.group, interval: interval)
                                                 .swipeActions {
                                                     Button(role: .destructive) {
-                                                        Task { await taskViewModel.deleteTask(element.task) }
-                                                    } label: { Label("Löschen", systemImage: "trash") }
+                                                        Task {
+                                                            do {
+                                                                try await taskViewModel.deleteTask(task)
+                                                            } catch {
+                                                                print("Fehler beim Löschen: \(error)")
+                                                            }
+                                                        }
+                                                    } label: {
+                                                        Label("Löschen", systemImage: "trash")
+                                                    }
                                                 }
+
                                         }
                                     }
                                 }
@@ -170,11 +188,18 @@ struct TaskView: View {
                                                 taskCard(task: task, group: group, interval: interval)
                                                     .swipeActions {
                                                         Button(role: .destructive) {
-                                                            Task { await taskViewModel.deleteTask(task) }
+                                                            Task {
+                                                                do {
+                                                                    try await taskViewModel.deleteTask(task)
+                                                                } catch {
+                                                                    print("Fehler beim Löschen: \(error)")
+                                                                }
+                                                            }
                                                         } label: {
                                                             Label("Löschen", systemImage: "trash")
                                                         }
                                                     }
+
                                             }
                                         }
                                         .padding(.vertical, 4)
@@ -395,9 +420,18 @@ struct TaskView: View {
                 onCancel: { activeSheet = nil },
                 onConfirm: {
                     Task {
-                        await taskViewModel.addGroupTask(title: newTaskTitle, group: group, interval: groupTaskInterval)
-                        activeSheet = nil
+                        do {
+                            try await taskViewModel.addGroupTask(
+                                title: newTaskTitle,
+                                group: group,
+                                interval: groupTaskInterval
+                            )
+                            activeSheet = nil
+                        } catch {
+                            print("Fehler beim Hinzufügen der Gruppenaufgabe: \(error)")
+                        }
                     }
+
                 }
             )
 
