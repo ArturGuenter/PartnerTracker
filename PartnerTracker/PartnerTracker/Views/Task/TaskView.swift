@@ -16,7 +16,7 @@ struct TaskView: View {
     @State private var personalTaskInterval: TaskResetInterval = .daily
     @State private var groupTaskInterval: TaskResetInterval = .daily
     @State private var sortByInterval = false
-
+    
     var body: some View {
         NavigationStack {
             listContent
@@ -63,11 +63,85 @@ struct TaskView: View {
             groupTasksByGroup
         }
     }
+    
+    
+    // MARK: - Interval Section (für sortByInterval = true)
+    @ViewBuilder
+    private func intervalSection(_ interval: TaskResetInterval) -> some View {
+        let personalForInterval = taskViewModel.personalTasks
+            .filter { $0.resetInterval == interval }
+            .sortedByCreationDate()
+        
+        let groupedForInterval = groupedTasksByInterval(interval)
+        
+        if !personalForInterval.isEmpty || !groupedForInterval.isEmpty {
+            Section(header: intervalHeader(interval)) {
+                personalTasksInInterval(personalForInterval, interval: interval)
+                groupTasksInInterval(groupedForInterval, interval: interval)
+            }
+            .listRowBackground(color(for: interval).opacity(0.05))
+        }
+    }
+    
+    // MARK: - Interval Header
+    private func intervalHeader(_ interval: TaskResetInterval) -> some View {
+        HStack {
+            Text(intervalHeaderText(interval))
+                .font(.headline)
+                .foregroundColor(color(for: interval))
+            Spacer()
+            Button {
+                newTaskTitle = ""
+                personalTaskInterval = interval
+                activeSheet = .personal
+            } label: {
+                Image(systemName: "plus.circle.fill")
+                    .foregroundColor(color(for: interval))
+            }
+        }
+    }
+    
+    // MARK: - Persönliche Aufgaben in Intervall-Ansicht
+    @ViewBuilder
+    private func personalTasksInInterval(_ tasks: [TaskItem], interval: TaskResetInterval) -> some View {
+        ForEach(tasks, id: \.id) { task in
+            taskRow(task: task, group: nil, interval: interval)
+        }
+    }
+    
+    // MARK: - Gruppenaufgaben in Intervall-Ansicht
+    @ViewBuilder
+    private func groupTasksInInterval(_ tasks: [(task: TaskItem, group: Group)], interval: TaskResetInterval) -> some View {
+        ForEach(groupViewModel.groups, id: \.id) { group in
+            let tasksForGroup = tasks.filter { $0.group.id == group.id }
+            if !tasksForGroup.isEmpty {
+                groupHeaderInInterval(group, interval: interval)
+                ForEach(tasksForGroup, id: \.task.id) { element in
+                    taskRow(task: element.task, group: element.group, interval: interval)
+                }
+            }
+        }
+    }
+    
+    // MARK: - Gruppen-Header in Intervall-Ansicht
+    private func groupHeaderInInterval(_ group: Group, interval: TaskResetInterval) -> some View {
+        HStack {
+            Text(group.name)
+                .font(.subheadline).bold()
+            Spacer()
+            Button {
+                newTaskTitle = ""
+                groupTaskInterval = interval
+                activeSheet = .group(group)
+            } label: {
+                Image(systemName: "plus.circle.fill")
+            }
+            .buttonStyle(.plain)
+        }
+        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+    }
+    
 }
-
-
-
-
 
 
 
