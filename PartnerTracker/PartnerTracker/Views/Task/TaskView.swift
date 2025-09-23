@@ -173,6 +173,41 @@ struct TaskView: View {
                 }
             }
     }
+    
+    // MARK: - Persönliche Aufgaben nach Intervallen gruppiert
+    @ViewBuilder
+    private var personalTasksByInterval: some View {
+        ForEach(TaskResetInterval.allCases, id: \.self) { interval in
+            let tasks = taskViewModel.personalTasks
+                .filter { $0.resetInterval == interval }
+                .sortedByCreationDate()
+            
+            if !tasks.isEmpty {
+                Section(header: personalSectionHeader(interval)) {
+                    ForEach(tasks, id: \.id) { task in
+                        taskRow(task: task, group: nil, interval: interval)
+                    }
+                }
+                .listRowBackground(color(for: interval).opacity(0.05))
+            }
+        }
+    }
+
+    // MARK: - Gruppenaufgaben nach Gruppen
+    @ViewBuilder
+    private var groupTasksByGroup: some View {
+        ForEach(groupViewModel.groups, id: \.id) { group in
+            Section(header: groupSectionHeader(group)) {
+                let tasks = taskViewModel.groupedTasks[group.name] ?? []
+                if tasks.isEmpty {
+                    Text("Keine Aufgaben in dieser Gruppe.")
+                        .foregroundColor(.gray)
+                } else {
+                    groupTasksContent(tasks, group: group)
+                }
+            }
+        }
+    }
 }
 
 
