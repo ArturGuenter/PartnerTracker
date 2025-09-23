@@ -141,6 +141,38 @@ struct TaskView: View {
         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
     }
     
+    
+    // MARK: - Hilfsfunktionen
+    private func groupedTasksByInterval(_ interval: TaskResetInterval) -> [(task: TaskItem, group: Group)] {
+        return groupViewModel.groups.flatMap { group in
+            (taskViewModel.groupedTasks[group.name] ?? [])
+                .filter { $0.resetInterval == interval }
+                .map { (task: $0, group: group) }
+        }.sorted { a, b in
+            if a.task.createdAt == b.task.createdAt { return a.task.id < b.task.id }
+            return a.task.createdAt > b.task.createdAt
+        }
+    }
+
+    private func intervalHeaderText(_ interval: TaskResetInterval) -> String {
+        switch interval {
+        case .daily: return "Täglich"
+        case .weekly: return "Wöchentlich"
+        case .monthly: return "Monatlich"
+        }
+    }
+
+    // MARK: - Task Row vereinfacht
+    private func taskRow(task: TaskItem, group: Group?, interval: TaskResetInterval) -> some View {
+        taskCard(task: task, group: group, interval: interval)
+            .swipeActions {
+                Button(role: .destructive) {
+                    deleteTaskSafely(task)
+                } label: {
+                    Label("Löschen", systemImage: "trash")
+                }
+            }
+    }
 }
 
 
