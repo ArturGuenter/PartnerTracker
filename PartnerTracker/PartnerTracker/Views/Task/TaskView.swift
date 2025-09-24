@@ -7,9 +7,6 @@
 
 import SwiftUI
 
-
-
-
 extension Array where Element == TaskItem {
     func sortedByCreationDate() -> [TaskItem] {
         self.sorted {
@@ -28,6 +25,11 @@ struct TaskView: View {
     @State private var personalTaskInterval: TaskResetInterval = .daily
     @State private var groupTaskInterval: TaskResetInterval = .daily
     @State private var sortByInterval = false
+    
+    // Hilfsfunktion um zu prüfen, ob der aktuelle User Admin einer Gruppe ist
+    private func isUserAdmin(of group: Group) -> Bool {
+        return group.ownerId == taskViewModel.currentUserId
+    }
     
     var body: some View {
         NavigationStack {
@@ -101,6 +103,7 @@ struct TaskView: View {
                 .font(.headline)
                 .foregroundColor(color(for: interval))
             Spacer()
+            // Plus-Button für persönliche Aufgaben - immer sichtbar
             Button {
                 newTaskTitle = ""
                 personalTaskInterval = interval
@@ -140,14 +143,17 @@ struct TaskView: View {
             Text(group.name)
                 .font(.subheadline).bold()
             Spacer()
-            Button {
-                newTaskTitle = ""
-                groupTaskInterval = interval
-                activeSheet = .group(group)
-            } label: {
-                Image(systemName: "plus.circle.fill")
+            // Plus-Button nur für Admin sichtbar
+            if isUserAdmin(of: group) {
+                Button {
+                    newTaskTitle = ""
+                    groupTaskInterval = interval
+                    activeSheet = .group(group)
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
     }
@@ -194,6 +200,7 @@ struct TaskView: View {
                 .foregroundColor(color(for: interval))
                 .font(.headline)
             Spacer()
+            // Plus-Button für persönliche Aufgaben - immer sichtbar
             Button {
                 newTaskTitle = ""
                 personalTaskInterval = interval
@@ -211,13 +218,16 @@ struct TaskView: View {
             Text(group.name)
                 .font(.headline)
             Spacer()
-            Button {
-                newTaskTitle = ""
-                groupTaskInterval = .daily
-                activeSheet = .group(group)
-            } label: {
-                Image(systemName: "plus.circle.fill")
-                    .foregroundColor(.orange)
+            // Plus-Button nur für Admin sichtbar
+            if isUserAdmin(of: group) {
+                Button {
+                    newTaskTitle = ""
+                    groupTaskInterval = .daily
+                    activeSheet = .group(group)
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundColor(.orange)
+                }
             }
         }
     }
@@ -232,9 +242,23 @@ struct TaskView: View {
             
             if !filteredTasks.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(intervalHeaderText(interval))
-                        .font(.subheadline.bold())
-                        .foregroundColor(color(for: interval))
+                    HStack {
+                        Text(intervalHeaderText(interval))
+                            .font(.subheadline.bold())
+                            .foregroundColor(color(for: interval))
+                        Spacer()
+                        // Plus-Button für spezifisches Intervall nur für Admin sichtbar
+                        if isUserAdmin(of: group) {
+                            Button {
+                                newTaskTitle = ""
+                                groupTaskInterval = interval
+                                activeSheet = .group(group)
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(color(for: interval))
+                            }
+                        }
+                    }
                     
                     ForEach(filteredTasks, id: \.id) { task in
                         taskRow(task: task, group: group, interval: interval)
@@ -270,15 +294,18 @@ struct TaskView: View {
     private func taskRow(task: TaskItem, group: Group?, interval: TaskResetInterval) -> some View {
         taskCard(task: task, group: group, interval: interval)
             .swipeActions {
-                Button(role: .destructive) {
-                    deleteTaskSafely(task)
-                } label: {
-                    Label("Löschen", systemImage: "trash")
+                // Löschen-Button nur für Admin sichtbar bei Gruppenaufgaben
+                if task.groupId == nil || (group != nil && isUserAdmin(of: group!)) {
+                    Button(role: .destructive) {
+                        deleteTaskSafely(task)
+                    } label: {
+                        Label("Löschen", systemImage: "trash")
+                    }
                 }
             }
     }
     
-    // MARK: - Task Card (aus deinem ursprünglichen Code)
+    // MARK: - Task Card
     func taskCard(task: TaskItem, group: Group? = nil, interval: TaskResetInterval? = nil) -> some View {
         let isGroupTask = task.groupId != nil
         let currentUserId = taskViewModel.currentUserId
@@ -304,13 +331,16 @@ struct TaskView: View {
 
                 Spacer()
 
-                Button {
-                    activeSheet = .edit(task)
-                } label: {
-                    Image(systemName: "pencil")
-                        .foregroundColor(.blue)
+                // Bearbeiten-Button nur für Admin sichtbar bei Gruppenaufgaben
+                if task.groupId == nil || (group != nil && isUserAdmin(of: group!)) {
+                    Button {
+                        activeSheet = .edit(task)
+                    } label: {
+                        Image(systemName: "pencil")
+                            .foregroundColor(.blue)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
 
             if let groupId = task.groupId,
@@ -332,7 +362,7 @@ struct TaskView: View {
         .shadow(color: color(for: interval ?? .daily).opacity(0.2), radius: 3, x: 0, y: 2)
     }
     
-    // MARK: - Sheet Handling (aus deinem ursprünglichen Code)
+    // MARK: - Sheet Handling
     @ViewBuilder
     func sheetView(for sheet: TaskSheetType) -> some View {
         switch sheet {
@@ -351,40 +381,47 @@ struct TaskView: View {
             )
 
         case .group(let group):
-            TaskSheetView(
-                title: "Neue Aufgabe für \(group.name)",
-                taskTitle: $newTaskTitle,
-                selectedInterval: $groupTaskInterval,
-                onCancel: { activeSheet = nil },
-                onConfirm: {
-                    Task {
-                        do {
-                            try await taskViewModel.addGroupTask(
-                                title: newTaskTitle,
-                                group: group,
-                                interval: groupTaskInterval
-                            )
-                            activeSheet = nil
-                        } catch {
-                            print("Fehler beim Hinzufügen der Gruppenaufgabe: \(error)")
+            // Nur Admin kann Gruppenaufgaben hinzufügen (Sicherheitscheck)
+            if isUserAdmin(of: group) {
+                TaskSheetView(
+                    title: "Neue Aufgabe für \(group.name)",
+                    taskTitle: $newTaskTitle,
+                    selectedInterval: $groupTaskInterval,
+                    onCancel: { activeSheet = nil },
+                    onConfirm: {
+                        Task {
+                            do {
+                                try await taskViewModel.addGroupTask(
+                                    title: newTaskTitle,
+                                    group: group,
+                                    interval: groupTaskInterval
+                                )
+                                activeSheet = nil
+                            } catch {
+                                print("Fehler beim Hinzufügen der Gruppenaufgabe: \(error)")
+                            }
                         }
                     }
-                }
-            )
+                )
+            }
 
         case .edit(let task):
-            EditTaskSheetWithInterval(
-                task: task,
-                onSave: { updatedTitle, updatedInterval in
-                    Task {
-                        await taskViewModel.updateTask(task: task, newTitle: updatedTitle, newInterval: updatedInterval)
+            // Bearbeiten nur erlauben wenn User Admin ist oder es eine persönliche Aufgabe ist
+            if task.groupId == nil ||
+               (task.groupId != nil && groupViewModel.groups.contains { $0.id == task.groupId && isUserAdmin(of: $0) }) {
+                EditTaskSheetWithInterval(
+                    task: task,
+                    onSave: { updatedTitle, updatedInterval in
+                        Task {
+                            await taskViewModel.updateTask(task: task, newTitle: updatedTitle, newInterval: updatedInterval)
+                            activeSheet = nil
+                        }
+                    },
+                    onCancel: {
                         activeSheet = nil
                     }
-                },
-                onCancel: {
-                    activeSheet = nil
-                }
-            )
+                )
+            }
         }
     }
     
