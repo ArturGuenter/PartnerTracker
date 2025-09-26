@@ -26,7 +26,7 @@ struct TaskView: View {
     @State private var groupTaskInterval: TaskResetInterval = .daily
     @State private var sortByInterval = false
     
-    // Hilfsfunktion um zu prüfen, ob der aktuelle User Admin einer Gruppe ist
+    
     private func isUserAdmin(of group: Group) -> Bool {
         return group.ownerId == taskViewModel.currentUserId
     }
