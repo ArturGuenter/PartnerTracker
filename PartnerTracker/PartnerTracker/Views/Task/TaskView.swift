@@ -26,6 +26,9 @@ struct TaskView: View {
     @State private var groupTaskInterval: TaskResetInterval = .daily
     @State private var sortByInterval = false
     
+    // Für Bestätigungs-Dialog beim Löschen
+    @State private var taskToDelete: TaskItem?
+    @State private var showDeleteConfirmation = false
     
     private func isUserAdmin(of group: Group) -> Bool {
         return group.ownerId == taskViewModel.currentUserId
@@ -46,6 +49,24 @@ struct TaskView: View {
                         } label: {
                             Image(systemName: sortByInterval ? "list.bullet" : "line.3.horizontal.decrease.circle")
                         }
+                    }
+                }
+                .confirmationDialog(
+                    "Aufgabe löschen",
+                    isPresented: $showDeleteConfirmation,
+                    titleVisibility: .visible
+                ) {
+                    Button("Löschen", role: .destructive) {
+                        if let task = taskToDelete {
+                            deleteTaskSafely(task)
+                        }
+                    }
+                    Button("Abbrechen", role: .cancel) {
+                        taskToDelete = nil
+                    }
+                } message: {
+                    if let task = taskToDelete {
+                        Text("Möchtest du die Aufgabe \"\(task.title)\" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.")
                     }
                 }
         }
@@ -290,22 +311,12 @@ struct TaskView: View {
         }
     }
 
-    // MARK: - Task Row vereinfacht
+    // MARK: - Task Row (ohne Swipe Actions)
     private func taskRow(task: TaskItem, group: Group?, interval: TaskResetInterval) -> some View {
         taskCard(task: task, group: group, interval: interval)
-            .swipeActions {
-                // Löschen-Button nur für Admin sichtbar bei Gruppenaufgaben
-                if task.groupId == nil || (group != nil && isUserAdmin(of: group!)) {
-                    Button(role: .destructive) {
-                        deleteTaskSafely(task)
-                    } label: {
-                        Label("Löschen", systemImage: "trash")
-                    }
-                }
-            }
     }
     
-    // MARK: - Task Card
+    // MARK: - Task Card mit Mülleimer-Symbol
     func taskCard(task: TaskItem, group: Group? = nil, interval: TaskResetInterval? = nil) -> some View {
         let isGroupTask = task.groupId != nil
         let currentUserId = taskViewModel.currentUserId
@@ -313,6 +324,9 @@ struct TaskView: View {
         let showCheckmark = isGroupTask ? userHasCompleted : task.isDone
         let iconName = showCheckmark ? "checkmark.circle.fill" : "circle"
         let iconColor = showCheckmark ? Color.green : .gray
+        
+        // Prüfen ob Löschen erlaubt ist (nur für persönliche Aufgaben oder Admin bei Gruppenaufgaben)
+        let canDelete = task.groupId == nil || (group != nil && isUserAdmin(of: group!))
 
         return VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -330,16 +344,30 @@ struct TaskView: View {
                     .foregroundColor(showCheckmark ? .gray : .primary)
 
                 Spacer()
-
-                // Bearbeiten-Button nur für Admin sichtbar bei Gruppenaufgaben
-                if task.groupId == nil || (group != nil && isUserAdmin(of: group!)) {
-                    Button {
-                        activeSheet = .edit(task)
-                    } label: {
-                        Image(systemName: "pencil")
-                            .foregroundColor(.blue)
+                
+                HStack(spacing: 16) {
+                    // Bearbeiten-Button nur für Admin sichtbar bei Gruppenaufgaben
+                    if task.groupId == nil || (group != nil && isUserAdmin(of: group!)) {
+                        Button {
+                            activeSheet = .edit(task)
+                        } label: {
+                            Image(systemName: "pencil")
+                                .foregroundColor(.blue)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
+                    
+                    // Mülleimer-Button nur sichtbar wenn Löschen erlaubt ist
+                    if canDelete {
+                        Button {
+                            taskToDelete = task
+                            showDeleteConfirmation = true
+                        } label: {
+                            Image(systemName: "trash")
+                                .foregroundColor(.red)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
 
@@ -451,8 +479,10 @@ struct TaskView: View {
         Task {
             do {
                 try await taskViewModel.deleteTask(task)
+                taskToDelete = nil
             } catch {
                 print("Fehler beim Löschen: \(error)")
+                taskToDelete = nil
             }
         }
     }
@@ -507,8 +537,3 @@ struct TaskView: View {
         groupViewModel: groupVM
     )
 }
-
-
-
-
-
