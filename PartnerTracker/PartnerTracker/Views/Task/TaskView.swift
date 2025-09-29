@@ -150,13 +150,16 @@ struct TaskView: View {
         ForEach(groupViewModel.groups, id: \.id) { group in
             let tasksForGroup = tasks.filter { $0.group.id == group.id }
             if !tasksForGroup.isEmpty {
-                groupHeaderInInterval(group, interval: interval)
-                ForEach(tasksForGroup, id: \.task.id) { element in
-                    taskRow(task: element.task, group: element.group, interval: interval)
+                Section(header: groupHeaderInInterval(group, interval: interval)) {
+                    ForEach(tasksForGroup, id: \.task.id) { element in
+                        taskRow(task: element.task, group: element.group, interval: interval)
+                    }
                 }
+                .listRowBackground(color(for: interval).opacity(0.05))
             }
         }
     }
+
     
     // MARK: - Gruppen-Header in Intervall-Ansicht
     private func groupHeaderInInterval(_ group: Group, interval: TaskResetInterval) -> some View {
@@ -311,7 +314,7 @@ struct TaskView: View {
         }
     }
 
-    // MARK: - Task Row 
+    // MARK: - Task Row
     private func taskRow(task: TaskItem, group: Group?, interval: TaskResetInterval) -> some View {
         taskCard(task: task, group: group, interval: interval)
     }
