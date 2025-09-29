@@ -176,7 +176,10 @@ struct TaskView: View {
                 } label: {
                     Image(systemName: "plus.circle.fill")
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.borderless)
+                .contentShape(Rectangle()) // nur falls nötig
+                .frame(width: 36, height: 36, alignment: .center)
+
             }
         }
         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
