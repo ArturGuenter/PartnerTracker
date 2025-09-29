@@ -311,7 +311,7 @@ struct TaskView: View {
         }
     }
 
-    // MARK: - Task Row (ohne Swipe Actions)
+    // MARK: - Task Row 
     private func taskRow(task: TaskItem, group: Group?, interval: TaskResetInterval) -> some View {
         taskCard(task: task, group: group, interval: interval)
     }
