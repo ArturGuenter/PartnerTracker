@@ -176,10 +176,7 @@ struct TaskView: View {
                 } label: {
                     Image(systemName: "plus.circle.fill")
                 }
-                .buttonStyle(.borderless)
-                .contentShape(Rectangle()) // nur falls nötig
-                .frame(width: 36, height: 36, alignment: .center)
-
+                .buttonStyle(.plain)
             }
         }
         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
@@ -277,13 +274,18 @@ struct TaskView: View {
                         // Plus-Button für spezifisches Intervall nur für Admin sichtbar
                         if isUserAdmin(of: group) {
                             Button {
+                                print("Plus für Gruppe gedrückt. Plus-Button für spezifisches Intervall")
                                 newTaskTitle = ""
                                 groupTaskInterval = interval
                                 activeSheet = .group(group)
                             } label: {
                                 Image(systemName: "plus.circle.fill")
                                     .foregroundColor(color(for: interval))
+                                    .frame(width: 24, height: 24) 
                             }
+                            .buttonStyle(.borderless)
+                            .contentShape(Circle())
+
                         }
                     }
                     
