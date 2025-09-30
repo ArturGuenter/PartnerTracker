@@ -190,16 +190,19 @@ struct TaskView: View {
                 .filter { $0.resetInterval == interval }
                 .sortedByCreationDate()
             
-            if !tasks.isEmpty {
-                Section(header: personalSectionHeader(interval)) {
-                    ForEach(tasks, id: \.id) { task in
-                        taskRow(task: task, group: nil, interval: interval)
+            Section(header: personalSectionHeader(interval)) {
+                        if tasks.isEmpty {
+                            Text("Keine eigenen Aufgaben in diesem Intervall.")
+                                .foregroundColor(.gray)
+                        } else {
+                            ForEach(tasks, id: \.id) { task in
+                                taskRow(task: task, group: nil, interval: interval)
+                            }
+                        }
                     }
+                    .listRowBackground(color(for: interval).opacity(0.05))
                 }
-                .listRowBackground(color(for: interval).opacity(0.05))
             }
-        }
-    }
     
     // MARK: - Gruppenaufgaben nach Gruppen
     @ViewBuilder
@@ -281,7 +284,7 @@ struct TaskView: View {
                             } label: {
                                 Image(systemName: "plus.circle.fill")
                                     .foregroundColor(color(for: interval))
-                                    .frame(width: 24, height: 24) 
+                                    .frame(width: 24, height: 24)
                             }
                             .buttonStyle(.borderless)
                             .contentShape(Circle())
