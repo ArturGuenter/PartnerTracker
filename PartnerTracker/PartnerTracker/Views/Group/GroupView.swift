@@ -54,11 +54,7 @@ struct GroupView: View {
             .navigationTitle("Meine Gruppen")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        sortByInterval.toggle()
-                    } label: {
-                        Image(systemName: sortByInterval ? "list.bullet" : "line.3.horizontal.decrease.circle")
-                    }
+                    
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showAddGroupSheet = true } label: {
