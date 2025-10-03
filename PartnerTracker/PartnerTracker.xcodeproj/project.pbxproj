@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AB153B472E906ABD006FF4D4 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB153B462E906ABD006FF4D4 /* WidgetKit.framework */; };
+		AB153B492E906ABD006FF4D4 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB153B482E906ABD006FF4D4 /* SwiftUI.framework */; };
+		AB153B5A2E906ABF006FF4D4 /* PartnerTrackerWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AB153B452E906ABD006FF4D4 /* PartnerTrackerWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		AB2511982E030F0B006D6624 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = AB2511972E030F0B006D6624 /* FirebaseAnalytics */; };
 		AB25119A2E030F0B006D6624 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = AB2511992E030F0B006D6624 /* FirebaseAuth */; };
 		AB25119C2E030F0B006D6624 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = AB25119B2E030F0B006D6624 /* FirebaseDatabase */; };
@@ -16,6 +19,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		AB153B582E906ABF006FF4D4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AB2511372DFCD34F006D6624 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AB153B442E906ABD006FF4D4;
+			remoteInfo = PartnerTrackerWidgetExtension;
+		};
 		AB25114D2DFCD351006D6624 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = AB2511372DFCD34F006D6624 /* Project object */;
@@ -32,14 +42,49 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		AB153B5F2E906ABF006FF4D4 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				AB153B5A2E906ABF006FF4D4 /* PartnerTrackerWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		AB153B452E906ABD006FF4D4 /* PartnerTrackerWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PartnerTrackerWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB153B462E906ABD006FF4D4 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		AB153B482E906ABD006FF4D4 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		AB25113F2DFCD34F006D6624 /* PartnerTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PartnerTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB25114C2DFCD351006D6624 /* PartnerTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PartnerTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB2511562DFCD351006D6624 /* PartnerTrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PartnerTrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		ABA7F0DB2E54F5B50084A77E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		AB153B5B2E906ABF006FF4D4 /* Exceptions for "PartnerTrackerWidget" folder in "PartnerTrackerWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = AB153B442E906ABD006FF4D4 /* PartnerTrackerWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		AB153B4A2E906ABD006FF4D4 /* PartnerTrackerWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AB153B5B2E906ABF006FF4D4 /* Exceptions for "PartnerTrackerWidget" folder in "PartnerTrackerWidgetExtension" target */,
+			);
+			path = PartnerTrackerWidget;
+			sourceTree = "<group>";
+		};
 		AB2511412DFCD34F006D6624 /* PartnerTracker */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = PartnerTracker;
@@ -58,6 +103,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		AB153B422E906ABD006FF4D4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AB153B492E906ABD006FF4D4 /* SwiftUI.framework in Frameworks */,
+				AB153B472E906ABD006FF4D4 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AB25113C2DFCD34F006D6624 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -94,6 +148,7 @@
 				AB2511412DFCD34F006D6624 /* PartnerTracker */,
 				AB25114F2DFCD351006D6624 /* PartnerTrackerTests */,
 				AB2511592DFCD351006D6624 /* PartnerTrackerUITests */,
+				AB153B4A2E906ABD006FF4D4 /* PartnerTrackerWidget */,
 				AB25119D2E03152C006D6624 /* Frameworks */,
 				AB2511402DFCD34F006D6624 /* Products */,
 			);
@@ -105,6 +160,7 @@
 				AB25113F2DFCD34F006D6624 /* PartnerTracker.app */,
 				AB25114C2DFCD351006D6624 /* PartnerTrackerTests.xctest */,
 				AB2511562DFCD351006D6624 /* PartnerTrackerUITests.xctest */,
+				AB153B452E906ABD006FF4D4 /* PartnerTrackerWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -112,6 +168,8 @@
 		AB25119D2E03152C006D6624 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AB153B462E906ABD006FF4D4 /* WidgetKit.framework */,
+				AB153B482E906ABD006FF4D4 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -119,6 +177,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		AB153B442E906ABD006FF4D4 /* PartnerTrackerWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AB153B5C2E906ABF006FF4D4 /* Build configuration list for PBXNativeTarget "PartnerTrackerWidgetExtension" */;
+			buildPhases = (
+				AB153B412E906ABD006FF4D4 /* Sources */,
+				AB153B422E906ABD006FF4D4 /* Frameworks */,
+				AB153B432E906ABD006FF4D4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				AB153B4A2E906ABD006FF4D4 /* PartnerTrackerWidget */,
+			);
+			name = PartnerTrackerWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = PartnerTrackerWidgetExtension;
+			productReference = AB153B452E906ABD006FF4D4 /* PartnerTrackerWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		AB25113E2DFCD34F006D6624 /* PartnerTracker */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = AB2511602DFCD351006D6624 /* Build configuration list for PBXNativeTarget "PartnerTracker" */;
@@ -126,10 +206,12 @@
 				AB25113B2DFCD34F006D6624 /* Sources */,
 				AB25113C2DFCD34F006D6624 /* Frameworks */,
 				AB25113D2DFCD34F006D6624 /* Resources */,
+				AB153B5F2E906ABF006FF4D4 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				AB153B592E906ABF006FF4D4 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				AB2511412DFCD34F006D6624 /* PartnerTracker */,
@@ -202,6 +284,9 @@
 				LastSwiftUpdateCheck = 1630;
 				LastUpgradeCheck = 1630;
 				TargetAttributes = {
+					AB153B442E906ABD006FF4D4 = {
+						CreatedOnToolsVersion = 16.3;
+					};
 					AB25113E2DFCD34F006D6624 = {
 						CreatedOnToolsVersion = 16.3;
 					};
@@ -235,11 +320,19 @@
 				AB25113E2DFCD34F006D6624 /* PartnerTracker */,
 				AB25114B2DFCD351006D6624 /* PartnerTrackerTests */,
 				AB2511552DFCD351006D6624 /* PartnerTrackerUITests */,
+				AB153B442E906ABD006FF4D4 /* PartnerTrackerWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		AB153B432E906ABD006FF4D4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AB25113D2DFCD34F006D6624 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -265,6 +358,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		AB153B412E906ABD006FF4D4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AB25113B2DFCD34F006D6624 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -289,6 +389,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		AB153B592E906ABF006FF4D4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AB153B442E906ABD006FF4D4 /* PartnerTrackerWidgetExtension */;
+			targetProxy = AB153B582E906ABF006FF4D4 /* PBXContainerItemProxy */;
+		};
 		AB25114E2DFCD351006D6624 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = AB25113E2DFCD34F006D6624 /* PartnerTracker */;
@@ -302,6 +407,58 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		AB153B5D2E906ABF006FF4D4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PartnerTrackerWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PartnerTrackerWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "de.syntax-institut.PartnerTracker.PartnerTrackerWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AB153B5E2E906ABF006FF4D4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PartnerTrackerWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PartnerTrackerWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "de.syntax-institut.PartnerTracker.PartnerTrackerWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		AB25115E2DFCD351006D6624 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -554,6 +711,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		AB153B5C2E906ABF006FF4D4 /* Build configuration list for PBXNativeTarget "PartnerTrackerWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AB153B5D2E906ABF006FF4D4 /* Debug */,
+				AB153B5E2E906ABF006FF4D4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		AB25113A2DFCD34F006D6624 /* Build configuration list for PBXProject "PartnerTracker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
