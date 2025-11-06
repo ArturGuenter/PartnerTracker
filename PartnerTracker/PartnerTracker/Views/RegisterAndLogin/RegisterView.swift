@@ -121,12 +121,12 @@ struct RegisterView: View {
                 let currentStrength = analyzePassword(password) // Direkt prüfen
                 
                 guard currentStrength >= 3 else {
-                    errorMessage = "Das Passwort ist nicht sicher genug."
+                    errorMessage = "Das Passwort ist nicht sicher genug. Wählen sie ein stärkeres Passwort"
                     return
                 }
 
                 guard password == confirmPassword else {
-                    errorMessage = "Die Passwörter stimmen nicht überein."
+                    errorMessage = "Die Passwörter stimmen nicht überein. Bitte prüfen."
                     return
                 }
 
